@@ -36,7 +36,7 @@ const progressWrapVariants: Variants = {
 export default function BootScreen() {
   return (
     <motion.div
-      className="flex flex-col items-center justify-between min-h-full w-full"
+      className="flex flex-col items-center justify-between min-h-full w-full select-none cursor-none"
       initial="hidden"
       animate="visible"
       variants={container}
