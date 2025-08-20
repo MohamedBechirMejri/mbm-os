@@ -1,0 +1,74 @@
+[
+  {
+    "name": "memetube",
+    "logo": "/assets/memetube.svg",
+    "preview": "/assets/previews/memetube.png",
+    "description": "MemeTube is a video sharing platform for memes. \n I created it to store my meme collection and share it with my friends and learn how to make PWAs. \n It might not load fast because the firebase quota is exceeded. xD  ",
+    "tech": ["Nextjs", "TypeScript", "TailwindCSS", "Firebase", "PWA"],
+    "demo": "https://memetube.vercel.app/",
+    "sourceCode": "https://github.com/MohamedBechirMejri/memetube",
+    "imgStyle": {},
+    "style": { "background": "#f59e0b" }
+  },
+  {
+    "name": "odinbook",
+    "logo": "/assets/odinbook.svg",
+    "preview": "/assets/previews/odinbook.png",
+    "description": "A Facebook clone for The Odin Project.",
+    "tech": [
+      "Nextjs",
+      "TypeScript",
+      "TailwindCSS",
+      "Firebase",
+      "MongoDB",
+      "Facebook Login",
+      "JWT",
+      "...More"
+    ],
+    "demo": "https://odinbook-next.vercel.app/",
+    "sourceCode": "https://github.com/MohamedBechirMejri/facebook-next",
+    "imgStyle": { "margin": "-1rem" },
+    "style": { "background": "white" }
+  },
+  {
+    "name": "ETCH-A-SKETCH",
+    "logo": "/assets/etchasketch.svg",
+    "preview": "/assets/previews/ETCH-A-SKETCH.png",
+    "description": "Replicating the original Etch-A-Sketch Toy. \n I'm proud of this one since I accurately replicated the original toy while still being a beginner.",
+    "tech": ["HTML", "CSS", "Javascript"],
+    "demo": "https://mohamedbechirmejri.github.io/ETCH-A-SKETCH/",
+    "sourceCode": "https://github.com/MohamedBechirMejri/ETCH-A-SKETCH",
+    "imgStyle": {},
+    "style": { "background": "#a01632" }
+  },
+
+  {
+    "name": "nyutab",
+    "logo": "/assets/nyutab.svg",
+    "preview": "/assets/previews/nyutab.png",
+    "description": "A chrome extension that replaces the bland default new tab page with a beautiful and feature packed one.",
+    "tech": [
+      "React",
+      "TypeScript",
+      "TailwindCSS",
+      "Framer-Motion",
+      "Vite",
+      "MDX"
+    ],
+    "demo": "https://nyutab.vercel.app/",
+    "sourceCode": "https://github.com/MohamedBechirMejri/nyutab",
+    "imgStyle": {},
+    "style": {}
+  },
+  {
+    "name": "lab",
+    "logo": "/assets/lab.svg",
+    "preview": "/assets/previews/lab.png",
+    "description": "A Place where I experiment with new technologies and ideas.",
+    "tech": ["Nextjs", "TypeScript", "TailwindCSS", "...More"],
+    "demo": "https://lab.mohamedbechirmejri.dev",
+    "sourceCode": "https://github.com/MohamedBechirMejri/lab",
+    "imgStyle": { "marginBottom": ".5rem" },
+    "style": { "background": "#3b82f6" }
+  }
+]
