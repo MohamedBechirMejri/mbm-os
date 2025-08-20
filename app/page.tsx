@@ -1,11 +1,11 @@
 "use client";
 
-import { Spinner } from "@/components/ui/spinner";
+import BootScreen from "@/components/screens/boot";
 
 export default function Home() {
   return (
-    <div className="font-sans flex items-center justify-center min-h-screen p-8 pb-20 gap-16 sm:p-20 w-full">
-      <Spinner />
+    <div className="font-sans flex items-center justify-center h-screen w-full bg-black">
+      <BootScreen />
     </div>
   );
 }
