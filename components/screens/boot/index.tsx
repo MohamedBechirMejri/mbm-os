@@ -33,7 +33,7 @@ const progressWrapVariants: Variants = {
   }),
 };
 
-export default function BootScreen() {
+export default function BootScreen({onDone}: { onDone?: () => void }) {
   return (
     <motion.div
       className="flex flex-col items-center justify-between min-h-full w-full select-none cursor-none"
@@ -55,6 +55,7 @@ export default function BootScreen() {
       </motion.div>
 
       {/* Progress block: appears after logo (delay) and animates with keyframes to emulate realistic loading */}
+      {/* TODO: Improve progress animation and styling (use progress component) */}
       <motion.div
         className="w-72 relative -top-32 bg-white/10"
         custom={1.0}
@@ -81,6 +82,7 @@ export default function BootScreen() {
             }}
             className="h-2 bg-white"
             style={{ transformOrigin: "left center" }}
+            onAnimationComplete={onDone}
           />
         </div>
 
