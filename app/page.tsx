@@ -4,6 +4,7 @@ import { useMachine } from "@xstate/react";
 import BootScreen from "@/components/screens/boot";
 import { appMachine } from "@/lib/app-machine";
 import { cn } from "@/lib/utils";
+import LoginScreen from "@/components/screens/login";
 
 export default function AppShell() {
   const [state, send] = useMachine(appMachine);
@@ -18,8 +19,8 @@ export default function AppShell() {
           }}
         />
       );
-    // if (state.matches("login"))
-    // return <LoginScreen onSuccess={() => send({ type: "LOGIN_SUCCESS" })} />;
+    if (state.matches("login"))
+    return <LoginScreen onSuccess={() => send({ type: "LOGIN_SUCCESS" })} />;
     // return <Desktop />;
   };
 
