@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import {
   Avatar,
   PasswordInput,
-  StatusBar,
-  SVGFilters,
+  StatusBar, 
   TimeDisplay,
   useCapsLockDetection,
 } from "./components";
@@ -67,9 +66,6 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
 
   return (
     <div className="relative isolate z-10 flex flex-col items-center justify-between h-screen w-full select-none">
-      {/* Hidden SVG defs for liquid glass */}
-      <SVGFilters />
-
       {/* Time and Date Display */}
       <TimeDisplay date={dateText} time={timeText} />
 
