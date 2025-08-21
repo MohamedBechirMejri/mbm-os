@@ -33,12 +33,12 @@ export default function LoginScreen({
   });
 
   return (
-    <div className="relative isolate z-10 flex flex-col items-center justify-between h-screen w-full">
+    <div className="relative isolate z-10 flex flex-col items-center justify-between h-screen w-full select-none">
       <h1
-        className="relative flex flex-col items-center justify-center text-8xl font-extrabold py-8 pt-32 tracking-tight text-white/95 antialiased"
+        className="relative flex flex-col items-center justify-center text-8xl font-extrabold py-8 pt-24 tracking-tight"
         style={{ fontFamily: APPLE_FONT_STACK }}
       >
-        <div className="relative w-full flex justify-center mb-3 md:mb-4">
+        <div className="relative w-full flex justify-center -mb-4">
           <svg
             className="block w-[min(92vw,820px)] h-[80px]"
             viewBox="0 0 1000 100"
