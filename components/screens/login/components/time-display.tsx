@@ -9,7 +9,7 @@ export default function TimeDisplay({ date, time }: TimeDisplayProps) {
     >
       <div className="relative w-full flex justify-center -mb-4">
         <svg
-          className="block w-[min(92vw,820px)] h-[80px]"
+          className="block w-[min(92vw,820px)] h-max"
           viewBox="0 0 1000 100"
           preserveAspectRatio="xMidYMid meet"
           aria-hidden="true"
@@ -89,7 +89,7 @@ export default function TimeDisplay({ date, time }: TimeDisplayProps) {
             x="50%"
             y="60%"
             textAnchor="middle"
-            className="text-[20px] sm:text-[28px] md:text-[38px] font-medium"
+            className="text-[1rem] sm:text-[1.5rem] md:text-[2rem] lg:text-[2.25rem] xl:text-[2.5rem] 2xl:text-[2.75rem] font-medium"
             letterSpacing="0"
             fill="rgba(125,210,255,0.18)"
             filter="url(#softGlowSmall)"
@@ -103,7 +103,7 @@ export default function TimeDisplay({ date, time }: TimeDisplayProps) {
             x="50%"
             y="60%"
             textAnchor="middle"
-            className="text-[20px] sm:text-[28px] md:text-[38px] font-medium"
+            className="text-[1rem] sm:text-[1.5rem] md:text-[2rem] lg:text-[2.25rem] xl:text-[2.5rem] 2xl:text-[2.75rem] font-medium"
             letterSpacing="0"
             fill="url(#glassFillSmall)"
             stroke="white"
@@ -118,7 +118,7 @@ export default function TimeDisplay({ date, time }: TimeDisplayProps) {
       </div>
       <div className="relative leading-none w-full flex justify-center">
         <svg
-          className="block w-[min(92vw,980px)] h-[200px]"
+          className="block w-[min(92vw,980px)] h-max -mt-4"
           viewBox="0 0 1000 220"
           preserveAspectRatio="xMidYMid meet"
           aria-hidden="true"
@@ -181,13 +181,7 @@ export default function TimeDisplay({ date, time }: TimeDisplayProps) {
             </filter>
 
             {/* Time text soft cyan glow */}
-            <filter
-              id="softGlow"
-              x="-50%"
-              y="-50%"
-              width="200%"
-              height="200%"
-            >
+            <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
               <feGaussianBlur stdDeviation="8" />
             </filter>
           </defs>
@@ -197,7 +191,7 @@ export default function TimeDisplay({ date, time }: TimeDisplayProps) {
             x="50%"
             y="57%"
             textAnchor="middle"
-            className="text-[72px] sm:text-[96px] md:text-[140px] lg:text-[150px] font-semibold"
+            className="text-[3.5rem] sm:text-[5rem] md:text-[7rem] lg:text-[7.5rem] xl:text-[8rem] 2xl:text-[8.5rem] font-semibold"
             letterSpacing="-0.02em"
             fill="rgba(125, 210, 255, 0.35)"
             filter="url(#softGlow)"
@@ -207,20 +201,20 @@ export default function TimeDisplay({ date, time }: TimeDisplayProps) {
           </text>
 
           {/* Highlight stripe for specular sweep effect */}
-          <rect
+          {/* <rect
             x="140"
             y="20"
             width="720"
             height="90"
             rx="45"
             fill="rgba(255,255,255,0.08)"
-          />
+          /> */}
           {/* Time text main glassy layer (responsive sizes via Tailwind) */}
           <text
             x="50%"
             y="57%"
             textAnchor="middle"
-            className="text-[72px] sm:text-[96px] md:text-[140px] lg:text-[150px] font-semibold"
+            className="text-[3.5rem] sm:text-[5rem] md:text-[7rem] lg:text-[7.5rem] xl:text-[8rem] 2xl:text-[8.5rem] font-semibold"
             letterSpacing="-0.02em"
             fill="url(#glassFill)"
             stroke="white"
