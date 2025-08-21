@@ -84,13 +84,12 @@ export default function TimeDisplay({ date, time }: TimeDisplayProps) {
             </filter>
           </defs>
 
-          {/* Date text glow layer */}
+          {/* Date text glow layer (responsive sizes via Tailwind) */}
           <text
             x="50%"
             y="60%"
             textAnchor="middle"
-            fontSize="38"
-            fontWeight="500"
+            className="text-[20px] sm:text-[28px] md:text-[38px] font-medium"
             letterSpacing="0"
             fill="rgba(125,210,255,0.18)"
             filter="url(#softGlowSmall)"
@@ -99,13 +98,12 @@ export default function TimeDisplay({ date, time }: TimeDisplayProps) {
             {date}
           </text>
 
-          {/* Date text main layer */}
+          {/* Date text main layer (responsive sizes via Tailwind) */}
           <text
             x="50%"
             y="60%"
             textAnchor="middle"
-            fontSize="38"
-            fontWeight="500"
+            className="text-[20px] sm:text-[28px] md:text-[38px] font-medium"
             letterSpacing="0"
             fill="url(#glassFillSmall)"
             stroke="white"
@@ -194,13 +192,12 @@ export default function TimeDisplay({ date, time }: TimeDisplayProps) {
             </filter>
           </defs>
 
-          {/* Time text glow layer */}
+          {/* Time text glow layer (responsive sizes via Tailwind) */}
           <text
             x="50%"
             y="57%"
             textAnchor="middle"
-            fontSize="150"
-            fontWeight="800"
+            className="text-[72px] sm:text-[96px] md:text-[140px] lg:text-[150px] font-semibold"
             letterSpacing="-0.02em"
             fill="rgba(125, 210, 255, 0.35)"
             filter="url(#softGlow)"
@@ -218,13 +215,12 @@ export default function TimeDisplay({ date, time }: TimeDisplayProps) {
             rx="45"
             fill="rgba(255,255,255,0.08)"
           />
-          {/* Time text main glassy layer */}
+          {/* Time text main glassy layer (responsive sizes via Tailwind) */}
           <text
             x="50%"
             y="57%"
             textAnchor="middle"
-            fontSize="150"
-            fontWeight="800"
+            className="text-[72px] sm:text-[96px] md:text-[140px] lg:text-[150px] font-semibold"
             letterSpacing="-0.02em"
             fill="url(#glassFill)"
             stroke="white"
