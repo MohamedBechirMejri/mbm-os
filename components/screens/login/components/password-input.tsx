@@ -40,9 +40,23 @@ export default function PasswordInput({
     <div className="flex flex-col items-center gap-3">
       {/* Password field */}
       <div
-        className={`relative w-[min(86vw,440px)] transition-all ${wrong ? "shake" : ""}`}
-        style={{ filter: "url(#liquidGlassDisplace)" }}
+        className={`relative w-[min(86vw,440px)] transition-all ${wrong ? "shake" : ""} overflow-hidden rounded-2xl`}
       >
+        {/* glass effect */}
+        <div
+          className="absolute inset-0 z-0 isolate overflow-hidden backdrop-blur-[2px]"
+          style={{ filter: "url(#glass-distortion)" }}
+        />
+        {/* tint */}
+        <div className="absolute inset-0 z-10 bg-white/25" />
+        {/* shine */}
+        <div
+          className="absolute inset-0 z-20 overflow-hidden rounded-2xl"
+          style={{
+            boxShadow:
+              "inset 0 0 1px 0 rgba(255,255,255,0.5), inset 0 0 1px 1px rgba(255,255,255,0.5)",
+          }}
+        />
         {/* Decoy field to confuse password managers */}
         <input
           type="password"
@@ -57,46 +71,6 @@ export default function PasswordInput({
           }}
           readOnly
         />
-
-        {/* Liquid glass overlay (specular + sweep) */}
-        <svg
-          className="pointer-events-none absolute inset-0 h-12 w-full rounded-lg opacity-0 [box-shadow:inset_0_1px_0_rgba(255,255,255,0.35)]"
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
-          aria-hidden="true"
-        >
-          <defs>
-            <linearGradient id="lg-spec-sweep" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="rgba(255,255,255,0)" />
-              <stop offset="50%" stopColor="rgba(255,255,255,0.18)" />
-              <stop offset="100%" stopColor="rgba(255,255,255,0)" />
-            </linearGradient>
-          </defs>
-          <rect
-            x="0"
-            y="0"
-            width="100"
-            height="100"
-            rx="18"
-            fill="rgba(255,255,255,0.06)"
-            filter="url(#liquidGlassSpec)"
-          />
-          <rect
-            x="-100"
-            y="18"
-            width="200"
-            height="22"
-            fill="url(#lg-spec-sweep)"
-          >
-            <animate
-              attributeName="x"
-              values="-100;100"
-              dur="1.8s"
-              repeatCount="1"
-              fill="freeze"
-            />
-          </rect>
-        </svg>
 
         <input
           type="text"
@@ -117,9 +91,7 @@ export default function PasswordInput({
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           disabled={verifying}
-          className="w-full h-12 pl-4 pr-12 text-[15px] rounded-2xl text-white/95 placeholder-white/60 tracking-wide outline-none
-                     bg-white/5 backdrop-blur-xl saturate-150 ring-1 ring-white/25 focus:ring-2 focus:ring-cyan-200/60
-                     shadow-[inset_0_1px_0_0_rgba(255,255,255,0.35)]"
+          className="relative z-30 w-full h-12 pl-4 pr-12 text-[15px] rounded-2xl text-white/95 placeholder-white/60 tracking-wide outline-none bg-transparent focus:ring-2 focus:ring-cyan-200/60"
         />
 
         {!verifying && (
@@ -129,7 +101,7 @@ export default function PasswordInput({
             disabled={!value.trim()}
             className="absolute right-1.5 top-1/2 -translate-y-1/2 w-10 h-10 grid place-items-center rounded-xl
                        bg-white/15 hover:bg-white/25 active:bg-white/30 backdrop-blur-xl ring-1 ring-white/20
-                       text-white/95 transition disabled:opacity-40 disabled:pointer-events-none"
+                       text-white/95 transition disabled:opacity-40 disabled:pointer-events-none z-30"
           >
             <ArrowRight size={18} />
           </button>
@@ -137,7 +109,7 @@ export default function PasswordInput({
 
         {/* Spinner overlay while verifying */}
         {verifying && (
-          <div className="absolute inset-0 grid place-items-center rounded-2xl bg-black/20">
+          <div className="absolute inset-0 grid place-items-center rounded-2xl bg-black/20 z-40">
             <svg
               className="animate-spin"
               width="22"

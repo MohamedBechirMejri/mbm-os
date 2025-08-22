@@ -11,7 +11,7 @@ export default function Avatar({ username = "Guest" }: { username?: string }) {
           style={{ filter: "url(#glass-distortion)" }}
         />
         {/* tint */}
-        <div className="absolute inset-0 z-10 bg-white/25" />
+        <div className="absolute inset-0 z-10 bg-teal-200/25" />
         {/* shine */}
         <div
           className="absolute inset-0 z-20 overflow-hidden rounded-full"

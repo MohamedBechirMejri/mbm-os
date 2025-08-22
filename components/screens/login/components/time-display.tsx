@@ -4,7 +4,7 @@ import type { TimeDisplayProps } from "../types";
 export default function TimeDisplay({ date, time }: TimeDisplayProps) {
   return (
     <h1
-      className="relative flex flex-col items-center justify-center text-8xl font-extrabold py-8 pt-24 tracking-tight"
+      className="relative flex flex-col items-center justify-center text-8xl font-extrabold py-8 pt-12 tracking-tight"
       style={{ fontFamily: APPLE_FONT_STACK }}
     >
       <div className="relative w-full flex justify-center -mb-4">

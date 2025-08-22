@@ -6,7 +6,6 @@ import {
   TimeDisplay,
   useCapsLockDetection,
 } from "./components";
-import LiquidGlassFilters from "./components/liquid-glass-filters";
 import { APPLE_TEXT_FONT_STACK } from "./constants/fonts";
 import { loginStyles } from "./styles/animations";
 import type { LoginScreenProps } from "./types";
@@ -66,18 +65,15 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
   });
 
   return (
-    <div className="relative isolate z-10 flex flex-col items-center justify-between h-screen w-full select-none">
-      {/* SVG Filters */}
-      <LiquidGlassFilters />
+    <div className="relative isolate z-10 flex flex-col items-center justify-between h-screen w-full select-none py-12">
+      {/* Top-right status: Wi‑Fi + Battery (no clock) */}
+      <StatusBar />
 
       {/* Time and Date Display */}
       <TimeDisplay date={dateText} time={timeText} />
 
       {/* Vignette overlay to improve text legibility on bright videos */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_50%_35%,rgba(0,0,0,0)_0%,rgba(0,0,0,0.18)_65%,rgba(0,0,0,0.45)_100%)]" />
-
-      {/* Top-right status: Wi‑Fi + Battery (no clock) */}
-      <StatusBar />
 
       {/* Center login tile */}
       <form
