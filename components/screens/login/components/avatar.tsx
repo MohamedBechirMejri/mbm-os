@@ -1,8 +1,10 @@
+import { UserRound } from "lucide-react";
+
 export default function Avatar({ username = "Guest" }: { username?: string }) {
   return (
     <div className="flex flex-col items-center gap-3">
       {/* Avatar */}
-      <div className="relative flex h-24 w-24 items-center justify-center overflow-hidden rounded-full p-8">
+      <div className="relative flex h-18 w-18 items-center justify-center overflow-hidden rounded-full">
         {/* glass effect */}
         <div
           className="absolute inset-0 z-0 isolate overflow-hidden  backdrop-blur-[2px]"
@@ -19,9 +21,11 @@ export default function Avatar({ username = "Guest" }: { username?: string }) {
           }}
         />
         {/* content */}
-        <div className="absolute z-30 text-4xl"> 👤</div>
+        <div className="absolute z-30 text-4xl">
+          <UserRound size={36} className="text-white" />
+        </div>
       </div>
-      <div className="text-lg font-medium text-white/90">{username}</div>
+        <p className="text-md font-medium text-white/90 -mt-2">{username}</p>
     </div>
   );
 }
