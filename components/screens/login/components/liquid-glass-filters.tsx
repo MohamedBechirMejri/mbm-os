@@ -13,7 +13,7 @@ export default function LiquidGlassFilters() {
         <feTurbulence
           type="fractalNoise"
           baseFrequency="0.01 0.01"
-          numOctaves="1"
+          numOctaves="5"
           seed="5"
           result="turbulence"
         />
@@ -50,7 +50,7 @@ export default function LiquidGlassFilters() {
         <feDisplacementMap
           in="SourceGraphic"
           in2="softMap"
-          scale="150"
+          scale="120"
           xChannelSelector="R"
           yChannelSelector="G"
         />

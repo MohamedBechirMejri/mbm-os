@@ -5,7 +5,7 @@ export default function Avatar({ username = "Guest" }: { username?: string }) {
       <div className="relative flex h-24 w-24 items-center justify-center overflow-hidden rounded-full p-8">
         {/* glass effect */}
         <div
-          className="absolute inset-0 z-0 isolate overflow-hidden  backdrop-blur-[3px]"
+          className="absolute inset-0 z-0 isolate overflow-hidden  backdrop-blur-[2px]"
           style={{ filter: "url(#glass-distortion)" }}
         />
         {/* tint */}
