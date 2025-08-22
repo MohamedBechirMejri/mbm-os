@@ -18,8 +18,4 @@ export interface TimeDisplayProps {
   date: string;
   time: string;
 }
-
-export interface AvatarProps {
-  username?: string;
-  avatar?: string;
-}
+ 

@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import {
   Avatar,
   PasswordInput,
-  StatusBar, 
+  StatusBar,
   TimeDisplay,
   useCapsLockDetection,
 } from "./components";
+import LiquidGlassFilters from "./components/liquid-glass-filters";
 import { APPLE_TEXT_FONT_STACK } from "./constants/fonts";
 import { loginStyles } from "./styles/animations";
 import type { LoginScreenProps } from "./types";
@@ -66,6 +67,9 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
 
   return (
     <div className="relative isolate z-10 flex flex-col items-center justify-between h-screen w-full select-none">
+      {/* SVG Filters */}
+      <LiquidGlassFilters />
+
       {/* Time and Date Display */}
       <TimeDisplay date={dateText} time={timeText} />
 
