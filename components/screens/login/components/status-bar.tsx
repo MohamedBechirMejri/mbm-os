@@ -1,4 +1,3 @@
-import { Wifi } from "lucide-react";
 import Image from "next/image";
 import { APPLE_TEXT_FONT_STACK } from "../constants/fonts";
 
