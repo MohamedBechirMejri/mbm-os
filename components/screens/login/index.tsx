@@ -1,3 +1,4 @@
+import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import {
   Avatar,
@@ -65,7 +66,14 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
   });
 
   return (
-    <div className="relative isolate z-10 flex flex-col items-center justify-between h-screen w-full select-none py-12">
+    <motion.div
+      key={"login-screen"}
+      className="relative isolate z-10 flex flex-col items-center justify-between h-screen w-full select-none py-12"
+      initial={{ opacity: 0, scale: 1 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0, scale: 1.2 }}
+      transition={{ duration: 0.2, ease: "easeInOut" }}
+    >
       {/* Top-right status: Wi‑Fi + Battery (no clock) */}
       <StatusBar />
 
@@ -101,6 +109,6 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
 
       {/* Local styles for shake animation */}
       <style>{loginStyles}</style>
-    </div>
+    </motion.div>
   );
 }

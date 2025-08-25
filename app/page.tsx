@@ -6,6 +6,7 @@ import LoginScreen from "@/components/screens/login";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { appMachine } from "@/lib/app-machine";
 import { cn } from "@/lib/utils";
+import { AnimatePresence } from "motion/react";
 
 export default function AppShell() {
   const [state, send] = useMachine(appMachine);
@@ -50,7 +51,9 @@ export default function AppShell() {
         muted
       />
 
-      {renderScreen()}
+      <AnimatePresence>
+        {renderScreen()}
+      </AnimatePresence>
     </main>
   );
 }
