@@ -1,5 +1,12 @@
 import { ArrowRight } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import NextImage from "next/image";
+import { useEffect, useRef, useState } from "react";
+import { Spinner } from "@/components/ui/spinner";
+import { cn } from "@/lib/utils";
 import type { PasswordInputProps } from "../types";
+
+const Image = motion(NextImage);
 
 export default function PasswordInput({
   value,
@@ -12,6 +19,8 @@ export default function PasswordInput({
   showHint,
   onToggleHint,
 }: PasswordInputProps) {
+  const [isInputVisible, setIsInputVisible] = useState(true);
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") onSubmit();
   };
@@ -36,114 +45,130 @@ export default function PasswordInput({
     }
   };
 
+  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        (e.key === "Control" || e.key === "Meta") &&
+        !longPressTimer.current
+      ) {
+        longPressTimer.current = setTimeout(() => {
+          setIsInputVisible((prev) => !prev);
+        }, 500);
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === "Control" || e.key === "Meta") {
+        if (longPressTimer.current) {
+          clearTimeout(longPressTimer.current);
+          longPressTimer.current = null;
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+
+    return () => {
+      if (longPressTimer.current) {
+        clearTimeout(longPressTimer.current);
+      }
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+    };
+  }, []);
+
   return (
     <div className="flex flex-col items-center gap-3">
       {/* Password field */}
-      <div
-        className={`relative w-[min(86vw,440px)] transition-all ${wrong ? "shake" : ""} overflow-hidden rounded-2xl`}
-      >
-        {/* glass effect */}
+      {isInputVisible ? (
         <div
-          className="absolute inset-0 z-0 isolate overflow-hidden backdrop-blur-[2px]"
-          style={{ filter: "url(#glass-distortion)" }}
-        />
-        {/* tint */}
-        <div className="absolute inset-0 z-10 bg-white/25" />
-        {/* shine */}
-        <div
-          className="absolute inset-0 z-20 overflow-hidden rounded-2xl"
-          style={{
-            boxShadow:
-              "inset 0 0 1px 0 rgba(255,255,255,0.5), inset 0 0 1px 1px rgba(255,255,255,0.5)",
-          }}
-        />
-        {/* Decoy field to confuse password managers */}
-        <input
-          type="password"
-          name="password"
-          autoComplete="current-password"
-          tabIndex={-1}
-          style={{
-            position: "absolute",
-            left: "-9999px",
-            opacity: 0,
-            pointerEvents: "none",
-          }}
-          readOnly
-        />
+          className={`relative w-[min(86vw,440px)] transition-all ${wrong ? "shake" : ""} overflow-hidden rounded-2xl`}
+        >
+          {/* glass effect */}
+          <div
+            className="absolute inset-0 z-0 isolate overflow-hidden backdrop-blur-[2px]"
+            style={{ filter: "url(#glass-distortion)" }}
+          />
+          {/* tint */}
+          <div className="absolute inset-0 z-10 bg-white/25" />
+          {/* shine */}
+          <div
+            className="absolute inset-0 z-20 overflow-hidden rounded-2xl"
+            style={{
+              boxShadow:
+                "inset 0 0 1px 0 rgba(255,255,255,0.5), inset 0 0 1px 1px rgba(255,255,255,0.5)",
+            }}
+          />
+          {/* Decoy field to confuse password managers */}
+          <input
+            type="password"
+            name="password"
+            autoComplete="current-password"
+            tabIndex={-1}
+            style={{
+              position: "absolute",
+              left: "-9999px",
+              opacity: 0,
+              pointerEvents: "none",
+            }}
+            readOnly
+          />
 
-        <input
-          type="text"
-          inputMode="text"
-          autoComplete="off"
-          autoCorrect="off"
-          autoCapitalize="off"
-          spellCheck={false}
-          data-form-type="other"
-          data-lpignore="true"
-          data-1p-ignore="true"
-          name="not-a-password"
-          form="non-existent-form"
-          readOnly={false}
-          aria-label="Password"
-          placeholder="Enter password"
-          value={displayValue}
-          onChange={handleChange}
-          onKeyDown={handleKeyDown}
-          disabled={verifying}
-          className="relative z-30 w-full h-12 pl-4 pr-12 text-[15px] rounded-2xl text-white/95 placeholder-white/60 tracking-wide outline-none bg-transparent focus:ring-2 focus:ring-cyan-200/60"
-        />
+          <input
+            type="text"
+            inputMode="text"
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
+            data-form-type="other"
+            data-lpignore="true"
+            data-1p-ignore="true"
+            name="not-a-password"
+            form="non-existent-form"
+            readOnly={false}
+            aria-label="Password"
+            placeholder="Enter password"
+            value={displayValue}
+            onChange={handleChange}
+            onKeyDown={handleKeyDown}
+            disabled={verifying}
+            className="relative z-30 w-full h-12 pl-4 pr-12 text-[15px] rounded-2xl text-white/95 placeholder-white/60 tracking-wide outline-none bg-transparent focus:ring-2 focus:ring-cyan-200/60"
+          />
 
-        {!verifying && (
-          <button
-            type="submit"
-            aria-label="Unlock"
-            disabled={!value.trim()}
-            className="absolute right-1.5 top-1/2 -translate-y-1/2 w-10 h-10 grid place-items-center rounded-xl
+          {!verifying && (
+            <button
+              type="submit"
+              aria-label="Unlock"
+              disabled={!value.trim()}
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 w-10 h-10 grid place-items-center rounded-xl
                        bg-white/15 hover:bg-white/25 active:bg-white/30 backdrop-blur-xl ring-1 ring-white/20
                        text-white/95 transition disabled:opacity-40 disabled:pointer-events-none z-30"
-          >
-            <ArrowRight size={18} />
-          </button>
-        )}
-
-        {/* Spinner overlay while verifying */}
-        {verifying && (
-          <div className="absolute inset-0 grid place-items-center rounded-2xl bg-black/20 z-40">
-            <svg
-              className="animate-spin"
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
             >
-              <title>Loading...</title>
-              <circle
-                cx="12"
-                cy="12"
-                r="9"
-                stroke="white"
-                strokeOpacity="0.25"
-                strokeWidth="3"
-                fill="none"
-              />
-              <path
-                d="M21 12a9 9 0 0 1-9 9"
-                stroke="white"
-                strokeWidth="3"
-                fill="none"
-                strokeLinecap="round"
-              />
-            </svg>
-          </div>
-        )}
+              <ArrowRight size={18} />
+            </button>
+          )}
 
-        {/* CapsLock hint */}
-        {caps && !verifying && (
-          <div className="absolute -bottom-6 left-1 text-xs text-amber-200/90">
-            Caps Lock is on
-          </div>
-        )}
-      </div>
+          {/* Spinner overlay while verifying */}
+          {verifying && (
+            <div className="absolute inset-0 grid place-items-center rounded-2xl bg-black/20 z-40">
+              <Spinner className="text-white" />
+            </div>
+          )}
+
+          {/* CapsLock hint */}
+          {caps && !verifying && (
+            <div className="absolute -bottom-6 left-1 text-xs text-amber-200/90">
+              Caps Lock is on
+            </div>
+          )}
+        </div>
+      ) : (
+        <Fingerprint />
+      )}
 
       {/* Touch ID / hint row */}
       <div className="h-6 flex items-center gap-3 text-white/70 text-sm">
@@ -155,10 +180,107 @@ export default function PasswordInput({
         >
           ?
         </button>
-        {showHint && (
-          <span className="text-white/80 text-xs">Hint: Anything</span>
-        )}
       </div>
+      {showHint && (
+        <p className="text-white/80 text-xs">
+          Password: Anything
+          <br />
+          Touch ID: Long press Control
+        </p>
+      )}
+    </div>
+  );
+}
+
+function Fingerprint() {
+  const [isComplete, setIsComplete] = useState(false);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setIsComplete(true);
+    }, 1300);
+
+    return () => clearTimeout(timeout);
+  }, []);
+
+  return (
+    <div className="relative h-12 w-12 overflow-hidden">
+      {/* Overlap both states and crossfade/scale synchronously for a morph-like feel */}
+      <AnimatePresence initial={false} mode="sync">
+        {!isComplete && (
+          <motion.div
+            key="scan"
+            className="absolute inset-0 grid place-items-center"
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            aria-live="polite"
+          >
+            {/* Animated scanning line (CSS keyframes for reliability/perf) */}
+            <div className={cn("absolute inset-0")}>
+              <div
+                className={cn("scan-line scan-anim", isComplete && "!hidden")}
+                aria-hidden="true"
+              />
+            </div>
+
+            <Image
+              src="/assets/icons/fingerprint-detection-symbolic.ico"
+              alt="Fingerprint scanning"
+              width={32}
+              height={32}
+              priority
+            />
+          </motion.div>
+        )}
+
+        {isComplete && (
+          <motion.div
+            key="done"
+            className="absolute inset-0 grid place-items-center"
+            initial={{
+              opacity: 0,
+              scale: 0.9,
+              rotate: -4,
+              filter: "blur(2px)",
+            }}
+            animate={{ opacity: 1, scale: 1, rotate: 0, filter: "blur(0px)" }}
+            exit={{ opacity: 0, scale: 1.02, filter: "blur(2px)" }}
+            transition={{ type: "spring", stiffness: 520, damping: 22 }}
+          >
+            <Image
+              src="/assets/icons/fingerprint-detection-complete-symbolic.ico"
+              alt="Fingerprint verified"
+              width={32}
+              height={32}
+              priority
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+      {/* Local styles for the scanning line animation */}
+      <style jsx>{`
+        .scan-line {
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 10%;
+          height: 0.24rem; /* 1 */
+          background-image: linear-gradient(90deg, transparent, rgba(165, 243, 252, 1), transparent);
+          filter: blur(2px);
+          will-change: top;
+          border-radius: 9999px;
+        }
+        .scan-anim { animation: fingerprint-scan-y 1.5s linear infinite; }
+        @keyframes fingerprint-scan-y {
+          0% { top: 10%; }
+          50% { top: 90%; }
+          100% { top: 10%; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .scan-anim { animation-duration: 3s; }
+        }
+      `}</style>
     </div>
   );
 }
