@@ -7,6 +7,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { appMachine } from "@/lib/app-machine";
 import { cn } from "@/lib/utils";
 import { AnimatePresence } from "motion/react";
+import Desktop from "@/components/screens/desktop";
 
 export default function AppShell() {
   const [state, send] = useMachine(appMachine);
@@ -23,9 +24,11 @@ export default function AppShell() {
           }}
         />
       );
+      
     if (state.matches("login"))
       return <LoginScreen onSuccess={() => send({ type: "LOGIN_SUCCESS" })} />;
-    // return <Desktop />;
+
+    return <Desktop />;
   };
 
   if (isMobile) {
@@ -51,9 +54,7 @@ export default function AppShell() {
         muted
       />
 
-      <AnimatePresence>
-        {renderScreen()}
-      </AnimatePresence>
+      <AnimatePresence>{renderScreen()}</AnimatePresence>
     </main>
   );
 }
