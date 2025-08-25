@@ -54,7 +54,7 @@ export default function PasswordInput({
         !longPressTimer.current
       ) {
         longPressTimer.current = setTimeout(() => {
-          setIsInputVisible((prev) => !prev);
+          setIsInputVisible(false);
         }, 500);
       }
     };
@@ -83,92 +83,112 @@ export default function PasswordInput({
   return (
     <div className="flex flex-col items-center gap-3">
       {/* Password field */}
-      {isInputVisible ? (
-        <div
-          className={`relative w-[min(86vw,440px)] transition-all ${wrong ? "shake" : ""} overflow-hidden rounded-2xl`}
-        >
-          {/* glass effect */}
-          <div
-            className="absolute inset-0 z-0 isolate overflow-hidden backdrop-blur-[2px]"
-            style={{ filter: "url(#glass-distortion)" }}
-          />
-          {/* tint */}
-          <div className="absolute inset-0 z-10 bg-white/25" />
-          {/* shine */}
-          <div
-            className="absolute inset-0 z-20 overflow-hidden rounded-2xl"
-            style={{
-              boxShadow:
-                "inset 0 0 1px 0 rgba(255,255,255,0.5), inset 0 0 1px 1px rgba(255,255,255,0.5)",
-            }}
-          />
-          {/* Decoy field to confuse password managers */}
-          <input
-            type="password"
-            name="password"
-            autoComplete="current-password"
-            tabIndex={-1}
-            style={{
-              position: "absolute",
-              left: "-9999px",
+      <AnimatePresence initial={false} mode="wait">
+        {isInputVisible ? (
+          <motion.div
+            key="password-field"
+            className={`relative w-[min(86vw,440px)] transition-all ${wrong ? "shake" : ""} overflow-hidden rounded-2xl`}
+            initial={{
               opacity: 0,
-              pointerEvents: "none",
+              clipPath: "inset(0% 12% 0% 12% round 1rem)",
             }}
-            readOnly
-          />
+            animate={{ opacity: 1, clipPath: "inset(0% 0% 0% 0% round 1rem)" }}
+            exit={{ opacity: 0, clipPath: "inset(0% 50% 0% 50% round 1rem)" }}
+            transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+            style={{ willChange: "opacity, clip-path" }}
+          >
+            {/* glass effect */}
+            <div
+              className="absolute inset-0 z-0 isolate overflow-hidden backdrop-blur-[2px]"
+              style={{ filter: "url(#glass-distortion)" }}
+            />
+            {/* tint */}
+            <div className="absolute inset-0 z-10 bg-white/25" />
+            {/* shine */}
+            <div
+              className="absolute inset-0 z-20 overflow-hidden rounded-2xl"
+              style={{
+                boxShadow:
+                  "inset 0 0 1px 0 rgba(255,255,255,0.5), inset 0 0 1px 1px rgba(255,255,255,0.5)",
+              }}
+            />
+            {/* Decoy field to confuse password managers */}
+            <input
+              type="password"
+              name="password"
+              autoComplete="current-password"
+              tabIndex={-1}
+              style={{
+                position: "absolute",
+                left: "-9999px",
+                opacity: 0,
+                pointerEvents: "none",
+              }}
+              readOnly
+            />
 
-          <input
-            type="text"
-            inputMode="text"
-            autoComplete="off"
-            autoCorrect="off"
-            autoCapitalize="off"
-            spellCheck={false}
-            data-form-type="other"
-            data-lpignore="true"
-            data-1p-ignore="true"
-            name="not-a-password"
-            form="non-existent-form"
-            readOnly={false}
-            aria-label="Password"
-            placeholder="Enter password"
-            value={displayValue}
-            onChange={handleChange}
-            onKeyDown={handleKeyDown}
-            disabled={verifying}
-            className="relative z-30 w-full h-12 pl-4 pr-12 text-[15px] rounded-2xl text-white/95 placeholder-white/60 tracking-wide outline-none bg-transparent focus:ring-2 focus:ring-cyan-200/60"
-          />
+            <input
+              type="text"
+              inputMode="text"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              data-form-type="other"
+              data-lpignore="true"
+              data-1p-ignore="true"
+              name="not-a-password"
+              form="non-existent-form"
+              readOnly={false}
+              aria-label="Password"
+              placeholder="Enter password"
+              value={displayValue}
+              onChange={handleChange}
+              onKeyDown={handleKeyDown}
+              disabled={verifying}
+              className="relative z-30 w-full h-12 pl-4 pr-12 text-[15px] rounded-2xl text-white/95 placeholder-white/60 tracking-wide outline-none bg-transparent focus:ring-2 focus:ring-cyan-200/60"
+            />
 
-          {!verifying && (
-            <button
-              type="submit"
-              aria-label="Unlock"
-              disabled={!value.trim()}
-              className="absolute right-1.5 top-1/2 -translate-y-1/2 w-10 h-10 grid place-items-center rounded-xl
-                       bg-white/15 hover:bg-white/25 active:bg-white/30 backdrop-blur-xl ring-1 ring-white/20
-                       text-white/95 transition disabled:opacity-40 disabled:pointer-events-none z-30"
-            >
-              <ArrowRight size={18} />
-            </button>
-          )}
+            {!verifying && (
+              <button
+                type="submit"
+                aria-label="Unlock"
+                onClick={onSubmit}
+                disabled={!value.trim()}
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 w-10 h-10 grid place-items-center rounded-xl
+                         bg-white/15 hover:bg-white/25 active:bg-white/30 backdrop-blur-xl ring-1 ring-white/20
+                         text-white/95 transition disabled:opacity-40 disabled:pointer-events-none z-30"
+              >
+                <ArrowRight size={18} />
+              </button>
+            )}
 
-          {/* Spinner overlay while verifying */}
-          {verifying && (
-            <div className="absolute inset-0 grid place-items-center rounded-2xl bg-black/20 z-40">
-              <Spinner className="text-white" />
-            </div>
-          )}
+            {/* Spinner overlay while verifying */}
+            {verifying && (
+              <div className="absolute inset-0 grid place-items-center rounded-2xl bg-black/20 z-40">
+                <Spinner className="text-white" />
+              </div>
+            )}
 
-          {/* CapsLock hint */}
-          {caps && !verifying && (
-            <div className="absolute -bottom-6 left-1 text-xs text-amber-200/90">
-              Caps Lock is on
-            </div>
-          )}
-        </div>
-      ) : (
-        <Fingerprint />
-      )}
+            {/* CapsLock hint */}
+            {caps && !verifying && (
+              <div className="absolute -bottom-6 left-1 text-xs text-amber-200/90">
+                Caps Lock is on
+              </div>
+            )}
+          </motion.div>
+        ) : (
+          <motion.div
+            key="fingerprint"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <Fingerprint />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Touch ID / hint row */}
       <div className="h-6 flex items-center gap-3 text-white/70 text-sm">
