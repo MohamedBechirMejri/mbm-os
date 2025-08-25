@@ -3,10 +3,22 @@ import { AnimatePresence, motion } from "motion/react";
 import NextImage from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
-import { cn } from "@/lib/utils";
-import type { PasswordInputProps } from "../types";
+import { cn, sleep } from "@/lib/utils";
 
 const Image = motion(NextImage);
+
+type PasswordInputProps = {
+  value: string;
+  displayValue: string;
+  onValueChange: (value: string, displayValue: string) => void;
+  onSubmit: () => void;
+  verifying: boolean;
+  wrong: boolean;
+  caps: boolean;
+  showHint: boolean;
+  onToggleHint: () => void;
+  onSuccess: () => void;
+};
 
 export default function PasswordInput({
   value,
@@ -18,6 +30,7 @@ export default function PasswordInput({
   caps,
   showHint,
   onToggleHint,
+  onSuccess,
 }: PasswordInputProps) {
   const [isInputVisible, setIsInputVisible] = useState(true);
 
@@ -185,7 +198,7 @@ export default function PasswordInput({
             exit={{ opacity: 0, scale: 0.98 }}
             transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
           >
-            <Fingerprint />
+            <Fingerprint onSuccess={onSuccess} />
           </motion.div>
         )}
       </AnimatePresence>
@@ -212,16 +225,22 @@ export default function PasswordInput({
   );
 }
 
-function Fingerprint() {
+function Fingerprint({ onSuccess }: { onSuccess: (value: string) => void }) {
   const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      setIsComplete(true);
-    }, 1300);
+    void (async () => {
+      const timeout = setTimeout(async () => {
+        setIsComplete(true);
 
-    return () => clearTimeout(timeout);
-  }, []);
+        await sleep(800);
+
+        onSuccess("fp");
+      }, 1300);
+
+      return () => clearTimeout(timeout);
+    })();
+  }, [onSuccess]);
 
   return (
     <div className="relative h-12 w-12 overflow-hidden">

@@ -95,6 +95,7 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
           caps={caps}
           showHint={showHint}
           onToggleHint={() => setShowHint((v) => !v)}
+          onSuccess={onSuccess}
         />
       </form>
 
