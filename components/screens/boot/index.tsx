@@ -51,6 +51,7 @@ export default function BootScreen({onDone}: { onDone?: () => void }) {
           height={140}
           className="invert"
           draggable={false}
+          priority
         />
       </motion.div>
 

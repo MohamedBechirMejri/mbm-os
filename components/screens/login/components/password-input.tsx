@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import { cn, sleep } from "@/lib/utils";
 
-const Image = motion(NextImage);
+const Image = motion.create(NextImage);
 
 type PasswordInputProps = {
   value: string;
@@ -14,7 +14,6 @@ type PasswordInputProps = {
   onSubmit: () => void;
   verifying: boolean;
   wrong: boolean;
-  caps: boolean;
   showHint: boolean;
   onToggleHint: () => void;
   onSuccess: () => void;
@@ -27,7 +26,6 @@ export default function PasswordInput({
   onSubmit,
   verifying,
   wrong,
-  caps,
   showHint,
   onToggleHint,
   onSuccess,
@@ -177,16 +175,9 @@ export default function PasswordInput({
             )}
 
             {/* Spinner overlay while verifying */}
-            {verifying && (
+            {!verifying && (
               <div className="absolute inset-0 grid place-items-center rounded-2xl bg-black/20 z-40">
                 <Spinner className="text-white" />
-              </div>
-            )}
-
-            {/* CapsLock hint */}
-            {caps && !verifying && (
-              <div className="absolute -bottom-6 left-1 text-xs text-amber-200/90">
-                Caps Lock is on
               </div>
             )}
           </motion.div>
