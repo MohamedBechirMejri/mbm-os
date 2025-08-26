@@ -4,8 +4,7 @@ import {
   Avatar,
   PasswordInput,
   StatusBar,
-  TimeDisplay,
-  useCapsLockDetection,
+  TimeDisplay
 } from "./components";
 import { APPLE_TEXT_FONT_STACK } from "./constants/fonts";
 import { loginStyles } from "./styles/animations";
@@ -20,9 +19,6 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
   const [verifying, setVerifying] = useState(false);
   const [wrong, setWrong] = useState(false);
   const [showHint, setShowHint] = useState(false);
-
-  // Use the caps lock detection hook
-  const caps = useCapsLockDetection();
 
   // Submit logic: succeed on any non-empty password after a short verify
   const submit = (e?: React.FormEvent) => {
@@ -100,7 +96,6 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
           onSubmit={submit}
           verifying={verifying}
           wrong={wrong}
-          caps={caps}
           showHint={showHint}
           onToggleHint={() => setShowHint((v) => !v)}
           onSuccess={() => onSuccess?.()}
