@@ -59,9 +59,7 @@ export default function AppShell() {
         muted
       />
 
-      <AnimatePresence mode="wait" initial={false}>
-        {renderScreen()}
-      </AnimatePresence>
+      <AnimatePresence mode="wait">{renderScreen()}</AnimatePresence>
     </main>
   );
 }
