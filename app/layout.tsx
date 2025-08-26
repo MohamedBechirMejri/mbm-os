@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { MotionConfig } from "motion/react";
 import LiquidGlassFilters from "@/components/screens/login/components/liquid-glass-filters";
 
 const inter = Inter({
@@ -22,7 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} antialiased`}>
-        {children}
+        <MotionConfig reducedMotion="never">{children}</MotionConfig>
 
         {/* SVG Filters */}
         <LiquidGlassFilters />

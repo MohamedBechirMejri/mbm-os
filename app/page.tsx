@@ -1,13 +1,13 @@
 "use client";
 
 import { useMachine } from "@xstate/react";
+import { AnimatePresence } from "motion/react";
 import BootScreen from "@/components/screens/boot";
+import Desktop from "@/components/screens/desktop";
 import LoginScreen from "@/components/screens/login";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { appMachine } from "@/lib/app-machine";
 import { cn } from "@/lib/utils";
-import { AnimatePresence } from "motion/react";
-import Desktop from "@/components/screens/desktop";
 
 export default function AppShell() {
   const [state, send] = useMachine(appMachine);
@@ -24,11 +24,16 @@ export default function AppShell() {
           }}
         />
       );
-      
-    if (state.matches("login"))
-      return <LoginScreen onSuccess={() => send({ type: "LOGIN_SUCCESS" })} />;
 
-    return <Desktop />;
+    if (state.matches("login"))
+      return (
+        <LoginScreen
+          key="login"
+          onSuccess={() => send({ type: "LOGIN_SUCCESS" })}
+        />
+      );
+
+    return <Desktop key="desktop" />;
   };
 
   if (isMobile) {
@@ -54,7 +59,9 @@ export default function AppShell() {
         muted
       />
 
-      <AnimatePresence>{renderScreen()}</AnimatePresence>
+      <AnimatePresence mode="wait" initial={false}>
+        {renderScreen()}
+      </AnimatePresence>
     </main>
   );
 }

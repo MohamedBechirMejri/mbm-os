@@ -1,11 +1,8 @@
+"use client";
+
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
-import {
-  Avatar,
-  PasswordInput,
-  StatusBar,
-  TimeDisplay
-} from "./components";
+import { Avatar, PasswordInput, StatusBar, TimeDisplay } from "./components";
 import { APPLE_TEXT_FONT_STACK } from "./constants/fonts";
 import { loginStyles } from "./styles/animations";
 import type { LoginScreenProps } from "./types";

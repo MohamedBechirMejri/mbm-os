@@ -1,3 +1,5 @@
+"use client";
+
 import { ArrowRight } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import NextImage from "next/image";
@@ -94,7 +96,7 @@ export default function PasswordInput({
   return (
     <div className="flex flex-col items-center gap-3">
       {/* Password field */}
-      <AnimatePresence initial={false} mode="wait">
+      <AnimatePresence mode="wait">
         {isInputVisible ? (
           <motion.div
             key="password-field"
@@ -175,7 +177,7 @@ export default function PasswordInput({
             )}
 
             {/* Spinner overlay while verifying */}
-            {!verifying && (
+            {verifying && (
               <div className="absolute inset-0 grid place-items-center rounded-2xl bg-black/20 z-40">
                 <Spinner className="text-white" />
               </div>
@@ -216,7 +218,7 @@ export default function PasswordInput({
   );
 }
 
-function Fingerprint({ onSuccess }: { onSuccess: (value: string) => void }) {
+function Fingerprint({ onSuccess }: { onSuccess: () => void }) {
   const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
@@ -226,7 +228,7 @@ function Fingerprint({ onSuccess }: { onSuccess: (value: string) => void }) {
 
         await sleep(800);
 
-        onSuccess("fp");
+        onSuccess();
       }, 1300);
 
       return () => clearTimeout(timeout);
