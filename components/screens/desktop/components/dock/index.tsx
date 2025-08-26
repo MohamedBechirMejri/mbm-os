@@ -51,12 +51,15 @@ const Dock = React.forwardRef<HTMLDivElement, DockProps>(
           React.isValidElement<DockIconProps>(child) &&
           child.type === DockIcon
         ) {
+          const childProps = child.props as DockIconProps;
+
+          // Child-provided props should win; fall back to Dock defaults when absent.
           return React.cloneElement(child, {
+            size: childProps.size ?? iconSize,
+            magnification: childProps.magnification ?? iconMagnification,
+            distance: childProps.distance ?? iconDistance,
+            mouseX: childProps.mouseX ?? mouseX,
             ...child.props,
-            mouseX: mouseX,
-            size: iconSize,
-            magnification: iconMagnification,
-            distance: iconDistance,
           });
         }
         return child;
@@ -115,7 +118,8 @@ const DockIcon = ({
   const sizeTransform = useTransform(
     distanceCalc,
     [-distance, 0, distance],
-    [size, magnification, size],
+    // Interpret small magnification values (<=10) as a scale factor; otherwise treat as absolute px.
+    [size, magnification <= 10 ? size * magnification : magnification, size],
   );
 
   const scaleSize = useSpring(sizeTransform, {
