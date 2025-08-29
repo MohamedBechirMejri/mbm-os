@@ -1,5 +1,7 @@
 import Image from "next/image";
 import { Dock, DockIcon } from "./components/dock";
+import { DesktopAPI, WindowManagerRoot } from "./components/window-manager";
+import { __DevRegisterSampleApp } from "./components/window-manager/index";
 
 const icons = [
   "file-manager",
@@ -21,7 +23,16 @@ export default function Desktop() {
   return (
     <div className="relative size-full grid grid-rows-[auto_minmax(0,_1fr)_auto]">
       <div></div>
-      <div></div>
+      <div>
+        <WindowManagerRoot />
+        <__DevRegisterSampleApp />
+        <button
+          style={{ position: "fixed", left: 12, bottom: 12, zIndex: 9999 }}
+          onClick={() => DesktopAPI.launch("demo")}
+        >
+          Launch Demo
+        </button>
+      </div>
       <Dock className="mb-2 select-none w-max">
         {icons.map((icon) => (
           <DockIcon key={icon} size={64} magnification={2} distance={120}>
