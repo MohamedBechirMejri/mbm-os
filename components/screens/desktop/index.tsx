@@ -27,6 +27,7 @@ export default function Desktop() {
         <WindowManagerRoot />
         <__DevRegisterSampleApp />
         <button
+          type="button"
           style={{ position: "fixed", left: 12, bottom: 12, zIndex: 9999 }}
           onClick={() => DesktopAPI.launch("demo")}
         >
