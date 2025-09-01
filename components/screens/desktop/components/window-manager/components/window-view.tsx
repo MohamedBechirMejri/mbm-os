@@ -1,39 +1,12 @@
 "use client";
 
 import type React from "react";
-import { useEffect, useMemo, useRef } from "react";
-import { closeWin, focusWin, registerApps, setWinState } from "./api";
-import { useWindowDrag, useWindowResize } from "./hooks";
-import { useDesktop } from "./store";
-import type { WinInstance } from "./types";
+import { closeWin, focusWin, setWinState } from "../api";
+import { useWindowDrag, useWindowResize } from "../hooks";
+import { useDesktop } from "../store";
+import type { WinInstance } from "../types";
 
-export function WindowManagerRoot({ className }: { className?: string }) {
-  const ref = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    el.id = "wm-root";
-  }, []);
-
-  const ids = useDesktop((s) => s.order);
-  const windows = useDesktop((s) => s.windows);
-
-  return (
-    <div
-      ref={ref}
-      className={className}
-      style={{ position: "absolute", inset: 0, overflow: "hidden" }}
-    >
-      {ids.map((id) => {
-        const w = windows[id];
-        if (!w || w.state === "minimized" || w.state === "hidden") return null;
-        return <WindowView key={id} win={w} rootRef={ref} />;
-      })}
-    </div>
-  );
-}
-
-function WindowView({
+export function WindowView({
   win,
   rootRef,
 }: {
@@ -245,32 +218,4 @@ function resizeHandleStyle(
         cursor: "nwse-resize",
       };
   }
-}
-
-export function __DevRegisterSampleApp() {
-  const Demo = useMemo(
-    () =>
-      function Demo({ instanceId }: { instanceId: string }) {
-        return (
-          <div style={{ padding: 16, color: "white" }} className="">
-            <p style={{ margin: 0, fontWeight: 600 }}>Demo App</p>
-            <p style={{ marginTop: 6, opacity: 0.8 }}>Instance: {instanceId}</p>
-            <p
-              style={{ marginTop: 10, opacity: 0.7 }}
-              className="bg-black text-white p-2 rounded"
-            >
-              Replace this with your actual apps. This component exists so you
-              can see a window render before wiring your registry.
-            </p>
-          </div>
-        );
-      },
-    [],
-  );
-
-  useEffect(() => {
-    registerApps([{ id: "demo", title: "Demo", Component: Demo }]);
-  }, [Demo]);
-
-  return null;
 }
