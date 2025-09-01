@@ -134,8 +134,8 @@ function WindowView({
       </div>
 
       <div
-        className="wm-content"
-        style={{ position: "absolute", inset: 36, overflow: "auto" }}
+        className="wm-content w-full bg-rose-400 h-[calc(100%-36px)]"
+        style={{ position: "absolute", inset: 0, top: 36, overflow: "auto" }}
       >
         {meta ? <meta.Component instanceId={win.id} /> : null}
       </div>
@@ -252,10 +252,13 @@ export function __DevRegisterSampleApp() {
     () =>
       function Demo({ instanceId }: { instanceId: string }) {
         return (
-          <div style={{ padding: 16, color: "white" }}>
+          <div style={{ padding: 16, color: "white" }} className="">
             <p style={{ margin: 0, fontWeight: 600 }}>Demo App</p>
             <p style={{ marginTop: 6, opacity: 0.8 }}>Instance: {instanceId}</p>
-            <p style={{ marginTop: 10, opacity: 0.7 }}>
+            <p
+              style={{ marginTop: 10, opacity: 0.7 }}
+              className="bg-black text-white p-2 rounded"
+            >
               Replace this with your actual apps. This component exists so you
               can see a window render before wiring your registry.
             </p>
