@@ -33,7 +33,7 @@ const progressWrapVariants: Variants = {
   }),
 };
 
-export default function BootScreen({onDone}: { onDone?: () => void }) {
+export default function BootScreen({ onDone }: { onDone?: () => void }) {
   return (
     <motion.div
       className="flex flex-col items-center justify-between min-h-full w-full select-none cursor-none"

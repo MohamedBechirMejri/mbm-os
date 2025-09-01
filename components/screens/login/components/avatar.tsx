@@ -25,7 +25,7 @@ export default function Avatar({ username = "Guest" }: { username?: string }) {
           <UserRound size={36} className="text-white" />
         </div>
       </div>
-        <p className="text-md font-medium text-white/90 -mt-2">{username}</p>
+      <p className="text-md font-medium text-white/90 -mt-2">{username}</p>
     </div>
   );
 }

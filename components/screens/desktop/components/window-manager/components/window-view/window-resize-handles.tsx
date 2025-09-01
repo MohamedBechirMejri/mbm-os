@@ -19,92 +19,34 @@ export function WindowResizeHandles({
       {edges.map((edge) => (
         <div
           key={edge}
-          className="wm-resize-handle"
+          className={`wm-resize-handle ${resizeHandleClass(edge)}`}
           onPointerDown={onPointerDown(edge)}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
-          style={resizeHandleStyle(edge)}
         />
       ))}
     </>
   );
 }
 
-function resizeHandleStyle(edge: Edge): React.CSSProperties {
-  const base: React.CSSProperties = { position: "absolute", zIndex: 2 };
-  const size = 8;
+function resizeHandleClass(edge: Edge): string {
+  const base = "absolute z-[2]";
   switch (edge) {
     case "t":
-      return {
-        ...base,
-        top: -2,
-        left: 8,
-        right: 8,
-        height: size,
-        cursor: "ns-resize",
-      };
+      return `${base} top-[-2px] left-2 right-2 h-2 cursor-[ns-resize]`;
     case "b":
-      return {
-        ...base,
-        bottom: -2,
-        left: 8,
-        right: 8,
-        height: size,
-        cursor: "ns-resize",
-      };
+      return `${base} bottom-[-2px] left-2 right-2 h-2 cursor-[ns-resize]`;
     case "l":
-      return {
-        ...base,
-        left: -2,
-        top: 8,
-        bottom: 8,
-        width: size,
-        cursor: "ew-resize",
-      };
+      return `${base} left-[-2px] top-2 bottom-2 w-2 cursor-[ew-resize]`;
     case "r":
-      return {
-        ...base,
-        right: -2,
-        top: 8,
-        bottom: 8,
-        width: size,
-        cursor: "ew-resize",
-      };
+      return `${base} right-[-2px] top-2 bottom-2 w-2 cursor-[ew-resize]`;
     case "tr":
-      return {
-        ...base,
-        right: -2,
-        top: -2,
-        width: size,
-        height: size,
-        cursor: "nesw-resize",
-      };
+      return `${base} right-[-2px] top-[-2px] w-2 h-2 cursor-[nesw-resize]`;
     case "br":
-      return {
-        ...base,
-        right: -2,
-        bottom: -2,
-        width: size,
-        height: size,
-        cursor: "nwse-resize",
-      };
+      return `${base} right-[-2px] bottom-[-2px] w-2 h-2 cursor-[nwse-resize]`;
     case "bl":
-      return {
-        ...base,
-        left: -2,
-        bottom: -2,
-        width: size,
-        height: size,
-        cursor: "nesw-resize",
-      };
+      return `${base} left-[-2px] bottom-[-2px] w-2 h-2 cursor-[nesw-resize]`;
     case "tl":
-      return {
-        ...base,
-        left: -2,
-        top: -2,
-        width: size,
-        height: size,
-        cursor: "nwse-resize",
-      };
+      return `${base} left-[-2px] top-[-2px] w-2 h-2 cursor-[nwse-resize]`;
   }
 }

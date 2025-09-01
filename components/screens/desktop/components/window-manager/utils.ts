@@ -7,19 +7,31 @@ export function clamp(n: number, min: number, max: number) {
 }
 
 export function viewportRect(container: HTMLElement | null): DOMRect {
-  if (!container) return new DOMRect(0, 0, window.innerWidth, window.innerHeight);
+  if (!container)
+    return new DOMRect(0, 0, window.innerWidth, window.innerHeight);
   return container.getBoundingClientRect();
 }
 
-export function cascadeOrigin(existing: WinInstance[], rootRect: DOMRect): Bounds {
+export function cascadeOrigin(
+  existing: WinInstance[],
+  rootRect: DOMRect,
+): Bounds {
   const size = {
     w: Math.round(Math.min(900, rootRect.width * 0.6)),
     h: Math.round(Math.min(700, rootRect.height * 0.6)),
   };
   const step = 28;
   const idx = existing.length % 8;
-  const x = clamp(rootRect.x + step * idx + 40, 0, Math.max(0, rootRect.width - size.w));
-  const y = clamp(rootRect.y + step * idx + 64, 0, Math.max(0, rootRect.height - size.h));
+  const x = clamp(
+    rootRect.x + step * idx + 40,
+    0,
+    Math.max(0, rootRect.width - size.w),
+  );
+  const y = clamp(
+    rootRect.y + step * idx + 64,
+    0,
+    Math.max(0, rootRect.height - size.h),
+  );
   return { x, y, w: size.w, h: size.h } satisfies Bounds;
 }
 
@@ -58,4 +70,3 @@ export function computeSnapRect(snap: Snap, rootRect: DOMRect): Bounds {
 export function near(a: number, b: number, threshold = 16) {
   return Math.abs(a - b) <= threshold;
 }
-

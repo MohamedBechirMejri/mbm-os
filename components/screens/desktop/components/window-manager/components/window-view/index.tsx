@@ -18,27 +18,12 @@ export function WindowView({
   const drag = useWindowDrag(win, rootRef);
   const resize = useWindowResize(win, rootRef);
 
-  const style: React.CSSProperties = {
-    position: "absolute",
-    left: 0,
-    top: 0,
+  // Dynamic layout (position/size/z) stays in style; visual styles use Tailwind
+  const dynamicStyle: React.CSSProperties = {
     transform: `translate3d(${win.bounds.x}px, ${win.bounds.y}px, 0)`,
     width: win.bounds.w,
     height: win.bounds.h,
     zIndex: win.z,
-    borderRadius: 12,
-    overflow: "hidden",
-    background: "rgba(255,255,255,0.06)",
-    border: "1px solid rgba(255,255,255,0.18)",
-    backdropFilter: "blur(20px)",
-    WebkitBackdropFilter: "blur(20px)",
-    boxShadow: win.focused
-      ? "0 10px 32px rgba(0,0,0,0.45)"
-      : "0 10px 28px rgba(0,0,0,0.28)",
-    outline: win.focused
-      ? "1px solid rgba(255,255,255,0.25)"
-      : "1px solid rgba(255,255,255,0.12)",
-    userSelect: "none",
   };
 
   const onTitleDoubleClick = () => {
@@ -47,8 +32,14 @@ export function WindowView({
 
   return (
     <div
-      className="wm-window"
-      style={style}
+      className={
+        `wm-window absolute left-0 top-0 rounded-xl overflow-hidden select-none ` +
+        `bg-[rgba(255,255,255,0.06)] backdrop-blur-[20px] ` +
+        (win.focused
+          ? "shadow-[0_10px_32px_rgba(0,0,0,0.45)]"
+          : "shadow-[0_10px_28px_rgba(0,0,0,0.28)]")
+      }
+      style={dynamicStyle}
       onPointerDown={() => focusWin(win.id)}
     >
       <WindowTitlebar

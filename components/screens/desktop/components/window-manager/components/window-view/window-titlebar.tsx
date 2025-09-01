@@ -19,26 +19,15 @@ export function WindowTitlebar({
 }: WindowTitlebarProps) {
   return (
     <div
-      className="wm-titlebar"
+      className="wm-titlebar h-9 flex items-center gap-2 px-[10px] cursor-grab bg-[linear-gradient(180deg,rgba(255,255,255,0.14),rgba(255,255,255,0.06))] border-b border-white/15"
       onPointerDown={drag.onPointerDown}
       onPointerMove={drag.onPointerMove}
       onPointerUp={drag.onPointerUp}
       onDoubleClick={onTitleDoubleClick}
       role="toolbar"
       aria-label="Window title bar"
-      style={{
-        height: 36,
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-        padding: "0 10px",
-        cursor: "grab",
-        background:
-          "linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.06))",
-        borderBottom: "1px solid rgba(255,255,255,0.14)",
-      }}
     >
-      <div style={{ display: "flex", gap: 8, paddingRight: 6 }}>
+      <div className="flex gap-2 pr-1.5">
         <button
           type="button"
           aria-label="Close"
@@ -46,7 +35,7 @@ export function WindowTitlebar({
             e.stopPropagation();
             closeWin(win.id);
           }}
-          style={circleBtn("#ff5f57")}
+          className="h-3 w-3 rounded-full border border-black/15 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.35)] bg-[#ff5f57]"
         />
         <button
           type="button"
@@ -55,7 +44,7 @@ export function WindowTitlebar({
             e.stopPropagation();
             setWinState(win.id, "minimized");
           }}
-          style={circleBtn("#ffbd2e")}
+          className="h-3 w-3 rounded-full border border-black/15 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.35)] bg-[#ffbd2e]"
         />
         <button
           type="button"
@@ -67,22 +56,10 @@ export function WindowTitlebar({
               win.state === "maximized" ? "normal" : "maximized",
             );
           }}
-          style={circleBtn("#28c840")}
+          className="h-3 w-3 rounded-full border border-black/15 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.35)] bg-[#28c840]"
         />
       </div>
-      <div style={{ fontSize: "0.75rem", opacity: 0.85 }}>{win.title}</div>
+      <div className="text-[0.75rem] opacity-[0.85]">{win.title}</div>
     </div>
   );
-}
-
-function circleBtn(color: string): React.CSSProperties {
-  return {
-    width: 12,
-    height: 12,
-    borderRadius: 9999,
-    background: color,
-    border: "1px solid rgba(0,0,0,0.15)",
-    boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.35)",
-    cursor: "pointer",
-  };
 }
