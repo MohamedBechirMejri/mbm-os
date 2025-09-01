@@ -25,6 +25,7 @@
     "rules": {
       "recommended": true,
       "suspicious": {
+        "noAlert": "error",
         "noUnknownAtRules": "off"
       }
     }
