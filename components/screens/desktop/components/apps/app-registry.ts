@@ -41,6 +41,7 @@ export const apps: AppMeta[] = [
     Component: CalculatorApp,
     minSize: { w: 200, h: 400 },
     maxSize: { w: 200, h: 400 },
+    resizable: false,
   },
   {
     id: "terminal",

@@ -9,6 +9,7 @@ export interface AppMeta {
   Component: React.ComponentType<{ instanceId: string }>;
   minSize?: { w: number; h: number };
   maxSize?: { w: number; h: number };
+  resizable?: boolean; // if false: hide resize handles and disable maximize/zoom
 }
 
 export type WinState =

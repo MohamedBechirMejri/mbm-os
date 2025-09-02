@@ -3,8 +3,8 @@
 import { useCallback, useRef, useState } from "react";
 import { focusWin, moveWin } from "./api";
 import { useDesktop } from "./store";
-import { clamp } from "./utils";
 import type { Bounds, WinInstance } from "./types";
+import { clamp } from "./utils";
 
 export function useWindowDrag(
   win: WinInstance,

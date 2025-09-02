@@ -3,6 +3,7 @@
 import type React from "react";
 import { focusWin, setWinState } from "../../api";
 import { useWindowDrag, useWindowResize } from "../../hooks";
+import { useDesktop } from "../../store";
 import type { WinInstance } from "../../types";
 import { WindowContent } from "./window-content";
 import { WindowResizeHandles } from "./window-resize-handles";
@@ -17,6 +18,8 @@ export function WindowView({
 }) {
   const drag = useWindowDrag(win, rootRef);
   const resize = useWindowResize(win, rootRef);
+  const meta = useDesktop((s) => s.apps[win.appId]);
+  const isResizable = meta?.resizable ?? true;
 
   // Dynamic layout (position/size/z) stays in style; visual styles use Tailwind
   const dynamicStyle: React.CSSProperties = {
@@ -27,6 +30,7 @@ export function WindowView({
   };
 
   const onTitleDoubleClick = () => {
+    if (!isResizable) return;
     setWinState(win.id, win.state === "maximized" ? "normal" : "maximized");
   };
 
@@ -50,11 +54,13 @@ export function WindowView({
 
       <WindowContent win={win} />
 
-      <WindowResizeHandles
-        onPointerDown={resize.onPointerDown}
-        onPointerMove={resize.onPointerMove}
-        onPointerUp={resize.onPointerUp}
-      />
+      {isResizable ? (
+        <WindowResizeHandles
+          onPointerDown={resize.onPointerDown}
+          onPointerMove={resize.onPointerMove}
+          onPointerUp={resize.onPointerUp}
+        />
+      ) : null}
     </div>
   );
 }

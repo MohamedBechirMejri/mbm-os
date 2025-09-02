@@ -88,6 +88,14 @@ export function setWinState(id: string, st: WinState) {
   const w = s.windows[id];
   if (!w) return;
   const meta = s.apps[w.appId];
+  // If the app is non-resizable, disallow maximize/fullscreen transitions
+  if (
+    meta &&
+    meta.resizable === false &&
+    (st === "maximized" || st === "fullscreen")
+  ) {
+    return;
+  }
   const minW = meta?.minSize?.w ?? 0;
   const minH = meta?.minSize?.h ?? 0;
   const maxW = meta?.maxSize?.w ?? Number.POSITIVE_INFINITY;

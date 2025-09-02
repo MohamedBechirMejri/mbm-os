@@ -1,6 +1,7 @@
 import type React from "react";
 import { cn } from "@/lib/utils";
 import { closeWin, setWinState } from "../../api";
+import { useDesktop } from "../../store";
 import type { WinInstance } from "../../types";
 
 interface WindowTitlebarProps {
@@ -18,6 +19,8 @@ export function WindowTitlebar({
   drag,
   onTitleDoubleClick,
 }: WindowTitlebarProps) {
+  const meta = useDesktop((s) => s.apps[win.appId]);
+  const isResizable = meta?.resizable ?? true;
   return (
     <div
       className="wm-titlebar h-9 flex items-center gap-2 px-4 bg-[linear-gradient(180deg,rgba(255,255,255,0.14),rgba(255,255,255,0.06))] border border-b-0 border-white/15"
@@ -42,12 +45,13 @@ export function WindowTitlebar({
         <ActionButton
           label="Zoom"
           onClick={() => {
+            if (!isResizable) return;
             setWinState(
               win.id,
               win.state === "maximized" ? "normal" : "maximized",
             );
           }}
-          className="bg-[#28c840]"
+          className={`bg-[#28c840] ${!isResizable ? "opacity-50 cursor-not-allowed" : ""}`}
         />
       </div>
       {/* <div className="text-[0.75rem] opacity-[0.85]">{win.title}</div> */}
