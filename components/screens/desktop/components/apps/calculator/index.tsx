@@ -213,25 +213,25 @@ export function CalculatorApp({ instanceId: _ }: { instanceId: string }) {
 
   return (
     <div
-      className="text-white w-full h-full flex flex-col bg-[#27282A]/80 justify-end"
+      className="text-white w-full h-full flex flex-col bg-[#27282A]/80 justify-end select-none"
       role="application"
       aria-label="Calculator"
     >
       {/* Display area: macOS-like top-right value with small expression */}
-      <div className="px-3 pt-3">
-        <div className="w-full rounded-2xl px-3 py-3 min-h-[62px] flex flex-col items-end justify-center">
+      <div className="px-2 pt-3">
+        <div className="w-full rounded-2xl px-1 py-2 flex flex-col items-end justify-center">
           <div className="text-right text-white/70 text-[12px] leading-tight w-full truncate">
             {prettyExpr}
             {hasTyped ? sanitizeNumber(display) : ""}
           </div>
-          <div className="text-right tabular-nums tracking-tight text-[34px] leading-[1] select-text">
+          <div className="text-right tabular-nums tracking-tight text-3xl leading-[1] select-text">
             {display}
           </div>
         </div>
       </div>
 
       {/* Keypad */}
-      <div className="p-3">
+      <div className="p-2">
         <div className="grid grid-cols-4 gap-2">
           {/* Row 1 */}
           <CalcKey
