@@ -80,13 +80,13 @@ export const apps: AppMeta[] = [
     Component: CalculatorApp,
     minSize: { w: 320, h: 240 },
   },
-  {
-    id: "doom-2016",
-    title: "Doom",
-    icon: "doom-2016",
-    Component: CalculatorApp,
-    minSize: { w: 320, h: 240 },
-  },
+  // {
+  //   id: "doom-2016",
+  //   title: "Doom",
+  //   icon: "doom-2016",
+  //   Component: CalculatorApp,
+  //   minSize: { w: 320, h: 240 },
+  // },
   // {
   //   id: "mindustry",
   //   title: "Mindustry",
