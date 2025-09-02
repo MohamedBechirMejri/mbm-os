@@ -217,7 +217,7 @@ export function CalculatorApp({ instanceId: _ }: { instanceId: string }) {
   return (
     <div
       ref={activeRef}
-      className="text-white w-full h-full flex flex-col bg-[linear-gradient(180deg,#1b2833,#0e1923)] justify-end"
+      className="text-white w-full h-full flex flex-col bg-[#27282A]/80 justify-end"
       role="application"
       aria-label="Calculator"
     >
