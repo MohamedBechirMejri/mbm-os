@@ -39,7 +39,8 @@ export const apps: AppMeta[] = [
     title: "Calculator",
     icon: "calc",
     Component: CalculatorApp,
-    minSize: { w: 320, h: 240 },
+    minSize: { w: 200, h: 400 },
+    maxSize: { w: 200, h: 400 },
   },
   {
     id: "terminal",

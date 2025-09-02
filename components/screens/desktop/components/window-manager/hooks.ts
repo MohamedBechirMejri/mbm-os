@@ -2,6 +2,8 @@
 
 import { useCallback, useRef, useState } from "react";
 import { focusWin, moveWin } from "./api";
+import { useDesktop } from "./store";
+import { clamp } from "./utils";
 import type { Bounds, WinInstance } from "./types";
 
 export function useWindowDrag(
@@ -54,6 +56,13 @@ export function useWindowResize(
   win: WinInstance,
   _rootRef: React.RefObject<HTMLDivElement | null>,
 ) {
+  // Get app meta to know min/max constraints
+  const meta = useDesktop((s) => s.apps[win.appId]);
+  const minW = meta?.minSize?.w ?? 200;
+  const minH = meta?.minSize?.h ?? 140;
+  const maxW = meta?.maxSize?.w ?? Number.POSITIVE_INFINITY;
+  const maxH = meta?.maxSize?.h ?? Number.POSITIVE_INFINITY;
+
   const [resizing, setResizing] = useState<null | {
     edge: string;
     start: { x: number; y: number; bounds: Bounds };
@@ -77,22 +86,38 @@ export function useWindowResize(
       const { edge, start } = resizing;
       const dx = e.clientX - start.x;
       const dy = e.clientY - start.y;
-      let { x, y, w, h } = start.bounds;
 
-      if (edge.includes("r")) w = Math.max(200, w + dx);
+      const startRight = start.bounds.x + start.bounds.w;
+      const startBottom = start.bounds.y + start.bounds.h;
+
+      let x = start.bounds.x;
+      let y = start.bounds.y;
+      let w = start.bounds.w;
+      let h = start.bounds.h;
+
+      // Horizontal resize
       if (edge.includes("l")) {
-        x = x + dx;
-        w = Math.max(200, w - dx);
+        // Left edge: right stays fixed; adjust width and recompute x
+        const newW = clamp(start.bounds.w - dx, minW, maxW);
+        w = newW;
+        x = startRight - newW;
+      } else if (edge.includes("r")) {
+        // Right edge: left stays fixed
+        w = clamp(start.bounds.w + dx, minW, maxW);
       }
-      if (edge.includes("b")) h = Math.max(140, h + dy);
+
+      // Vertical resize
       if (edge.includes("t")) {
-        y = y + dy;
-        h = Math.max(140, h - dy);
+        const newH = clamp(start.bounds.h - dy, minH, maxH);
+        h = newH;
+        y = startBottom - newH;
+      } else if (edge.includes("b")) {
+        h = clamp(start.bounds.h + dy, minH, maxH);
       }
 
       moveWin(win.id, { x, y, w, h });
     },
-    [resizing, win.id],
+    [resizing, win.id, minW, minH, maxW, maxH],
   );
 
   const onPointerUp = useCallback(() => setResizing(null), []);

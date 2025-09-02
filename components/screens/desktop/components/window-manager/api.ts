@@ -35,7 +35,19 @@ export function launch(appId: AppId, init?: Partial<WinInstance>): string {
   const root = document.getElementById("wm-root");
   const rootRect = viewportRect(root);
   const existing = Object.values(s.windows);
-  const bounds = init?.bounds ?? cascadeOrigin(existing, rootRect);
+  let bounds = init?.bounds ?? cascadeOrigin(existing, rootRect);
+  // Enforce min/max at launch
+  if (meta.minSize || meta.maxSize) {
+    const minW = meta.minSize?.w ?? 0;
+    const minH = meta.minSize?.h ?? 0;
+    const maxW = meta.maxSize?.w ?? Number.POSITIVE_INFINITY;
+    const maxH = meta.maxSize?.h ?? Number.POSITIVE_INFINITY;
+    bounds = {
+      ...bounds,
+      w: Math.min(Math.max(bounds.w, minW), maxW),
+      h: Math.min(Math.max(bounds.h, minH), maxH),
+    };
+  }
   const w: WinInstance = {
     id,
     appId,
@@ -75,6 +87,11 @@ export function setWinState(id: string, st: WinState) {
   const s = store.get();
   const w = s.windows[id];
   if (!w) return;
+  const meta = s.apps[w.appId];
+  const minW = meta?.minSize?.w ?? 0;
+  const minH = meta?.minSize?.h ?? 0;
+  const maxW = meta?.maxSize?.w ?? Number.POSITIVE_INFINITY;
+  const maxH = meta?.maxSize?.h ?? Number.POSITIVE_INFINITY;
 
   const root = document.getElementById("wm-root");
   const r = viewportRect(root);
@@ -90,10 +107,17 @@ export function setWinState(id: string, st: WinState) {
       state: st,
       snap: null,
       restoreBounds,
-      bounds:
-        st === "maximized"
-          ? { x: 0, y: 0, w: r.width, h: r.height }
-          : { x: 0, y: 0, w: window.innerWidth, h: window.innerHeight },
+      bounds: (() => {
+        const b =
+          st === "maximized"
+            ? { x: 0, y: 0, w: r.width, h: r.height }
+            : { x: 0, y: 0, w: window.innerWidth, h: window.innerHeight };
+        return {
+          ...b,
+          w: Math.min(Math.max(b.w, minW), maxW),
+          h: Math.min(Math.max(b.h, minH), maxH),
+        } as Bounds;
+      })(),
     };
   } else if (st === "normal") {
     // Restore previous bounds when unmaximizing/unfullscreening
@@ -102,7 +126,11 @@ export function setWinState(id: string, st: WinState) {
       ...next,
       state: "normal",
       snap: w.snap,
-      bounds: rb,
+      bounds: {
+        ...rb,
+        w: Math.min(Math.max(rb.w, minW), maxW),
+        h: Math.min(Math.max(rb.h, minH), maxH),
+      },
       restoreBounds: null,
     };
   } else {
@@ -129,7 +157,19 @@ export function moveWin(id: string, to: Partial<Bounds>) {
   const s = store.get();
   const w = s.windows[id];
   if (!w) return;
-  const next = { ...w, bounds: { ...w.bounds, ...to } } as WinInstance;
+  const meta = s.apps[w.appId];
+  const minW = meta?.minSize?.w ?? 0;
+  const minH = meta?.minSize?.h ?? 0;
+  const maxW = meta?.maxSize?.w ?? Number.POSITIVE_INFINITY;
+  const maxH = meta?.maxSize?.h ?? Number.POSITIVE_INFINITY;
+  const merged = { ...w.bounds, ...to } as Bounds;
+  const clamped: Bounds = {
+    ...merged,
+    w: Math.min(Math.max(merged.w, minW), maxW),
+    h: Math.min(Math.max(merged.h, minH), maxH),
+  };
+  // If width/height were clamped and left/top edges were being dragged, adjust x/y accordingly
+  const next = { ...w, bounds: clamped } as WinInstance;
   store.set((prev) => ({ ...prev, windows: { ...prev.windows, [id]: next } }));
 }
 
@@ -140,11 +180,21 @@ export function snapTo(id: string, snap: Snap) {
   store.set((prev) => {
     const w = prev.windows[id];
     if (!w) return prev;
+    const meta = prev.apps[w.appId];
+    const minW = meta?.minSize?.w ?? 0;
+    const minH = meta?.minSize?.h ?? 0;
+    const maxW = meta?.maxSize?.w ?? Number.POSITIVE_INFINITY;
+    const maxH = meta?.maxSize?.h ?? Number.POSITIVE_INFINITY;
+    const clamped: Bounds = {
+      ...rect,
+      w: Math.min(Math.max(rect.w, minW), maxW),
+      h: Math.min(Math.max(rect.h, minH), maxH),
+    };
     return {
       ...prev,
       windows: {
         ...prev.windows,
-        [id]: { ...w, snap, state: "normal", bounds: rect },
+        [id]: { ...w, snap, state: "normal", bounds: clamped },
       },
     };
   });
