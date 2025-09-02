@@ -1,23 +1,9 @@
 import Image from "next/image";
+import { AppRegistry, apps } from "./components/apps/app-registry";
 import { Dock, DockIcon } from "./components/dock";
 import { DesktopAPI, WindowManagerRoot } from "./components/window-manager";
-import { __DevRegisterSampleApp } from "./components/window-manager/index";
 
-const icons = [
-  "file-manager",
-  "safari",
-  "softwarecenter",
-  "calendar",
-  "calc",
-  "terminal",
-  "google-chrome",
-  "spotify-client",
-  "badland",
-  "chess",
-  "doom-2016",
-  "mindustry",
-  "rimworld",
-];
+
 
 export default function Desktop() {
   return (
@@ -25,20 +11,27 @@ export default function Desktop() {
       <div></div>
       <div>
         <WindowManagerRoot />
-        <__DevRegisterSampleApp />
-        <button
+        <AppRegistry />
+        {/* <__DevRegisterSampleApp /> */}
+        {/* <button
           type="button"
           style={{ position: "fixed", left: 12, bottom: 12, zIndex: 9999 }}
           onClick={() => DesktopAPI.launch("demo")}
         >
           Launch Demo
-        </button>
+        </button> */}
       </div>
       <Dock className="mb-2 select-none w-max">
-        {icons.map((icon) => (
-          <DockIcon key={icon} size={64} magnification={2} distance={120}>
+        {apps.map((app) => (
+          <DockIcon
+            key={app.id}
+            size={64}
+            magnification={2}
+            distance={120}
+            onClick={() => DesktopAPI.launch(app.id)}
+          >
             <Image
-              src={`/assets/icons/apps/${icon}.ico`}
+              src={`/assets/icons/apps/${app.icon}.ico`}
               alt="Icon"
               width={64}
               height={64}
