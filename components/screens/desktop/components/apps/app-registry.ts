@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { registerApps } from "../window-manager/api";
 import type { AppMeta } from "../window-manager/types";
 import { CalculatorApp } from "./calculator";
+// import { MindustryClassicApp } from "./mindustry";
 
 export const apps: AppMeta[] = [
   {
@@ -27,13 +28,13 @@ export const apps: AppMeta[] = [
     Component: CalculatorApp,
     minSize: { w: 320, h: 240 },
   },
-  {
-    id: "calendar",
-    title: "Calendar",
-    icon: "calendar",
-    Component: CalculatorApp,
-    minSize: { w: 320, h: 240 },
-  },
+  // {
+  //   id: "calendar",
+  //   title: "Calendar",
+  //   icon: "calendar",
+  //   Component: CalculatorApp,
+  //   minSize: { w: 320, h: 240 },
+  // },
   {
     id: "calculator",
     title: "Calculator",
@@ -42,7 +43,7 @@ export const apps: AppMeta[] = [
     minSize: { w: 200, h: 350 },
     maxSize: { w: 200, h: 350 },
     resizable: false,
-    floatingActionBar: true
+    floatingActionBar: true,
   },
   {
     id: "terminal",
@@ -65,13 +66,13 @@ export const apps: AppMeta[] = [
     Component: CalculatorApp,
     minSize: { w: 320, h: 240 },
   },
-  {
-    id: "badland",
-    title: "Badland",
-    icon: "badland",
-    Component: CalculatorApp,
-    minSize: { w: 320, h: 240 },
-  },
+  // {
+  //   id: "badland",
+  //   title: "Badland",
+  //   icon: "badland",
+  //   Component: CalculatorApp,
+  //   minSize: { w: 320, h: 240 },
+  // },
   {
     id: "chess",
     title: "Chess",
@@ -86,20 +87,20 @@ export const apps: AppMeta[] = [
     Component: CalculatorApp,
     minSize: { w: 320, h: 240 },
   },
-  {
-    id: "mindustry",
-    title: "Mindustry",
-    icon: "mindustry",
-    Component: CalculatorApp,
-    minSize: { w: 320, h: 240 },
-  },
-  {
-    id: "rimworld",
-    title: "RimWorld",
-    icon: "rimworld",
-    Component: CalculatorApp,
-    minSize: { w: 320, h: 240 },
-  },
+  // {
+  //   id: "mindustry",
+  //   title: "Mindustry",
+  //   icon: "mindustry",
+  //   Component: MindustryClassicApp,
+  //   minSize: { w: 320, h: 240 },
+  // },
+  // {
+  //   id: "rimworld",
+  //   title: "RimWorld",
+  //   icon: "rimworld",
+  //   Component: CalculatorApp,
+  //   minSize: { w: 320, h: 240 },
+  // },
   // add more apps here
 ];
 
