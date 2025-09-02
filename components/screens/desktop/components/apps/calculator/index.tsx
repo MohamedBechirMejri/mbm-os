@@ -310,28 +310,15 @@ function CalcKey({
   const base = cn(
     "aspect-square w-full rounded-full text-[17px] font-semibold select-none",
     "flex items-center justify-center",
-    "shadow-[0_1.5px_0_rgba(255,255,255,0.08),inset_0_1px_0_rgba(255,255,255,0.12)]",
     "active:scale-[0.995] active:translate-y-[0.5px] transition-transform duration-75",
   );
   const styles = {
-    digit: cn(
-      "bg-[linear-gradient(180deg,rgba(255,255,255,0.07),rgba(255,255,255,0.03))]",
-      "border border-white/10 hover:bg-white/12",
-    ),
-    func: cn(
-      "bg-[linear-gradient(180deg,rgba(255,255,255,0.18),rgba(255,255,255,0.08))]",
-      "text-white border border-white/20",
-    ),
-    op: cn(
-      "bg-[linear-gradient(180deg,#ffb14d,#ff8a27)]",
-      "border border-[#ff8a27]/70",
-    ),
-    "op-strong": cn(
-      "bg-[linear-gradient(180deg,#ffb14d,#ff8a27)]",
-      "border border-[#ff8a27]/70",
-    ),
+    digit: cn("bg-[#505153]/90", "  hover:bg-white/12"),
+    func: cn("bg-[#6D6F71]/90", "text-white  "),
+    op: cn("bg-[#FF9500]/90"),
+    "op-strong": cn("bg-[#FF9500]/90"),
   } as const;
-  const textClass = kind === "func" ? "text-[16px] font-semibold" : undefined;
+  const textClass = "font-semibold text-md";
   return (
     <button
       type="button"
