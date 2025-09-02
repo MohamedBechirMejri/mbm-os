@@ -20,7 +20,7 @@ export function WindowTitlebar({
 }: WindowTitlebarProps) {
   return (
     <div
-      className="wm-titlebar h-9 flex items-center gap-2 px-[10px] bg-[linear-gradient(180deg,rgba(255,255,255,0.14),rgba(255,255,255,0.06))] border border-b-0 border-white/15"
+      className="wm-titlebar h-9 flex items-center gap-2 px-4 bg-[linear-gradient(180deg,rgba(255,255,255,0.14),rgba(255,255,255,0.06))] border border-b-0 border-white/15"
       onPointerDown={drag.onPointerDown}
       onPointerMove={drag.onPointerMove}
       onPointerUp={drag.onPointerUp}
