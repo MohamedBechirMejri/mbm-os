@@ -1,10 +1,8 @@
 "use client";
 
+import type { Parser } from "expr-eval";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-
-// We evaluate expressions with an npm library (expr-eval) for correctness.
-// It's added as a dependency, and dynamically imported to keep bundle lean.
-type ExprEval = typeof import("expr-eval");
+import { cn } from "@/lib/utils";
 
 export function CalculatorApp({ instanceId: _ }: { instanceId: string }) {
   const [display, setDisplay] = useState<string>("0"); // current entry/result
@@ -12,8 +10,7 @@ export function CalculatorApp({ instanceId: _ }: { instanceId: string }) {
   const [prettyExpr, setPrettyExpr] = useState<string>(""); // UI expression (÷ × − +)
   const [error, setError] = useState<boolean>(false);
   const [hasTyped, setHasTyped] = useState<boolean>(false);
-  const parserRef = useRef<InstanceType<ExprEval["Parser"]> | null>(null);
-  const activeRef = useRef<HTMLDivElement | null>(null);
+  const parserRef = useRef<Parser | null>(null);
 
   // Lazy-load the evaluator
   useEffect(() => {
@@ -177,7 +174,7 @@ export function CalculatorApp({ instanceId: _ }: { instanceId: string }) {
     setDisplay((prev) => {
       if (!hasTyped || prev.length <= 1) return "0";
       const next = prev.slice(0, -1);
-      if (next === "-" || next === "-") return "0";
+      if (next === "-") return "0";
       return next;
     });
   }, [clearAll, hasTyped, error]);
@@ -216,7 +213,6 @@ export function CalculatorApp({ instanceId: _ }: { instanceId: string }) {
 
   return (
     <div
-      ref={activeRef}
       className="text-white w-full h-full flex flex-col bg-[#27282A]/80 justify-end"
       role="application"
       aria-label="Calculator"
@@ -311,27 +307,36 @@ function CalcKey({
   kind?: "digit" | "func" | "op" | "op-strong";
   className?: string;
 }) {
-  const base =
-    "aspect-square w-full rounded-full text-[17px] font-semibold select-none flex items-center justify-center " +
-    "shadow-[0_1.5px_0_rgba(255,255,255,0.08),inset_0_1px_0_rgba(255,255,255,0.12)] " +
-    "active:scale-[0.995] active:translate-y-[0.5px] transition-transform duration-75";
+  const base = cn(
+    "aspect-square w-full rounded-full text-[17px] font-semibold select-none",
+    "flex items-center justify-center",
+    "shadow-[0_1.5px_0_rgba(255,255,255,0.08),inset_0_1px_0_rgba(255,255,255,0.12)]",
+    "active:scale-[0.995] active:translate-y-[0.5px] transition-transform duration-75",
+  );
   const styles = {
-    digit:
-      "bg-[linear-gradient(180deg,rgba(255,255,255,0.07),rgba(255,255,255,0.03))] " +
+    digit: cn(
+      "bg-[linear-gradient(180deg,rgba(255,255,255,0.07),rgba(255,255,255,0.03))]",
       "border border-white/10 hover:bg-white/12",
-    func:
-      "bg-[linear-gradient(180deg,rgba(255,255,255,0.18),rgba(255,255,255,0.08))] " +
+    ),
+    func: cn(
+      "bg-[linear-gradient(180deg,rgba(255,255,255,0.18),rgba(255,255,255,0.08))]",
       "text-white border border-white/20",
-    op: "bg-[linear-gradient(180deg,#ffb14d,#ff8a27)] border border-[#ff8a27]/70",
-    "op-strong":
-      "bg-[linear-gradient(180deg,#ffb14d,#ff8a27)] border border-[#ff8a27]/70",
+    ),
+    op: cn(
+      "bg-[linear-gradient(180deg,#ffb14d,#ff8a27)]",
+      "border border-[#ff8a27]/70",
+    ),
+    "op-strong": cn(
+      "bg-[linear-gradient(180deg,#ffb14d,#ff8a27)]",
+      "border border-[#ff8a27]/70",
+    ),
   } as const;
-  const text = kind === "func" ? "text-[16px] font-semibold" : "";
+  const textClass = kind === "func" ? "text-[16px] font-semibold" : undefined;
   return (
     <button
       type="button"
       onClick={onPress}
-      className={`${base} ${styles[kind]} ${text} ${className}`}
+      className={cn(base, styles[kind], textClass, className)}
       aria-label={`Key ${label}`}
     >
       {label}
