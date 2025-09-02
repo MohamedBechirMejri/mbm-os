@@ -3,8 +3,6 @@ import { AppRegistry, apps } from "./components/apps/app-registry";
 import { Dock, DockIcon } from "./components/dock";
 import { DesktopAPI, WindowManagerRoot } from "./components/window-manager";
 
-
-
 export default function Desktop() {
   return (
     <div className="relative size-full grid grid-rows-[auto_minmax(0,_1fr)_auto]">
@@ -12,14 +10,6 @@ export default function Desktop() {
       <div>
         <WindowManagerRoot />
         <AppRegistry />
-        {/* <__DevRegisterSampleApp /> */}
-        {/* <button
-          type="button"
-          style={{ position: "fixed", left: 12, bottom: 12, zIndex: 9999 }}
-          onClick={() => DesktopAPI.launch("demo")}
-        >
-          Launch Demo
-        </button> */}
       </div>
       <Dock className="mb-2 select-none w-max">
         {apps.map((app) => (
