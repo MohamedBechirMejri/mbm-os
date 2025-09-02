@@ -10,6 +10,7 @@ export interface AppMeta {
   minSize?: { w: number; h: number };
   maxSize?: { w: number; h: number };
   resizable?: boolean; // if false: hide resize handles and disable maximize/zoom
+  floatingActionBar?: boolean; // if true: the app's action bar floats over content (like macOS Calculator)
 }
 
 export type WinState =

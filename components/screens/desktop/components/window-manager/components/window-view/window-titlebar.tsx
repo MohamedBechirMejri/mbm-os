@@ -21,9 +21,18 @@ export function WindowTitlebar({
 }: WindowTitlebarProps) {
   const meta = useDesktop((s) => s.apps[win.appId]);
   const isResizable = meta?.resizable ?? true;
+  const floatingActionBar = meta?.floatingActionBar ?? false;
+
   return (
     <div
-      className="wm-titlebar h-9 flex items-center gap-2 px-4 bg-[linear-gradient(180deg,rgba(255,255,255,0.14),rgba(255,255,255,0.06))] border border-b-0 border-white/15"
+      className={cn(
+        "wm-titlebar h-9 flex items-center gap-2 px-4  border border-b-0 border-white/15",
+        {
+          "absolute top-0 left-0 right-0 z-50": floatingActionBar,
+          "bg-[linear-gradient(180deg,rgba(255,255,255,0.14),rgba(255,255,255,0.06))]":
+            !floatingActionBar,
+        },
+      )}
       onPointerDown={drag.onPointerDown}
       onPointerMove={drag.onPointerMove}
       onPointerUp={drag.onPointerUp}

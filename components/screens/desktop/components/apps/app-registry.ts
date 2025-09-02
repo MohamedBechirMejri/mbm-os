@@ -42,6 +42,7 @@ export const apps: AppMeta[] = [
     minSize: { w: 200, h: 400 },
     maxSize: { w: 200, h: 400 },
     resizable: false,
+    floatingActionBar: true
   },
   {
     id: "terminal",
