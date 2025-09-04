@@ -34,7 +34,7 @@ type Tab = {
   favicon: string | null;
 };
 
-const START_PAGE = "https://duckduckgo.com";
+const START_PAGE = "https://mohamedbechirmejri.dev";
 
 function normalizeUrl(raw: string): string {
   const trimmed = raw.trim();
@@ -50,7 +50,7 @@ function normalizeUrl(raw: string): string {
     if (!hasSpace && hasDot) return `https://${trimmed}`;
     // Fallback to a search query
     const q = encodeURIComponent(trimmed);
-    return `https://duckduckgo.com/?q=${q}`;
+    return `https://google.com/?q=${q}`;
   }
 }
 
@@ -58,13 +58,13 @@ export function SafariApp({ instanceId: _ }: { instanceId: string }) {
   const [tabs, setTabs] = useState<Tab[]>(() => [
     {
       id: crypto.randomUUID(),
-      title: "DuckDuckGo",
+      title: "Mohamed Bechir Mejri",
       url: START_PAGE,
       input: START_PAGE,
       history: [START_PAGE],
       historyIndex: 0,
       loading: false,
-      favicon: "https://www.google.com/s2/favicons?domain=duckduckgo.com&sz=64",
+      favicon: "https://www.google.com/s2/favicons?domain=mohamedbechirmejri.dev&sz=64",
     },
   ]);
   const [activeId, setActiveId] = useState<string>(() =>
@@ -228,7 +228,7 @@ export function SafariApp({ instanceId: _ }: { instanceId: string }) {
             input: START_PAGE,
             history: [START_PAGE],
             historyIndex: 0,
-            title: "DuckDuckGo",
+            title: "Mohamed Bechir Mejri",
             loading: false,
             favicon: faviconFromUrl(START_PAGE),
           },
