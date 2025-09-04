@@ -1,58 +1,14 @@
 "use client";
 
-import {
-  ArrowLeft,
-  ArrowRight,
-  Globe,
-  Plus,
-  RotateCw,
-  SquareArrowOutUpRight,
-  X,
-} from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
-import Image from "next/image";
 import { useMemo, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
-
-type Tab = {
-  id: string;
-  title: string;
-  url: string;
-  input: string; // address bar text for this tab
-  history: string[];
-  historyIndex: number; // points into history
-  loading: boolean;
-  favicon: string | null;
-};
-
-const START_PAGE = "https://mohamedbechirmejri.dev";
-
-function normalizeUrl(raw: string): string {
-  const trimmed = raw.trim();
-  if (!trimmed) return START_PAGE;
-  try {
-    // If it's already a valid absolute URL
-    const u = new URL(trimmed);
-    return u.toString();
-  } catch {
-    // If it looks like a domain (has a dot, no spaces), prefix https
-    const hasSpace = /\s/.test(trimmed);
-    const hasDot = trimmed.includes(".");
-    if (!hasSpace && hasDot) return `https://${trimmed}`;
-    // Fallback to a search query
-    const q = encodeURIComponent(trimmed);
-    return `https://google.com/?q=${q}`;
-  }
-}
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { ContentView } from "./content-view";
+import { LoadingBar } from "./loading-bar";
+import { TabsStrip } from "./tabs-strip";
+import { Toolbar } from "./toolbar";
+import type { Tab } from "./types";
+import { START_PAGE } from "./types";
+import { faviconFromUrl, normalizeUrl } from "./utils";
 
 export function SafariApp({ instanceId: _ }: { instanceId: string }) {
   const [tabs, setTabs] = useState<Tab[]>(() => [
@@ -64,7 +20,8 @@ export function SafariApp({ instanceId: _ }: { instanceId: string }) {
       history: [START_PAGE],
       historyIndex: 0,
       loading: false,
-      favicon: "https://www.google.com/s2/favicons?domain=mohamedbechirmejri.dev&sz=64",
+      favicon:
+        "https://www.google.com/s2/favicons?domain=mohamedbechirmejri.dev&sz=64",
     },
   ]);
   const [activeId, setActiveId] = useState<string>(() =>
@@ -119,15 +76,6 @@ export function SafariApp({ instanceId: _ }: { instanceId: string }) {
         };
       }),
     );
-  }
-
-  function faviconFromUrl(url: string): string | null {
-    try {
-      const { hostname } = new URL(url);
-      return `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`;
-    } catch {
-      return null;
-    }
   }
 
   function canGoBack(t: Tab): boolean {
@@ -248,240 +196,40 @@ export function SafariApp({ instanceId: _ }: { instanceId: string }) {
   return (
     <TooltipProvider>
       <div className="flex h-full min-h-[18rem] w-full flex-col overflow-hidden rounded-md">
-        {/* Toolbar */}
-        <div className="relative z-[1] flex items-center gap-2 border-b border-border/60 bg-background/60 px-2 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/30">
-          {/* Nav controls */}
-          <div className="flex items-center gap-1">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label="Back"
-                  disabled={!canGoBack(activeTab)}
-                  onClick={() => goBack(activeId)}
-                >
-                  <ArrowLeft className="size-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Back</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label="Forward"
-                  disabled={!canGoForward(activeTab)}
-                  onClick={() => goForward(activeId)}
-                >
-                  <ArrowRight className="size-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Forward</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label={activeTab.loading ? "Stop" : "Reload"}
-                  onClick={() =>
-                    activeTab.loading ? stop(activeId) : reload(activeId)
-                  }
-                >
-                  {activeTab.loading ? (
-                    <X className="size-4" />
-                  ) : (
-                    <RotateCw className="size-4" />
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                {activeTab.loading ? "Stop" : "Reload"}
-              </TooltipContent>
-            </Tooltip>
-          </div>
+        <Toolbar
+          activeTab={activeTab}
+          canGoBack={canGoBack(activeTab)}
+          canGoForward={canGoForward(activeTab)}
+          onBack={() => goBack(activeId)}
+          onForward={() => goForward(activeId)}
+          onReload={() => reload(activeId)}
+          onStop={() => stop(activeId)}
+          onNavigate={(raw: string) => navigate(activeId, raw)}
+          onInputChange={(value: string) =>
+            updateTab(activeId, { input: value })
+          }
+          onNewTab={() => addTab()}
+        />
 
-          {/* Address bar */}
-          <div className="flex min-w-0 flex-1 items-center">
-            <div className="relative flex w-full items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1.5 backdrop-blur supports-[backdrop-filter]:bg-background/30">
-              <div className="flex size-4 items-center justify-center">
-                {activeTab.favicon ? (
-                  <Image
-                    src={activeTab.favicon}
-                    alt="favicon"
-                    width={16}
-                    height={16}
-                    className="rounded-sm"
-                  />
-                ) : (
-                  <Globe className="size-4" />
-                )}
-              </div>
-              <Input
-                className="h-7 w-full border-0 bg-transparent p-0 text-[0.9rem] focus-visible:ring-0"
-                value={activeTab.input}
-                onChange={(e) => updateTab(activeId, { input: e.target.value })}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") navigate(activeId, activeTab.input);
-                }}
-                aria-label="Address and search"
-              />
-              <Separator orientation="vertical" className="h-5" />
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label="Open in new window"
-                    onClick={() =>
-                      window.open(
-                        activeTab.url,
-                        "_blank",
-                        "noopener,noreferrer",
-                      )
-                    }
-                  >
-                    <SquareArrowOutUpRight className="size-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Open in new window</TooltipContent>
-              </Tooltip>
-            </div>
-          </div>
+        <TabsStrip
+          tabs={tabs}
+          activeId={activeId}
+          onSetActive={setActiveId}
+          onClose={closeTab}
+        />
 
-          {/* New tab */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="New tab"
-                onClick={() => addTab()}
-              >
-                <Plus className="size-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>New tab</TooltipContent>
-          </Tooltip>
-        </div>
+        <LoadingBar loading={activeTab.loading} />
 
-        {/* Tabs strip */}
-        <div className="relative z-[1] flex items-center gap-2 overflow-x-auto border-b border-border/60 bg-background/50 px-2 py-1.5 backdrop-blur supports-[backdrop-filter]:bg-background/20">
-          <div className="flex min-w-max items-center gap-2">
-            {tabs.map((t) => (
-              <button
-                key={t.id}
-                className={cn(
-                  "group relative flex max-w-[16rem] items-center gap-2 rounded-md px-3 py-1.5 text-[0.9rem]",
-                  t.id === activeId
-                    ? "bg-foreground/10"
-                    : "hover:bg-foreground/5",
-                )}
-                type="button"
-                onClick={() => setActiveId(t.id)}
-                title={t.title}
-              >
-                {/* favicon */}
-                {t.favicon ? (
-                  <Image
-                    src={t.favicon}
-                    alt="favicon"
-                    width={16}
-                    height={16}
-                    className="rounded-sm"
-                  />
-                ) : (
-                  <Globe className="size-4" />
-                )}
-                <span className="truncate">
-                  {(() => {
-                    if (t.title) return t.title;
-                    try {
-                      return new URL(t.url).hostname;
-                    } catch {
-                      return t.url;
-                    }
-                  })()}
-                </span>
-                <button
-                  className="ml-1 rounded p-0.5 opacity-70 hover:bg-foreground/10 hover:opacity-100"
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    closeTab(t.id);
-                  }}
-                  aria-label="Close tab"
-                >
-                  <X className="size-3.5" />
-                </button>
-                {t.id === activeId ? (
-                  <motion.span
-                    layoutId="safari-tab-underline"
-                    className="absolute inset-x-2 -bottom-[2px] h-[2px] rounded-full bg-foreground/50"
-                  />
-                ) : null}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Loading bar */}
-        <AnimatePresence>
-          {activeTab.loading ? (
-            <motion.div
-              key="loading"
-              className="relative h-0.5 w-full bg-transparent"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <motion.div
-                className="absolute left-0 top-0 h-full bg-primary"
-                initial={{ width: "0%" }}
-                animate={{ width: ["0%", "60%", "85%", "95%"] }}
-                transition={{
-                  duration: 2.2,
-                  ease: "easeInOut",
-                  repeat: Infinity,
-                  repeatType: "mirror",
-                }}
-              />
-            </motion.div>
-          ) : null}
-        </AnimatePresence>
-
-        {/* Content area */}
-        <div className="relative flex min-h-0 flex-1">
-          {tabs.map((t) => (
-            <div
-              key={t.id}
-              className={cn(
-                "absolute inset-0",
-                t.id === activeId ? "block" : "hidden",
-              )}
-            >
-              <iframe
-                ref={(el) => {
-                  frameRefs.current[t.id] = el;
-                }}
-                title={t.title || t.url}
-                src={t.url}
-                className="h-full w-full border-0 bg-background"
-                onLoad={(e) => {
-                  // On load, try to read title if same-origin; ignore errors otherwise
-                  const frame = e.currentTarget;
-                  let title = t.title;
-                  try {
-                    title = frame.contentDocument?.title || title;
-                  } catch {}
-                  updateTab(t.id, { loading: false, title });
-                }}
-              />
-            </div>
-          ))}
-        </div>
+        <ContentView
+          tabs={tabs}
+          activeId={activeId}
+          setFrameRef={(id: string, el: HTMLIFrameElement | null) => {
+            frameRefs.current[id] = el;
+          }}
+          onTabLoaded={(id: string, title: string | undefined) =>
+            updateTab(id, { loading: false, title })
+          }
+        />
       </div>
     </TooltipProvider>
   );

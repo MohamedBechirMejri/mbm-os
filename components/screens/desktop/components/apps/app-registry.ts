@@ -21,6 +21,7 @@ export const apps: AppMeta[] = [
     icon: "safari",
     Component: SafariApp,
     minSize: { w: 320, h: 240 },
+    floatingActionBar: true,
   },
   {
     id: "softwarecenter",
