@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { registerApps } from "../window-manager/api";
 import type { AppMeta } from "../window-manager/types";
 import { CalculatorApp } from "./calculator";
+import { SafariApp } from "./safari";
 // import { MindustryClassicApp } from "./mindustry";
 
 export const apps: AppMeta[] = [
@@ -18,7 +19,7 @@ export const apps: AppMeta[] = [
     id: "safari",
     title: "Safari",
     icon: "safari",
-    Component: CalculatorApp,
+    Component: SafariApp,
     minSize: { w: 320, h: 240 },
   },
   {
@@ -49,13 +50,13 @@ export const apps: AppMeta[] = [
     Component: CalculatorApp,
     minSize: { w: 320, h: 240 },
   },
-  {
-    id: "google-chrome",
-    title: "Google Chrome",
-    icon: "google-chrome",
-    Component: CalculatorApp,
-    minSize: { w: 320, h: 240 },
-  },
+  // {
+  //   id: "google-chrome",
+  //   title: "Google Chrome",
+  //   icon: "google-chrome",
+  //   Component: CalculatorApp,
+  //   minSize: { w: 320, h: 240 },
+  // },
   {
     id: "spotify",
     title: "Spotify",
@@ -74,15 +75,15 @@ export const apps: AppMeta[] = [
     floatingActionBar: true,
   },
   // {
-    //   id: "badland",
-    //   title: "Badland",
-    //   icon: "badland",
-    //   Component: CalculatorApp,
-    //   minSize: { w: 320, h: 240 },
-    // },
-    // {
-      //   id: "chess",
-      //   title: "Chess",
+  //   id: "badland",
+  //   title: "Badland",
+  //   icon: "badland",
+  //   Component: CalculatorApp,
+  //   minSize: { w: 320, h: 240 },
+  // },
+  // {
+  //   id: "chess",
+  //   title: "Chess",
   //   icon: "chess",
   //   Component: CalculatorApp,
   //   minSize: { w: 320, h: 240 },
