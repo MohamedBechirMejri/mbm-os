@@ -15,13 +15,13 @@ type Props = {
 
 export function TabsStrip({ tabs, activeId, onSetActive, onClose }: Props) {
   return (
-    <div className="relative z-[1] flex items-center gap-2 overflow-x-auto border-b border-border/60 bg-background/50 px-2 py-1.5 backdrop-blur supports-[backdrop-filter]:bg-background/20">
+    <div className="relative z-[1] flex items-center gap-2 overflow-x-auto bg-background/50 backdrop-blur supports-[backdrop-filter]:bg-background/20">
       <div className="flex min-w-max items-center gap-2">
         {tabs.map((t) => (
           <button
             key={t.id}
             className={cn(
-              "group relative flex max-w-[16rem] items-center gap-2 rounded-md px-3 py-1.5 text-[0.9rem]",
+              "group relative flex max-w-[16rem] items-center gap-2 px-3 py-1.5 text-[0.9rem]",
               t.id === activeId ? "bg-foreground/10" : "hover:bg-foreground/5",
             )}
             type="button"
