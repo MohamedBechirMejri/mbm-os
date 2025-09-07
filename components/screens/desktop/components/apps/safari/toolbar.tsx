@@ -46,8 +46,9 @@ export function Toolbar({
   onNewTab,
 }: Props) {
   return (
-    <div className="relative z-[1] flex items-center gap-2 border-b border-border/60 bg-background/60 px-2 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/30">
-      <div className="flex items-center gap-1">
+    <div className="relative z-[1] flex items-center gap-2 border-b border-border/60 bg-background/60 px-2 py-1.5 backdrop-blur supports-[backdrop-filter]:bg-background/30">
+      {/* Left: Back/Forward grouped like Safari */}
+      <div className="flex items-center gap-1 rounded-full bg-foreground/[0.06] p-0.5 shadow-sm ring-1 ring-inset ring-foreground/10">
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -56,12 +57,14 @@ export function Toolbar({
               aria-label="Back"
               disabled={!canGoBack}
               onClick={onBack}
+              className="h-8 w-8 rounded-full"
             >
-              <ArrowLeft className="size-4" />
+              <ArrowLeft className="size-[1.05rem]" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>Back</TooltipContent>
         </Tooltip>
+        <Separator orientation="vertical" className="mx-0.5 h-5" />
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -70,35 +73,18 @@ export function Toolbar({
               aria-label="Forward"
               disabled={!canGoForward}
               onClick={onForward}
+              className="h-8 w-8 rounded-full"
             >
-              <ArrowRight className="size-4" />
+              <ArrowRight className="size-[1.05rem]" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>Forward</TooltipContent>
         </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label={activeTab.loading ? "Stop" : "Reload"}
-              onClick={() => (activeTab.loading ? onStop() : onReload())}
-            >
-              {activeTab.loading ? (
-                <X className="size-4" />
-              ) : (
-                <RotateCw className="size-4" />
-              )}
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            {activeTab.loading ? "Stop" : "Reload"}
-          </TooltipContent>
-        </Tooltip>
       </div>
 
+      {/* Center: Address/Search field */}
       <div className="flex min-w-0 flex-1 items-center">
-        <div className="relative flex w-full items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1.5 backdrop-blur supports-[backdrop-filter]:bg-background/30">
+        <div className="group relative flex w-full items-center gap-2 rounded-full border border-foreground/10 bg-background/60 px-3 py-1.5 shadow-sm backdrop-blur transition-colors ring-1 ring-inset ring-foreground/5 supports-[backdrop-filter]:bg-background/30 focus-within:border-sky-500/40 focus-within:ring-2 focus-within:ring-sky-500/60">
           <div className="flex size-4 items-center justify-center">
             {activeTab.favicon ? (
               <Image
@@ -113,11 +99,13 @@ export function Toolbar({
             )}
           </div>
           <Input
-            className="h-7 w-full border-0 bg-transparent p-0 text-[0.9rem] focus-visible:ring-0"
+            className="h-7 w-full border-0 bg-transparent p-0 text-[0.9rem] outline-none ring-0 focus-visible:ring-0"
+            placeholder="Search or enter website name"
             value={activeTab.input}
             onChange={(e) => onInputChange(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") onNavigate(activeTab.input);
+              if (e.key === "Enter")
+                onNavigate((e.target as HTMLInputElement).value);
             }}
             aria-label="Address and search"
           />
@@ -127,32 +115,57 @@ export function Toolbar({
               <Button
                 variant="ghost"
                 size="icon"
-                aria-label="Open in new window"
-                onClick={() =>
-                  window.open(activeTab.url, "_blank", "noopener,noreferrer")
-                }
+                aria-label={activeTab.loading ? "Stop" : "Reload"}
+                onClick={() => (activeTab.loading ? onStop() : onReload())}
+                className="h-7 w-7 rounded-full"
               >
-                <SquareArrowOutUpRight className="size-4" />
+                {activeTab.loading ? (
+                  <X className="size-4" />
+                ) : (
+                  <RotateCw className="size-4" />
+                )}
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Open in new window</TooltipContent>
+            <TooltipContent>
+              {activeTab.loading ? "Stop" : "Reload"}
+            </TooltipContent>
           </Tooltip>
         </div>
       </div>
 
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="New tab"
-            onClick={onNewTab}
-          >
-            <Plus className="size-4" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>New tab</TooltipContent>
-      </Tooltip>
+      {/* Right: Share + New Tab */}
+      <div className="flex items-center gap-1">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Share / Open"
+              onClick={() =>
+                window.open(activeTab.url, "_blank", "noopener,noreferrer")
+              }
+              className="h-8 w-8 rounded-full"
+            >
+              <SquareArrowOutUpRight className="size-[1.05rem]" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Open in new window</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="New tab"
+              onClick={onNewTab}
+              className="h-8 w-8 rounded-full"
+            >
+              <Plus className="size-[1.05rem]" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>New tab</TooltipContent>
+        </Tooltip>
+      </div>
     </div>
   );
 }
