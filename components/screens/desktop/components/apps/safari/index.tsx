@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { TitlebarPortal } from "../../window-manager/components/window-view/titlebar-portal";
 import { ContentView } from "./content-view";
 import { LoadingBar } from "./loading-bar";
 import { TabsStrip } from "./tabs-strip";
@@ -196,20 +197,22 @@ export function SafariApp({ instanceId: _ }: { instanceId: string }) {
   return (
     <TooltipProvider>
       <div className="flex h-full min-h-[18rem] w-full flex-col overflow-hidden rounded-md">
-        <Toolbar
-          activeTab={activeTab}
-          canGoBack={canGoBack(activeTab)}
-          canGoForward={canGoForward(activeTab)}
-          onBack={() => goBack(activeId)}
-          onForward={() => goForward(activeId)}
-          onReload={() => reload(activeId)}
-          onStop={() => stop(activeId)}
-          onNavigate={(raw: string) => navigate(activeId, raw)}
-          onInputChange={(value: string) =>
-            updateTab(activeId, { input: value })
-          }
-          onNewTab={() => addTab()}
-        />
+        <TitlebarPortal>
+          <Toolbar
+            activeTab={activeTab}
+            canGoBack={canGoBack(activeTab)}
+            canGoForward={canGoForward(activeTab)}
+            onBack={() => goBack(activeId)}
+            onForward={() => goForward(activeId)}
+            onReload={() => reload(activeId)}
+            onStop={() => stop(activeId)}
+            onNavigate={(raw: string) => navigate(activeId, raw)}
+            onInputChange={(value: string) =>
+              updateTab(activeId, { input: value })
+            }
+            onNewTab={() => addTab()}
+          />
+        </TitlebarPortal>
 
         <TabsStrip
           tabs={tabs}

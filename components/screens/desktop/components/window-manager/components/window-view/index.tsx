@@ -1,10 +1,12 @@
 "use client";
 
 import type React from "react";
+import { useRef } from "react";
 import { focusWin, setWinState } from "../../api";
 import { useWindowDrag, useWindowResize } from "../../hooks";
 import { useDesktop } from "../../store";
 import type { WinInstance } from "../../types";
+import { TitlebarPortalProvider } from "./titlebar-portal";
 import { WindowContent } from "./window-content";
 import { WindowResizeHandles } from "./window-resize-handles";
 import { WindowTitlebar } from "./window-titlebar";
@@ -16,6 +18,7 @@ export function WindowView({
   win: WinInstance;
   rootRef: React.RefObject<HTMLDivElement | null>;
 }) {
+  const titlebarMountRef = useRef<HTMLDivElement | null>(null);
   const drag = useWindowDrag(win, rootRef);
   const resize = useWindowResize(win, rootRef);
   const meta = useDesktop((s) => s.apps[win.appId]);
@@ -35,32 +38,36 @@ export function WindowView({
   };
 
   return (
-    <div
-      className={
-        `wm-window absolute left-0 top-0 rounded-xl overflow-hidden select-none ` +
-        `bg-[rgba(255,255,255,0.06)] backdrop-blur-[20px] ` +
-        (win.focused
-          ? "shadow-[0_10px_32px_rgba(0,0,0,0.45)]"
-          : "shadow-[0_10px_28px_rgba(0,0,0,0.28)]")
-      }
-      style={dynamicStyle}
-      onPointerDown={() => focusWin(win.id)}
-    >
-      <WindowTitlebar
-        win={win}
-        drag={drag}
-        onTitleDoubleClick={onTitleDoubleClick}
-      />
-
-      <WindowContent win={win} />
-
-      {isResizable ? (
-        <WindowResizeHandles
-          onPointerDown={resize.onPointerDown}
-          onPointerMove={resize.onPointerMove}
-          onPointerUp={resize.onPointerUp}
+    <TitlebarPortalProvider value={titlebarMountRef}>
+      <div
+        className={
+          `wm-window absolute left-0 top-0 rounded-xl overflow-hidden select-none ` +
+          `bg-[rgba(255,255,255,0.06)] backdrop-blur-[20px] ` +
+          (win.focused
+            ? "shadow-[0_10px_32px_rgba(0,0,0,0.45)]"
+            : "shadow-[0_10px_28px_rgba(0,0,0,0.28)]")
+        }
+        style={dynamicStyle}
+        onPointerDown={() => focusWin(win.id)}
+      >
+        {/* Titlebar with a shared portal mount for this window */}
+        <WindowTitlebar
+          win={win}
+          drag={drag}
+          onTitleDoubleClick={onTitleDoubleClick}
+          mountRef={titlebarMountRef}
         />
-      ) : null}
-    </div>
+
+        <WindowContent win={win} />
+
+        {isResizable ? (
+          <WindowResizeHandles
+            onPointerDown={resize.onPointerDown}
+            onPointerMove={resize.onPointerMove}
+            onPointerUp={resize.onPointerUp}
+          />
+        ) : null}
+      </div>
+    </TitlebarPortalProvider>
   );
 }

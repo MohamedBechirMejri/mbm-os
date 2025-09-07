@@ -46,9 +46,9 @@ export function Toolbar({
   onNewTab,
 }: Props) {
   return (
-    <div className="relative z-[1] flex items-center gap-2 border-b border-border/60 bg-background/60 px-2 py-1.5 backdrop-blur supports-[backdrop-filter]:bg-background/30">
+    <div className="wm-safari-toolbar relative z-[1] flex items-center gap-2 px-2 py-1.5 pointer-events-auto">
       {/* Left: Back/Forward grouped like Safari */}
-      <div className="flex items-center gap-1 rounded-full bg-foreground/[0.06] p-0.5 shadow-sm ring-1 ring-inset ring-foreground/10">
+      <div className="flex items-center gap-1 rounded-full bg-black/20 p-0.5 shadow-sm ring-1 ring-inset ring-white/10">
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -57,7 +57,7 @@ export function Toolbar({
               aria-label="Back"
               disabled={!canGoBack}
               onClick={onBack}
-              className="h-8 w-8 rounded-full"
+              className="h-8 w-8 rounded-full text-white/90 hover:bg-white/10"
             >
               <ArrowLeft className="size-[1.05rem]" />
             </Button>
@@ -73,7 +73,7 @@ export function Toolbar({
               aria-label="Forward"
               disabled={!canGoForward}
               onClick={onForward}
-              className="h-8 w-8 rounded-full"
+              className="h-8 w-8 rounded-full text-white/90 hover:bg-white/10"
             >
               <ArrowRight className="size-[1.05rem]" />
             </Button>
@@ -84,7 +84,7 @@ export function Toolbar({
 
       {/* Center: Address/Search field */}
       <div className="flex min-w-0 flex-1 items-center">
-        <div className="group relative flex w-full items-center gap-2 rounded-full border border-foreground/10 bg-background/60 px-3 py-1.5 shadow-sm backdrop-blur transition-colors ring-1 ring-inset ring-foreground/5 supports-[backdrop-filter]:bg-background/30 focus-within:border-sky-500/40 focus-within:ring-2 focus-within:ring-sky-500/60">
+        <div className="group relative flex w-full items-center gap-2 rounded-full border border-white/10 bg-black/30 px-3 py-1.5 shadow-sm backdrop-blur ring-1 ring-inset ring-white/5 focus-within:ring-2 focus-within:ring-sky-500/50">
           <div className="flex size-4 items-center justify-center">
             {activeTab.favicon ? (
               <Image
@@ -95,11 +95,11 @@ export function Toolbar({
                 className="rounded-sm"
               />
             ) : (
-              <Globe className="size-4" />
+              <Globe className="size-4 text-white/80" />
             )}
           </div>
           <Input
-            className="h-7 w-full border-0 bg-transparent p-0 text-[0.9rem] outline-none ring-0 focus-visible:ring-0"
+            className="h-7 w-full border-0 bg-transparent p-0 text-[0.9rem] outline-none ring-0 placeholder:text-white/50 text-white focus-visible:ring-0"
             placeholder="Search or enter website name"
             value={activeTab.input}
             onChange={(e) => onInputChange(e.target.value)}
@@ -117,7 +117,7 @@ export function Toolbar({
                 size="icon"
                 aria-label={activeTab.loading ? "Stop" : "Reload"}
                 onClick={() => (activeTab.loading ? onStop() : onReload())}
-                className="h-7 w-7 rounded-full"
+                className="h-7 w-7 rounded-full text-white/90 hover:bg-white/10"
               >
                 {activeTab.loading ? (
                   <X className="size-4" />
@@ -144,7 +144,7 @@ export function Toolbar({
               onClick={() =>
                 window.open(activeTab.url, "_blank", "noopener,noreferrer")
               }
-              className="h-8 w-8 rounded-full"
+              className="h-8 w-8 rounded-full text-white/90 hover:bg-white/10"
             >
               <SquareArrowOutUpRight className="size-[1.05rem]" />
             </Button>
@@ -158,7 +158,7 @@ export function Toolbar({
               size="icon"
               aria-label="New tab"
               onClick={onNewTab}
-              className="h-8 w-8 rounded-full"
+              className="h-8 w-8 rounded-full text-white/90 hover:bg-white/10"
             >
               <Plus className="size-[1.05rem]" />
             </Button>

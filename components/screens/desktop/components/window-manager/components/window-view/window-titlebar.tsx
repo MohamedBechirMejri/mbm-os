@@ -4,6 +4,9 @@ import { closeWin, setWinState } from "../../api";
 import { useDesktop } from "../../store";
 import type { WinInstance } from "../../types";
 
+// Titlebar content is provided by a portal from inside apps; the mount ref is
+// passed from the parent window view.
+
 interface WindowTitlebarProps {
   win: WinInstance;
   drag: {
@@ -12,12 +15,14 @@ interface WindowTitlebarProps {
     onPointerUp: (e: React.PointerEvent) => void;
   };
   onTitleDoubleClick: () => void;
+  mountRef: React.RefObject<HTMLDivElement | null>;
 }
 
 export function WindowTitlebar({
   win,
   drag,
   onTitleDoubleClick,
+  mountRef,
 }: WindowTitlebarProps) {
   const meta = useDesktop((s) => s.apps[win.appId]);
   const isResizable = meta?.resizable ?? true;
@@ -26,20 +31,25 @@ export function WindowTitlebar({
   return (
     <div
       className={cn(
-        "wm-titlebar h-9 flex items-center gap-2 px-4  border border-b-0 border-white/15",
+        "wm-titlebar h-9 flex items-center gap-2 px-3 border border-b-0 border-white/15",
         {
           "absolute top-0 left-0 right-0 z-50": floatingActionBar,
           "bg-[linear-gradient(180deg,rgba(255,255,255,0.14),rgba(255,255,255,0.06))]":
             !floatingActionBar,
         },
       )}
-      onPointerDown={drag.onPointerDown}
+      onPointerDown={(e) => {
+        // Allow drag only if the user didn't start inside an interactive area
+        if ((e.target as HTMLElement).closest(".wm-titlebar-content")) return;
+        drag.onPointerDown(e);
+      }}
       onPointerMove={drag.onPointerMove}
       onPointerUp={drag.onPointerUp}
       onDoubleClick={onTitleDoubleClick}
       role="toolbar"
       aria-label="Window title bar"
     >
+      {/* Traffic lights */}
       <div className="flex gap-2 pr-1.5">
         <ActionButton
           label="Close"
@@ -63,7 +73,12 @@ export function WindowTitlebar({
           className={`bg-[#28c840] ${!isResizable ? "opacity-50 cursor-not-allowed" : ""}`}
         />
       </div>
-      {/* <div className="text-[0.75rem] opacity-[0.85]">{win.title}</div> */}
+
+      {/* Content area: apps can portal into here */}
+      <div
+        ref={mountRef}
+        className="wm-titlebar-content pointer-events-auto flex min-w-0 flex-1 items-center"
+      />
     </div>
   );
 }
