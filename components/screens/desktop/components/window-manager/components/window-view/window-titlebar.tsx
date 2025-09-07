@@ -31,7 +31,7 @@ export function WindowTitlebar({
   return (
     <div
       className={cn(
-        "wm-titlebar h-9 flex items-center gap-2 px-3 border border-b-0 border-white/15",
+        "wm-titlebar h-9 flex items-center gap-2 px-3 border border-b-0 border-white/15 cursor-grab active:cursor-grabbing",
         {
           "absolute top-0 left-0 right-0 z-50": floatingActionBar,
           "bg-[linear-gradient(180deg,rgba(255,255,255,0.14),rgba(255,255,255,0.06))]":
@@ -39,8 +39,12 @@ export function WindowTitlebar({
         },
       )}
       onPointerDown={(e) => {
-        // Allow drag only if the user didn't start inside an interactive area
-        if ((e.target as HTMLElement).closest(".wm-titlebar-content")) return;
+        // Start drag unless the initial target is an interactive control.
+        const target = e.target as HTMLElement;
+        const noDrag = target.closest(
+          'input, textarea, button, a, [role="button"], [role="textbox"], [contenteditable="true"], .no-window-drag',
+        );
+        if (noDrag) return; // let the control handle the event
         drag.onPointerDown(e);
       }}
       onPointerMove={drag.onPointerMove}

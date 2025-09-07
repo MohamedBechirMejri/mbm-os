@@ -14,6 +14,8 @@ export function useWindowDrag(
   const startRef = useRef<{ x: number; y: number; bounds: Bounds } | null>(
     null,
   );
+  const rafRef = useRef<number | null>(null);
+  const pendingRef = useRef<{ x: number; y: number } | null>(null);
 
   const onPointerDown = useCallback(
     (e: React.PointerEvent) => {
@@ -39,7 +41,14 @@ export function useWindowDrag(
         x: startRef.current.bounds.x + dx,
         y: startRef.current.bounds.y + dy,
       };
-      moveWin(win.id, next);
+      pendingRef.current = next;
+      if (rafRef.current == null) {
+        rafRef.current = requestAnimationFrame(() => {
+          rafRef.current = null;
+          const p = pendingRef.current;
+          if (p) moveWin(win.id, p);
+        });
+      }
     },
     [dragging, win.id],
   );
@@ -47,6 +56,11 @@ export function useWindowDrag(
   const onPointerUp = useCallback((_e: React.PointerEvent) => {
     // Drag-to-edge snapping disabled: simply end dragging without applying a snap state.
     setDragging(false);
+    pendingRef.current = null;
+    if (rafRef.current != null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
   }, []);
 
   return { dragging, onPointerDown, onPointerMove, onPointerUp } as const;
