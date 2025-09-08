@@ -10,13 +10,15 @@ export function WindowContent({ win }: WindowContentProps) {
   const meta = useDesktop((s) => s.apps[win.appId]);
 
   const floatingActionBar = meta?.floatingActionBar ?? false;
+  const titlebarHeight = meta?.titlebarHeight ?? 36;
 
   return (
     <div
-      className={cn("wm-content absolute inset-0 overflow-auto w-full ", {
-        "h-full top-0": floatingActionBar,
-        "h-[calc(100%-36px)] top-9": !floatingActionBar,
-      })}
+      className={cn("wm-content absolute inset-0 overflow-auto w-full ")}
+      style={{
+        height: floatingActionBar ? "100%" : `calc(100% - ${titlebarHeight}px)`,
+        top: floatingActionBar ? 0 : titlebarHeight,
+      }}
     >
       {meta ? <meta.Component instanceId={win.id} /> : null}
     </div>

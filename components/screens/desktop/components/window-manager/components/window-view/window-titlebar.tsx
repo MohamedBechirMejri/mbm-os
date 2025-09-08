@@ -27,17 +27,21 @@ export function WindowTitlebar({
   const meta = useDesktop((s) => s.apps[win.appId]);
   const isResizable = meta?.resizable ?? true;
   const floatingActionBar = meta?.floatingActionBar ?? false;
+  const titlebarHeight = meta?.titlebarHeight ?? 36;
 
   return (
     <div
       className={cn(
-        "wm-titlebar h-9 flex items-center gap-2 px-3 border border-b-0 border-white/15 cursor-grab active:cursor-grabbing",
+        "wm-titlebar flex items-center gap-2 px-3 border border-b-0 border-white/15 cursor-grab active:cursor-grabbing",
         {
           "absolute top-0 left-0 right-0 z-50": floatingActionBar,
           "bg-[linear-gradient(180deg,rgba(255,255,255,0.14),rgba(255,255,255,0.06))]":
             !floatingActionBar,
         },
       )}
+      style={{
+        height: titlebarHeight,
+      }}
       onPointerDown={(e) => {
         // Start drag unless the initial target is an interactive control.
         const target = e.target as HTMLElement;
