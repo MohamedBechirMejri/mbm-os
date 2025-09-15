@@ -214,12 +214,14 @@ export function SafariApp({ instanceId: _ }: { instanceId: string }) {
           />
         </TitlebarPortal>
 
-        <TabsStrip
-          tabs={tabs}
-          activeId={activeId}
-          onSetActive={setActiveId}
-          onClose={closeTab}
-        />
+        {tabs.length > 1 && (
+          <TabsStrip
+            tabs={tabs}
+            activeId={activeId}
+            onSetActive={setActiveId}
+            onClose={closeTab}
+          />
+        )}
 
         <LoadingBar loading={activeTab.loading} />
 
