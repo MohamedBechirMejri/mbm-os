@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { TitlebarPortal } from "../../window-manager/components/window-view/titlebar-portal";
 import { ContentView } from "./content-view";
 import { LoadingBar } from "./loading-bar";
-import { TabsStrip } from "./tabs-strip";
+import { TabsStrip } from "./tabs";
 import { Toolbar } from "./toolbar";
 import type { Tab } from "./types";
 import { START_PAGE } from "./types";
