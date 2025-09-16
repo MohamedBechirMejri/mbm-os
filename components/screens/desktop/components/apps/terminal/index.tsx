@@ -12,7 +12,7 @@ export function TerminalApp({ instanceId }: { instanceId: string }) {
 
   return (
     <div className="flex h-full w-full items-center justify-center bg-black/40 backdrop-blur-3xl">
-      <div className="relative flex h-full w-full flex-col overflow-hidden border border-white/10 backdrop-blur-xl">
+      <div className="relative flex h-full w-full flex-col overflow-hidden backdrop-blur-xl">
         <div className="relative flex flex-1 flex-col overflow-hidden pt-8">
           <div className="flex h-full overflow-hidden rounded-2xl">
             <TerminalContextProvider key={instanceId}>
