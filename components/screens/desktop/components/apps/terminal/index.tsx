@@ -1,60 +1,14 @@
 "use client";
 
-import { type ReactNode, useMemo } from "react";
+import { useMemo } from "react";
 import { ReactTerminal, TerminalContextProvider } from "react-terminal";
-
-type CommandValue =
-  | string
-  | ReactNode
-  | ((...args: string[]) => string | ReactNode);
-
-type CommandDictionary = Record<string, CommandValue>;
-
-const MAC_THEME_NAME = "macos-26";
-
-const MAC_TERMINAL_THEME = {
-  [MAC_THEME_NAME]: {
-    themeBGColor: "rgba(7, 10, 18, 0.86)",
-    themeToolbarColor: "rgba(14, 18, 26, 0.72)",
-    themeColor: "#F5F7FF",
-    themePromptColor: "#80FFBF",
-  },
-};
+import { buildCommands } from "./commands";
+import { MAC_TERMINAL_THEME, MAC_THEME_NAME } from "./theme";
+import { buildWelcomeMessage } from "./welcome";
 
 export function TerminalApp({ instanceId }: { instanceId: string }) {
-  const welcomeMessage = useMemo(
-    () =>
-      [
-        `Last login: ${new Date().toLocaleString()}`,
-        "Type `help` to list available commands.",
-      ].join("\n"),
-    [],
-  );
-
-  const commands = useMemo<CommandDictionary>(() => {
-    const lines = (...items: string[]) => items.join("\n");
-    return {
-      help: () =>
-        lines(
-          "Available commands:",
-          "  help        Show this help message",
-          "  about       Learn about this macOS 26 terminal",
-          "  projects    Highlight current work",
-          "  socials     Contact information",
-          "  date        Print the current date",
-          "  echo        Echo back your input",
-          "  clear       Clear the console",
-        ),
-      about: () =>
-        "macOS 26 inspired terminal. This is a simulated shell built for the mbm-os desktop experience.",
-      projects: () =>
-        "Latest experiments live on mohamedbechirmejri.dev and the mbm-os project.",
-      socials: () =>
-        "Twitter/X: @mbm  •  GitHub: @mohamedbechirmejri  •  Email: hello@mohamedbechirmejri.dev",
-      date: () => new Date().toLocaleString(),
-      echo: (...args: string[]) => (args.length ? args.join(" ") : ""),
-    } satisfies CommandDictionary;
-  }, []);
+  const welcomeMessage = useMemo(() => buildWelcomeMessage(), []);
+  const commands = useMemo(() => buildCommands(), []);
 
   return (
     <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_top,rgba(84,125,255,0.24),transparent_62%)]">
@@ -93,3 +47,5 @@ export function TerminalApp({ instanceId }: { instanceId: string }) {
     </div>
   );
 }
+
+export default TerminalApp;
