@@ -12,7 +12,7 @@ export function TerminalApp({ instanceId }: { instanceId: string }) {
 
   return (
     <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_top,rgba(84,125,255,0.24),transparent_62%)]">
-      <div className="relative flex h-full w-full max-w-3xl flex-col overflow-hidden rounded-[22px] border border-white/10 bg-[linear-gradient(135deg,rgba(24,27,37,0.95),rgba(8,10,16,0.92))] shadow-[0_42px_90px_-35px_rgba(8,10,20,0.95)] backdrop-blur-xl">
+      <div className="relative flex h-full w-full flex-col overflow-hidden border border-white/10 bg-[linear-gradient(135deg,rgba(24,27,37,0.95),rgba(8,10,16,0.92))] shadow-[0_42px_90px_-35px_rgba(8,10,20,0.95)] backdrop-blur-xl pt-2">
         <div className="pointer-events-none absolute inset-x-8 top-6 h-24 rounded-full bg-white/10 blur-3xl" />
         <div className="relative flex flex-1 flex-col overflow-hidden px-6 py-6">
           <div className="flex h-full overflow-hidden rounded-2xl border border-white/10 bg-black/70 shadow-inner">
