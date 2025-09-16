@@ -36,7 +36,7 @@ export function TerminalApp({ instanceId }: { instanceId: string }) {
                   lineHeight: "1.5",
                   fontFamily:
                     "SFMono-Regular, ui-monospace, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
-                  background: "transparent",
+                  background: "transparent !important",
                 }}
               />
             </TerminalContextProvider>
