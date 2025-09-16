@@ -24,6 +24,7 @@
     "next": "15.5.2",
     "react": "19.1.1",
     "react-dom": "19.1.1",
+    "react-terminal": "^1.4.5",
     "tailwind-merge": "^3.3.1",
     "xstate": "^5.21.0",
     "zustand": "^5.0.8"

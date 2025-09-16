@@ -5,6 +5,7 @@ import { registerApps } from "../window-manager/api";
 import type { AppMeta } from "../window-manager/types";
 import { CalculatorApp } from "./calculator";
 import { SafariApp } from "./safari";
+import { TerminalApp } from "./terminal";
 // import { MindustryClassicApp } from "./mindustry";
 
 export const apps: AppMeta[] = [
@@ -49,7 +50,7 @@ export const apps: AppMeta[] = [
     id: "terminal",
     title: "Terminal",
     icon: "terminal",
-    Component: CalculatorApp,
+    Component: TerminalApp,
     minSize: { w: 320, h: 240 },
   },
   // {
