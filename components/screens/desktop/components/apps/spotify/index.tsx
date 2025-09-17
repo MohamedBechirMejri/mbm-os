@@ -10,7 +10,11 @@ interface EmbedItem {
 
 const ITEMS: EmbedItem[] = [
   { type: "playlist", id: "37i9dQZEVXbMDoHDwVN2tF", title: "Top 50 – Global" },
-  { type: "album", id: "4m2880jivSbbyEGAKfITCa", title: "Random Access Memories" },
+  {
+    type: "album",
+    id: "4m2880jivSbbyEGAKfITCa",
+    title: "Random Access Memories",
+  },
   { type: "track", id: "0VjIjW4GlUZAMYd2vXMi3b", title: "Blinding Lights" },
   { type: "track", id: "1u7kkVrr14iBvrpYnZILJR", title: "Lose Yourself" },
 ];
@@ -81,7 +85,13 @@ export function SpotifyApp({ instanceId: _ }: { instanceId: string }) {
           height="100%"
           filterUnits="objectBoundingBox"
         >
-          <feTurbulence type="fractalNoise" baseFrequency="0.01 0.01" numOctaves={1} seed={5} result="turbulence" />
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency="0.01 0.01"
+            numOctaves={1}
+            seed={5}
+            result="turbulence"
+          />
           <feComponentTransfer in="turbulence" result="mapped">
             <feFuncR type="gamma" amplitude={1} exponent={10} offset={0.5} />
             <feFuncG type="gamma" amplitude={0} exponent={1} offset={0} />
@@ -98,8 +108,20 @@ export function SpotifyApp({ instanceId: _ }: { instanceId: string }) {
           >
             <fePointLight x={-200} y={-200} z={300} />
           </feSpecularLighting>
-          <feComposite in="specLight" operator="arithmetic" k2={1} k3={1} result="litImage" />
-          <feDisplacementMap in="SourceGraphic" in2="softMap" scale={150} xChannelSelector="R" yChannelSelector="G" />
+          <feComposite
+            in="specLight"
+            operator="arithmetic"
+            k2={1}
+            k3={1}
+            result="litImage"
+          />
+          <feDisplacementMap
+            in="SourceGraphic"
+            in2="softMap"
+            scale={150}
+            xChannelSelector="R"
+            yChannelSelector="G"
+          />
         </filter>
       </svg>
     </div>
