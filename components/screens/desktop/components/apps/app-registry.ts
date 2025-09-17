@@ -5,6 +5,7 @@ import { registerApps } from "../window-manager/api";
 import type { AppMeta } from "../window-manager/types";
 import { CalculatorApp } from "./calculator";
 import { SafariApp } from "./safari";
+import { SpotifyApp } from "./spotify";
 import { TerminalApp } from "./terminal";
 // import { MindustryClassicApp } from "./mindustry";
 
@@ -65,8 +66,9 @@ export const apps: AppMeta[] = [
     id: "spotify",
     title: "Spotify",
     icon: "spotify-client",
-    Component: CalculatorApp,
-    minSize: { w: 320, h: 240 },
+    Component: SpotifyApp,
+    minSize: { w: 480, h: 420 },
+    titlebarHeight: 46,
   },
   {
     id: "calculator",
