@@ -37,6 +37,8 @@ export function TerminalApp({ instanceId }: { instanceId: string }) {
                   fontFamily:
                     "SFMono-Regular, ui-monospace, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
                   background: "transparent !important",
+                  // Preserve newlines returned by command handlers (they were collapsing into spaces)
+                  whiteSpace: "pre-wrap",
                 }}
               />
             </TerminalContextProvider>

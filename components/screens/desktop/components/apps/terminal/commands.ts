@@ -1,3 +1,4 @@
+import React from "react";
 import type { CommandDictionary } from "./types";
 
 function lines(...items: string[]) {
@@ -8,17 +9,28 @@ function randomChoice<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-function repeat(str: string, n: number) {
-  return Array.from({ length: n }, () => str).join("");
-}
-
-function center(text: string, width = 48) {
-  const pad = Math.max(0, Math.floor((width - text.length) / 2));
-  return repeat(" ", pad) + text;
+function wrapMultiline<T extends string | React.ReactNode>(
+  value: T,
+): T | React.ReactNode {
+  if (typeof value === "string" && value.includes("\n")) {
+    return React.createElement(
+      "pre",
+      {
+        style: {
+          margin: 0,
+          font: "inherit",
+          whiteSpace: "pre-wrap",
+          background: "transparent",
+        },
+      },
+      value,
+    );
+  }
+  return value;
 }
 
 export function buildCommands(): CommandDictionary {
-  return {
+  const dict: CommandDictionary = {
     help: () =>
       lines(
         "Available commands:",
@@ -165,4 +177,22 @@ export function buildCommands(): CommandDictionary {
     echo: (...args: string[]) => (args.length ? args.join(" ") : ""),
     clear: () => "",
   } satisfies CommandDictionary;
+
+  // Automatically wrap any multiline string responses in <pre> so newlines render.
+  const wrapped: CommandDictionary = {};
+  for (const [key, value] of Object.entries(dict)) {
+    if (typeof value === "string") {
+      wrapped[key] = wrapMultiline(value);
+    } else if (typeof value === "function") {
+      wrapped[key] = (...args: string[]) => {
+        const out = value(...args);
+        if (typeof out === "string") return wrapMultiline(out);
+        return out;
+      };
+    } else {
+      wrapped[key] = value;
+    }
+  }
+
+  return wrapped;
 }
