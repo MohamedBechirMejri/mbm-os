@@ -5,9 +5,7 @@ import { registerApps } from "../window-manager/api";
 import type { AppMeta } from "../window-manager/types";
 import { CalculatorApp } from "./calculator";
 import { SafariApp } from "./safari";
-import { SpotifyApp } from "./spotify";
 import { TerminalApp } from "./terminal";
-// import { MindustryClassicApp } from "./mindustry";
 
 export const apps: AppMeta[] = [
   {
@@ -55,21 +53,7 @@ export const apps: AppMeta[] = [
     minSize: { w: 320, h: 240 },
     floatingActionBar: true,
   },
-  // {
-  //   id: "google-chrome",
-  //   title: "Google Chrome",
-  //   icon: "google-chrome",
-  //   Component: CalculatorApp,
-  //   minSize: { w: 320, h: 240 },
-  // },
-  {
-    id: "spotify",
-    title: "Spotify",
-    icon: "spotify-client",
-    Component: SpotifyApp,
-    minSize: { w: 480, h: 420 },
-    titlebarHeight: 46,
-  },
+
   {
     id: "calculator",
     title: "Calculator",
@@ -80,13 +64,7 @@ export const apps: AppMeta[] = [
     resizable: false,
     floatingActionBar: true,
   },
-  // {
-  //   id: "badland",
-  //   title: "Badland",
-  //   icon: "badland",
-  //   Component: CalculatorApp,
-  //   minSize: { w: 320, h: 240 },
-  // },
+
   // {
   //   id: "chess",
   //   title: "Chess",
@@ -94,27 +72,7 @@ export const apps: AppMeta[] = [
   //   Component: CalculatorApp,
   //   minSize: { w: 320, h: 240 },
   // },
-  // {
-  //   id: "doom-2016",
-  //   title: "Doom",
-  //   icon: "doom-2016",
-  //   Component: CalculatorApp,
-  //   minSize: { w: 320, h: 240 },
-  // },
-  // {
-  //   id: "mindustry",
-  //   title: "Mindustry",
-  //   icon: "mindustry",
-  //   Component: MindustryClassicApp,
-  //   minSize: { w: 320, h: 240 },
-  // },
-  // {
-  //   id: "rimworld",
-  //   title: "RimWorld",
-  //   icon: "rimworld",
-  //   Component: CalculatorApp,
-  //   minSize: { w: 320, h: 240 },
-  // },
+
   // add more apps here
 ];
 
