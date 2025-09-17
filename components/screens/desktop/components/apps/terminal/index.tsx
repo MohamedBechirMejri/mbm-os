@@ -7,7 +7,24 @@ import { MAC_TERMINAL_THEME, MAC_THEME_NAME } from "./theme";
 import { buildWelcomeMessage } from "./welcome";
 
 export function TerminalApp({ instanceId }: { instanceId: string }) {
-  const welcomeMessage = useMemo(() => buildWelcomeMessage(), []);
+  const welcomeMessage = useMemo(() => {
+    const raw = buildWelcomeMessage();
+    if (raw.includes("\n")) {
+      return (
+        <pre
+          style={{
+            margin: 0,
+            font: "inherit",
+            whiteSpace: "pre-wrap",
+            background: "transparent",
+          }}
+        >
+          {raw}
+        </pre>
+      );
+    }
+    return raw;
+  }, []);
   const commands = useMemo(() => buildCommands(), []);
 
   return (
