@@ -31,7 +31,7 @@ export function TerminalApp({ instanceId }: { instanceId: string }) {
     <div className="flex h-full w-full items-center justify-center bg-black/40 backdrop-blur-3xl">
       <div className="relative flex h-full w-full flex-col overflow-hidden backdrop-blur-xl">
         <div className="relative flex flex-1 flex-col overflow-hidden pt-8">
-          <div className="flex h-full overflow-hidden rounded-2xl">
+          <div className="flex h-full w-full overflow-hidden">
             <TerminalContextProvider key={instanceId}>
               <ReactTerminal
                 prompt="mbm@macos-26 ~ %"
