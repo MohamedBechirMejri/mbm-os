@@ -2,13 +2,21 @@
 
 import Image from "next/image";
 import { useMemo, useState } from "react";
-import { DesktopAPI, useDesktop } from "../../window-manager";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { DesktopAPI, useDesktop } from "../../window-manager";
 import { CATALOG, type CatalogEntry } from "./catalog";
 
-type Section = "discover" | "arcade" | "create" | "work" | "play" | "develop" | "categories" | "updates";
+type Section =
+  | "discover"
+  | "arcade"
+  | "create"
+  | "work"
+  | "play"
+  | "develop"
+  | "categories"
+  | "updates";
 
 export function AppStoreApp({ instanceId: _ }: { instanceId: string }) {
   const apps = useDesktop((s) => s.apps);
@@ -98,14 +106,22 @@ export function AppStoreApp({ instanceId: _ }: { instanceId: string }) {
   );
 }
 
-function SidebarItem({ label, active, onClick }: { label: string; active?: boolean; onClick?: () => void }) {
+function SidebarItem({
+  label,
+  active,
+  onClick,
+}: {
+  label: string;
+  active?: boolean;
+  onClick?: () => void;
+}) {
   return (
     <button
       type="button"
       onClick={onClick}
       className={cn(
         "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-white/80 hover:bg-white/10",
-        active && "bg-white/15 text-white"
+        active && "bg-white/15 text-white",
       )}
     >
       <span className="h-[18px] w-[18px] rounded-md bg-white/20" />
@@ -129,14 +145,23 @@ function HeroCard() {
   return (
     <div className="relative overflow-hidden rounded-xl border border-white/10 bg-white/5 p-0">
       <div className="px-5 py-4">
-        <div className="text-[12px] font-semibold tracking-wide text-white/70">MAJOR UPDATE</div>
-        <div className="mt-1 text-[22px] font-semibold">See What’s New in macOS Tahoe</div>
+        <div className="text-[12px] font-semibold tracking-wide text-white/70">
+          MAJOR UPDATE
+        </div>
+        <div className="mt-1 text-[22px] font-semibold">
+          See What’s New in macOS Tahoe
+        </div>
         <p className="mt-2 text-[13px] text-white/70 max-w-prose">
           A gorgeous new look, a supercharged Spotlight, and more.
         </p>
       </div>
       <div className="relative h-[160px] w-full overflow-hidden">
-        <Image src="/assets/Tahoe%20default%20wallpapers/macOS%20Tahoe%2026%20Light%20Wallpaper.png" alt="Tahoe" fill className="object-cover" />
+        <Image
+          src="/assets/Tahoe%20default%20wallpapers/macOS%20Tahoe%2026%20Light%20Wallpaper.png"
+          alt="Tahoe"
+          fill
+          className="object-cover"
+        />
       </div>
     </div>
   );
@@ -147,19 +172,37 @@ function WelcomeCard() {
     <div className="grid grid-rows-2 gap-4">
       <div className="rounded-xl border border-white/10 bg-white/5 p-5">
         <div className="text-[12px] text-white/70">GET STARTED</div>
-        <div className="mt-1 text-[18px] font-semibold">The Apple Games App Is Your New Home for Play</div>
-        <p className="mt-2 text-[13px] text-white/70">Find new favorites, play with friends—it’s all here.</p>
+        <div className="mt-1 text-[18px] font-semibold">
+          The Apple Games App Is Your New Home for Play
+        </div>
+        <p className="mt-2 text-[13px] text-white/70">
+          Find new favorites, play with friends—it’s all here.
+        </p>
       </div>
       <div className="rounded-xl border border-white/10 bg-white/5 p-5">
         <div className="text-[12px] text-white/70">FROM THE EDITORS</div>
-        <div className="mt-1 text-[18px] font-semibold">Welcome to the Mac App Store!</div>
-        <p className="mt-2 text-[13px] text-white/70">Take a tour and find your next favorite app.</p>
+        <div className="mt-1 text-[18px] font-semibold">
+          Welcome to the Mac App Store!
+        </div>
+        <p className="mt-2 text-[13px] text-white/70">
+          Take a tour and find your next favorite app.
+        </p>
       </div>
     </div>
   );
 }
 
-function AppCard({ entry, installed, onInstall, onOpen }: { entry: CatalogEntry; installed: boolean; onInstall: () => void; onOpen: () => void }) {
+function AppCard({
+  entry,
+  installed,
+  onInstall,
+  onOpen,
+}: {
+  entry: CatalogEntry;
+  installed: boolean;
+  onInstall: () => void;
+  onOpen: () => void;
+}) {
   const { meta, subtitle } = entry;
   return (
     <div className="group relative overflow-hidden rounded-xl border border-white/10 bg-white/5 p-4">
@@ -177,7 +220,11 @@ function AppCard({ entry, installed, onInstall, onOpen }: { entry: CatalogEntry;
         </div>
         <div className="flex items-center gap-2">
           {installed ? (
-            <Button size="sm" className="rounded-full bg-white text-black hover:bg-white/90" onClick={onOpen}>
+            <Button
+              size="sm"
+              className="rounded-full bg-white text-black hover:bg-white/90"
+              onClick={onOpen}
+            >
               Open
             </Button>
           ) : (

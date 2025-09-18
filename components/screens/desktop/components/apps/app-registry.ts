@@ -3,11 +3,11 @@
 import { useEffect } from "react";
 import { registerApps } from "../window-manager/api";
 import type { AppMeta } from "../window-manager/types";
+import { AppStoreApp } from "./app-store";
 import { CalculatorApp } from "./calculator";
 import { FinderApp } from "./finder";
 import { SafariApp } from "./safari";
 import { TerminalApp } from "./terminal";
-import { AppStoreApp } from "./app-store";
 
 // Full catalog known to the system (used by the App Store to install)
 export const catalogApps: AppMeta[] = [
@@ -83,7 +83,9 @@ export const catalogApps: AppMeta[] = [
 
 // Minimal set of apps preinstalled at boot (others appear after installing from App Store)
 const PREINSTALLED_IDS = new Set<string>(["softwarecenter", "file-manager"]);
-export const preinstalledApps = catalogApps.filter((a) => PREINSTALLED_IDS.has(a.id));
+export const preinstalledApps = catalogApps.filter((a) =>
+  PREINSTALLED_IDS.has(a.id),
+);
 
 export function AppRegistry() {
   useEffect(() => {

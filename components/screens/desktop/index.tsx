@@ -3,7 +3,11 @@
 import Image from "next/image";
 import { AppRegistry } from "./components/apps/app-registry";
 import { Dock, DockIcon } from "./components/dock";
-import { DesktopAPI, WindowManagerRoot, useDesktop } from "./components/window-manager";
+import {
+  DesktopAPI,
+  useDesktop,
+  WindowManagerRoot,
+} from "./components/window-manager";
 
 export default function Desktop() {
   const installed = useDesktop((s) => Object.values(s.apps));

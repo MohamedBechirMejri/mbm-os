@@ -2,8 +2,8 @@ import type { AppMeta } from "../../window-manager/types";
 import { CalculatorApp } from "../calculator";
 import { FinderApp } from "../finder";
 import { SafariApp } from "../safari";
-import { TerminalApp } from "../terminal";
 import { SpotifyApp } from "../spotify";
+import { TerminalApp } from "../terminal";
 
 export interface CatalogEntry {
   meta: AppMeta;
