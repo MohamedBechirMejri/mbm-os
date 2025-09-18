@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { AppRegistry, preinstalledApps } from "./components/apps/app-registry";
 import { Dock, DockIcon } from "./components/dock";
+import MenuBar from "./components/menu-bar";
 import {
   DesktopAPI,
   useDesktop,
@@ -25,7 +26,7 @@ export default function Desktop() {
   };
   return (
     <div className="relative size-full grid grid-rows-[auto_minmax(0,_1fr)_auto]">
-      <div></div>
+      <MenuBar />
       <div>
         <WindowManagerRoot />
         <AppRegistry />
