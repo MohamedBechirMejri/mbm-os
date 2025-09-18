@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { registerApps } from "../window-manager/api";
 import type { AppMeta } from "../window-manager/types";
 import { CalculatorApp } from "./calculator";
+import { FinderApp } from "./finder";
 import { SafariApp } from "./safari";
 import { TerminalApp } from "./terminal";
 
@@ -12,8 +13,10 @@ export const apps: AppMeta[] = [
     id: "file-manager",
     title: "Finder",
     icon: "file-manager",
-    Component: CalculatorApp,
-    minSize: { w: 320, h: 240 },
+    Component: FinderApp,
+    minSize: { w: 520, h: 380 },
+    floatingActionBar: false,
+    titlebarHeight: 46,
   },
   {
     id: "safari",
