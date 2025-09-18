@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
-import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
+import Image from "next/image";
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import type { FSFile } from "./fs";
 
 export function QuickLook({
@@ -43,7 +43,12 @@ export function QuickLook({
             initial={{ opacity: 0, y: 12, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 12, scale: 0.98 }}
-            transition={{ type: "spring", stiffness: 260, damping: 22, mass: 0.8 }}
+            transition={{
+              type: "spring",
+              stiffness: 260,
+              damping: 22,
+              mass: 0.8,
+            }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="text-white/80 mb-2 text-sm">{file.name}</div>
@@ -60,23 +65,45 @@ export function QuickLook({
                 </div>
               )}
               {file.kind === "video" && (
-                <video src={file.path} controls className="max-h-[68vh] max-w-[76vw]">
-                  <track kind="captions" srcLang="en" label="English captions" />
+                <video
+                  src={file.path}
+                  controls
+                  className="max-h-[68vh] max-w-[76vw]"
+                >
+                  <track
+                    kind="captions"
+                    srcLang="en"
+                    label="English captions"
+                  />
                 </video>
               )}
               {file.kind === "audio" && (
                 <audio src={file.path} controls className="w-[50vw]">
-                  <track kind="captions" srcLang="en" label="English captions" />
+                  <track
+                    kind="captions"
+                    srcLang="en"
+                    label="English captions"
+                  />
                 </audio>
               )}
               {file.kind === "text" && (
-                <iframe title={`Preview ${file.name}`} src={file.path} className="h-[68vh] w-[76vw] rounded-lg bg-black" />
+                <iframe
+                  title={`Preview ${file.name}`}
+                  src={file.path}
+                  className="h-[68vh] w-[76vw] rounded-lg bg-black"
+                />
               )}
               {file.kind === "pdf" && (
-                <iframe title={`Preview ${file.name}`} src={file.path} className="h-[68vh] w-[76vw] rounded-lg bg-black" />
+                <iframe
+                  title={`Preview ${file.name}`}
+                  src={file.path}
+                  className="h-[68vh] w-[76vw] rounded-lg bg-black"
+                />
               )}
             </div>
-            <div className="mt-3 text-center text-white/70 text-xs">Press Space to close</div>
+            <div className="mt-3 text-center text-white/70 text-xs">
+              Press Space to close
+            </div>
           </motion.section>
         </motion.div>
       ) : null}
