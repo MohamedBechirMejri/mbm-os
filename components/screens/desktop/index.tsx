@@ -1,9 +1,12 @@
+"use client";
+
 import Image from "next/image";
-import { AppRegistry, apps } from "./components/apps/app-registry";
+import { AppRegistry } from "./components/apps/app-registry";
 import { Dock, DockIcon } from "./components/dock";
-import { DesktopAPI, WindowManagerRoot } from "./components/window-manager";
+import { DesktopAPI, WindowManagerRoot, useDesktop } from "./components/window-manager";
 
 export default function Desktop() {
+  const installed = useDesktop((s) => Object.values(s.apps));
   return (
     <div className="relative size-full grid grid-rows-[auto_minmax(0,_1fr)_auto]">
       <div></div>
@@ -12,7 +15,7 @@ export default function Desktop() {
         <AppRegistry />
       </div>
       <Dock className="mb-2 select-none w-max">
-        {apps.map((app) => (
+        {installed.map((app) => (
           <DockIcon
             key={app.id}
             size={64}

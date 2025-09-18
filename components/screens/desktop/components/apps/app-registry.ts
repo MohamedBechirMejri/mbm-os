@@ -7,8 +7,10 @@ import { CalculatorApp } from "./calculator";
 import { FinderApp } from "./finder";
 import { SafariApp } from "./safari";
 import { TerminalApp } from "./terminal";
+import { AppStoreApp } from "./app-store";
 
-export const apps: AppMeta[] = [
+// Full catalog known to the system (used by the App Store to install)
+export const catalogApps: AppMeta[] = [
   {
     id: "file-manager",
     title: "Finder",
@@ -31,8 +33,8 @@ export const apps: AppMeta[] = [
     id: "softwarecenter",
     title: "App Store",
     icon: "softwarecenter",
-    Component: CalculatorApp,
-    minSize: { w: 320, h: 240 },
+    Component: AppStoreApp,
+    minSize: { w: 940, h: 640 },
   },
   // {
   //   id: "calendar",
@@ -79,9 +81,14 @@ export const apps: AppMeta[] = [
   // add more apps here
 ];
 
+// Minimal set of apps preinstalled at boot (others appear after installing from App Store)
+const PREINSTALLED_IDS = new Set<string>(["softwarecenter", "file-manager"]);
+export const preinstalledApps = catalogApps.filter((a) => PREINSTALLED_IDS.has(a.id));
+
 export function AppRegistry() {
   useEffect(() => {
-    registerApps(apps);
+    // Register only preinstalled apps at boot
+    registerApps(preinstalledApps);
   }, []);
 
   return null;
