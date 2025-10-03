@@ -81,7 +81,7 @@ function MenubarContent({
         sideOffset={sideOffset}
         className={cn(
           "relative isolate overflow-hidden rounded-xl",
-          "text-black dark:text-white",
+          "text-white",
           "shadow-[0_8px_32px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)]",
           "data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
           "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
@@ -94,11 +94,11 @@ function MenubarContent({
       >
         {/* Liquid glass effect layer */}
         <div
-          className="absolute inset-0 z-0 isolate overflow-hidden backdrop-blur-[2px]"
+          className="absolute inset-0 z-0 isolate overflow-hidden backdrop-blur-xl"
           style={{ filter: "url(#glass-distortion)" }}
         />
         {/* Tint layer */}
-        <div className="absolute inset-0 z-10 bg-white/30 dark:bg-black/40" />
+        <div className="absolute inset-0 z-10 bg-white/20 dark:bg-black/50" />
         {/* Shine layer */}
         <div
           className="absolute inset-0 z-20 overflow-hidden rounded-xl pointer-events-none"
@@ -130,11 +130,11 @@ function MenubarItem({
       data-variant={variant}
       className={cn(
         "focus:bg-white/20 dark:focus:bg-white/10",
-        "data-[variant=destructive]:text-red-600 dark:data-[variant=destructive]:text-red-400",
-        "data-[variant=destructive]:focus:bg-red-500/10 dark:data-[variant=destructive]:focus:bg-red-500/20",
-        "data-[variant=destructive]:focus:text-red-700 dark:data-[variant=destructive]:focus:text-red-300",
-        "data-[variant=destructive]:*:[svg]:!text-red-600 dark:data-[variant=destructive]:*:[svg]:!text-red-400",
-        "[&_svg:not([class*='text-'])]:text-black/60 dark:[&_svg:not([class*='text-'])]:text-white/60",
+        "data-[variant=destructive]:text-red-400",
+        "data-[variant=destructive]:focus:bg-red-500/20",
+        "data-[variant=destructive]:focus:text-red-300",
+        "data-[variant=destructive]:*:[svg]:!text-red-400",
+        "[&_svg:not([class*='text-'])]:text-white/70",
         "relative flex cursor-default items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-hidden select-none",
         "transition-colors duration-150",
         "data-[disabled]:pointer-events-none data-[disabled]:opacity-40",
@@ -232,7 +232,7 @@ function MenubarSeparator({
   return (
     <MenubarPrimitive.Separator
       data-slot="menubar-separator"
-      className={cn("bg-black/10 dark:bg-white/10 -mx-1 my-1 h-px", className)}
+      className={cn("bg-white/15 -mx-1 my-1 h-px", className)}
       {...props}
     />
   );
@@ -245,10 +245,7 @@ function MenubarShortcut({
   return (
     <span
       data-slot="menubar-shortcut"
-      className={cn(
-        "text-black/50 dark:text-white/50 ml-auto text-xs tracking-widest",
-        className,
-      )}
+      className={cn("text-white/60 ml-auto text-xs tracking-widest", className)}
       {...props}
     />
   );
@@ -298,7 +295,7 @@ function MenubarSubContent({
       data-slot="menubar-sub-content"
       className={cn(
         "relative isolate overflow-hidden rounded-xl",
-        "text-black dark:text-white",
+        "text-white",
         "shadow-[0_8px_32px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)]",
         "data-[state=open]:animate-in data-[state=closed]:animate-out",
         "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
@@ -312,11 +309,11 @@ function MenubarSubContent({
     >
       {/* Liquid glass effect layer */}
       <div
-        className="absolute inset-0 z-0 isolate overflow-hidden backdrop-blur-[2px]"
+        className="absolute inset-0 z-0 isolate overflow-hidden backdrop-blur-xl"
         style={{ filter: "url(#glass-distortion)" }}
       />
       {/* Tint layer */}
-      <div className="absolute inset-0 z-10 bg-white/30 dark:bg-black/40" />
+      <div className="absolute inset-0 z-10 bg-white/20 dark:bg-black/50" />
       {/* Shine layer */}
       <div
         className="absolute inset-0 z-20 overflow-hidden rounded-xl pointer-events-none"
