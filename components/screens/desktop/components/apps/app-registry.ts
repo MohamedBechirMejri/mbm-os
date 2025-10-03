@@ -82,7 +82,14 @@ export const catalogApps: AppMeta[] = [
 ];
 
 // Minimal set of apps preinstalled at boot (others appear after installing from App Store)
-const PREINSTALLED_IDS = new Set<string>(["softwarecenter", "file-manager"]);
+const PREINSTALLED_IDS = new Set<string>([
+  "softwarecenter",
+  "safari",
+  "file-manager",
+  "game-center",
+  "terminal",
+  "calculator",
+]);
 export const preinstalledApps = catalogApps.filter((a) =>
   PREINSTALLED_IDS.has(a.id),
 );
