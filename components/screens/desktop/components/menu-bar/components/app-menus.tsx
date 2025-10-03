@@ -8,60 +8,77 @@ import {
   MenubarShortcut,
   MenubarTrigger,
 } from "@/components/ui/menubar";
+import { DesktopAPI } from "../../window-manager";
+import { useMenuActions } from "../hooks/use-menu-actions";
 
 export function AppMenus() {
+  const { minimizeActiveWindow, closeActiveWindow, tileLeft, tileRight } =
+    useMenuActions();
+
   return (
     <>
       <MenubarMenu>
         <MenubarTrigger className="font-semibold">Finder</MenubarTrigger>
         <MenubarContent>
-          <MenubarItem>About Finder</MenubarItem>
+          <MenubarItem disabled className="opacity-50">
+            About Finder
+          </MenubarItem>
           <MenubarSeparator />
-          <MenubarItem>
+          <MenubarItem disabled className="opacity-50">
             Preferences... <MenubarShortcut>⌘,</MenubarShortcut>
           </MenubarItem>
           <MenubarSeparator />
-          <MenubarItem>Empty Trash...</MenubarItem>
+          <MenubarItem disabled className="opacity-50">
+            Empty Trash...
+          </MenubarItem>
           <MenubarSeparator />
-          <MenubarItem>Services</MenubarItem>
+          <MenubarItem disabled className="opacity-50">
+            Services
+          </MenubarItem>
           <MenubarSeparator />
-          <MenubarItem>
+          <MenubarItem onClick={minimizeActiveWindow}>
             Hide Finder <MenubarShortcut>⌘H</MenubarShortcut>
           </MenubarItem>
-          <MenubarItem>
+          <MenubarItem disabled className="opacity-50">
             Hide Others <MenubarShortcut>⌥⌘H</MenubarShortcut>
           </MenubarItem>
-          <MenubarItem>Show All</MenubarItem>
+          <MenubarItem disabled className="opacity-50">
+            Show All
+          </MenubarItem>
         </MenubarContent>
       </MenubarMenu>
 
       <MenubarMenu>
         <MenubarTrigger>File</MenubarTrigger>
         <MenubarContent>
-          <MenubarItem>
+          <MenubarItem onClick={() => DesktopAPI.launch("finder")}>
             New Finder Window <MenubarShortcut>⌘N</MenubarShortcut>
           </MenubarItem>
-          <MenubarItem>
+          <MenubarItem disabled className="opacity-50">
             New Folder <MenubarShortcut>⇧⌘N</MenubarShortcut>
           </MenubarItem>
-          <MenubarItem>New Smart Folder</MenubarItem>
-          <MenubarItem>
+          <MenubarItem disabled className="opacity-50">
+            New Smart Folder
+          </MenubarItem>
+          <MenubarItem disabled className="opacity-50">
             New Tab <MenubarShortcut>⌘T</MenubarShortcut>
           </MenubarItem>
           <MenubarSeparator />
-          <MenubarItem>
+          <MenubarItem disabled className="opacity-50">
             Open <MenubarShortcut>⌘O</MenubarShortcut>
           </MenubarItem>
-          <MenubarItem>
+          <MenubarItem onClick={closeActiveWindow}>
             Close Window <MenubarShortcut>⌘W</MenubarShortcut>
           </MenubarItem>
           <MenubarSeparator />
-          <MenubarItem>
+          <MenubarItem disabled className="opacity-50">
             Get Info <MenubarShortcut>⌘I</MenubarShortcut>
           </MenubarItem>
-          <MenubarItem>Rename</MenubarItem>
+          <MenubarItem disabled className="opacity-50">
+            Rename
+          </MenubarItem>
           <MenubarSeparator />
-          <MenubarItem>
+          <MenubarItem disabled className="opacity-50">
             Find <MenubarShortcut>⌘F</MenubarShortcut>
           </MenubarItem>
         </MenubarContent>
@@ -70,81 +87,89 @@ export function AppMenus() {
       <MenubarMenu>
         <MenubarTrigger>Edit</MenubarTrigger>
         <MenubarContent>
-          <MenubarItem>
+          <MenubarItem disabled className="opacity-50">
             Undo <MenubarShortcut>⌘Z</MenubarShortcut>
           </MenubarItem>
-          <MenubarItem>
+          <MenubarItem disabled className="opacity-50">
             Redo <MenubarShortcut>⇧⌘Z</MenubarShortcut>
           </MenubarItem>
           <MenubarSeparator />
-          <MenubarItem>
+          <MenubarItem disabled className="opacity-50">
             Cut <MenubarShortcut>⌘X</MenubarShortcut>
           </MenubarItem>
-          <MenubarItem>
+          <MenubarItem disabled className="opacity-50">
             Copy <MenubarShortcut>⌘C</MenubarShortcut>
           </MenubarItem>
-          <MenubarItem>
+          <MenubarItem disabled className="opacity-50">
             Paste <MenubarShortcut>⌘V</MenubarShortcut>
           </MenubarItem>
-          <MenubarItem>
+          <MenubarItem disabled className="opacity-50">
             Select All <MenubarShortcut>⌘A</MenubarShortcut>
           </MenubarItem>
           <MenubarSeparator />
-          <MenubarItem>Show Clipboard</MenubarItem>
+          <MenubarItem disabled className="opacity-50">
+            Show Clipboard
+          </MenubarItem>
         </MenubarContent>
       </MenubarMenu>
 
       <MenubarMenu>
         <MenubarTrigger>View</MenubarTrigger>
         <MenubarContent>
-          <MenubarItem>
+          <MenubarItem disabled className="opacity-50">
             as Icons <MenubarShortcut>⌘1</MenubarShortcut>
           </MenubarItem>
-          <MenubarItem>
+          <MenubarItem disabled className="opacity-50">
             as List <MenubarShortcut>⌘2</MenubarShortcut>
           </MenubarItem>
-          <MenubarItem>
+          <MenubarItem disabled className="opacity-50">
             as Columns <MenubarShortcut>⌘3</MenubarShortcut>
           </MenubarItem>
-          <MenubarItem>
+          <MenubarItem disabled className="opacity-50">
             as Gallery <MenubarShortcut>⌘4</MenubarShortcut>
           </MenubarItem>
           <MenubarSeparator />
-          <MenubarItem>
+          <MenubarItem disabled className="opacity-50">
             Show Preview <MenubarShortcut>⇧⌘P</MenubarShortcut>
           </MenubarItem>
-          <MenubarItem>Show Toolbar</MenubarItem>
-          <MenubarItem>Show Path Bar</MenubarItem>
-          <MenubarItem>Show Status Bar</MenubarItem>
+          <MenubarItem disabled className="opacity-50">
+            Show Toolbar
+          </MenubarItem>
+          <MenubarItem disabled className="opacity-50">
+            Show Path Bar
+          </MenubarItem>
+          <MenubarItem disabled className="opacity-50">
+            Show Status Bar
+          </MenubarItem>
         </MenubarContent>
       </MenubarMenu>
 
       <MenubarMenu>
         <MenubarTrigger>Go</MenubarTrigger>
         <MenubarContent>
-          <MenubarItem>
+          <MenubarItem disabled className="opacity-50">
             Back <MenubarShortcut>⌘[</MenubarShortcut>
           </MenubarItem>
-          <MenubarItem>
+          <MenubarItem disabled className="opacity-50">
             Forward <MenubarShortcut>⌘]</MenubarShortcut>
           </MenubarItem>
-          <MenubarItem>
+          <MenubarItem disabled className="opacity-50">
             Enclosing Folder <MenubarShortcut>⌘↑</MenubarShortcut>
           </MenubarItem>
           <MenubarSeparator />
-          <MenubarItem>
+          <MenubarItem disabled className="opacity-50">
             Desktop <MenubarShortcut>⇧⌘D</MenubarShortcut>
           </MenubarItem>
-          <MenubarItem>
+          <MenubarItem disabled className="opacity-50">
             Documents <MenubarShortcut>⇧⌘O</MenubarShortcut>
           </MenubarItem>
-          <MenubarItem>
+          <MenubarItem disabled className="opacity-50">
             Downloads <MenubarShortcut>⌥⌘L</MenubarShortcut>
           </MenubarItem>
-          <MenubarItem>
+          <MenubarItem onClick={() => DesktopAPI.launch("app-store")}>
             Applications <MenubarShortcut>⇧⌘A</MenubarShortcut>
           </MenubarItem>
-          <MenubarItem>
+          <MenubarItem disabled className="opacity-50">
             Utilities <MenubarShortcut>⇧⌘U</MenubarShortcut>
           </MenubarItem>
         </MenubarContent>
@@ -153,24 +178,40 @@ export function AppMenus() {
       <MenubarMenu>
         <MenubarTrigger>Window</MenubarTrigger>
         <MenubarContent>
-          <MenubarItem>
+          <MenubarItem onClick={minimizeActiveWindow}>
             Minimize <MenubarShortcut>⌘M</MenubarShortcut>
           </MenubarItem>
-          <MenubarItem>Zoom</MenubarItem>
+          <MenubarItem disabled className="opacity-50">
+            Zoom
+          </MenubarItem>
           <MenubarSeparator />
-          <MenubarItem>Bring All to Front</MenubarItem>
+          <MenubarItem disabled className="opacity-50">
+            Bring All to Front
+          </MenubarItem>
           <MenubarSeparator />
-          <MenubarItem>Tile Window to Left of Screen</MenubarItem>
-          <MenubarItem>Tile Window to Right of Screen</MenubarItem>
+          <MenubarItem onClick={tileLeft}>
+            Tile Window to Left of Screen
+          </MenubarItem>
+          <MenubarItem onClick={tileRight}>
+            Tile Window to Right of Screen
+          </MenubarItem>
         </MenubarContent>
       </MenubarMenu>
 
       <MenubarMenu>
         <MenubarTrigger>Help</MenubarTrigger>
         <MenubarContent>
-          <MenubarItem>Search</MenubarItem>
+          <MenubarItem disabled className="opacity-50">
+            Search
+          </MenubarItem>
           <MenubarSeparator />
-          <MenubarItem>macOS Help</MenubarItem>
+          <MenubarItem
+            onClick={() =>
+              window.open("https://mohamedbechirmejri.dev", "_blank")
+            }
+          >
+            Portfolio Website
+          </MenubarItem>
         </MenubarContent>
       </MenubarMenu>
     </>

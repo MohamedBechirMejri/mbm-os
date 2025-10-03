@@ -1,5 +1,6 @@
 "use client";
 
+import { useMachine } from "@xstate/react";
 import {
   MenubarContent,
   MenubarItem,
@@ -8,8 +9,30 @@ import {
   MenubarShortcut,
   MenubarTrigger,
 } from "@/components/ui/menubar";
+import { appMachine } from "@/lib/app-machine";
+import { DesktopAPI } from "../../window-manager";
+import { useMenuActions } from "../hooks/use-menu-actions";
 
 export function AppleMenu() {
+  const [, send] = useMachine(appMachine);
+  const { closeAllWindows } = useMenuActions();
+
+  const handleLockScreen = () => {
+    closeAllWindows();
+    send({ type: "BOOT_FINISHED" }); // Go to login screen
+  };
+
+  const handleRestart = () => {
+    closeAllWindows();
+    window.location.reload();
+  };
+
+  const handleShutDown = () => {
+    closeAllWindows();
+    // Navigate back to boot screen
+    window.location.href = "/";
+  };
+
   return (
     <MenubarMenu>
       <MenubarTrigger className="px-2">
@@ -26,23 +49,33 @@ export function AppleMenu() {
         </svg>
       </MenubarTrigger>
       <MenubarContent>
-        <MenubarItem>About This Mac</MenubarItem>
+        <MenubarItem disabled className="opacity-50">
+          About This Mac
+        </MenubarItem>
         <MenubarSeparator />
-        <MenubarItem>System Preferences...</MenubarItem>
-        <MenubarItem>App Store...</MenubarItem>
+        <MenubarItem disabled className="opacity-50">
+          System Preferences...
+        </MenubarItem>
+        <MenubarItem onClick={() => DesktopAPI.launch("app-store")}>
+          App Store
+        </MenubarItem>
         <MenubarSeparator />
-        <MenubarItem>Recent Items</MenubarItem>
+        <MenubarItem disabled className="opacity-50">
+          Recent Items
+        </MenubarItem>
         <MenubarSeparator />
-        <MenubarItem>Force Quit...</MenubarItem>
+        <MenubarItem onClick={closeAllWindows}>Close All Windows</MenubarItem>
         <MenubarSeparator />
-        <MenubarItem>Sleep</MenubarItem>
-        <MenubarItem>Restart...</MenubarItem>
-        <MenubarItem>Shut Down...</MenubarItem>
+        <MenubarItem disabled className="opacity-50">
+          Sleep
+        </MenubarItem>
+        <MenubarItem onClick={handleRestart}>Restart...</MenubarItem>
+        <MenubarItem onClick={handleShutDown}>Shut Down...</MenubarItem>
         <MenubarSeparator />
-        <MenubarItem>
+        <MenubarItem onClick={handleLockScreen}>
           Lock Screen <MenubarShortcut>⌃⌘Q</MenubarShortcut>
         </MenubarItem>
-        <MenubarItem>Log Out...</MenubarItem>
+        <MenubarItem onClick={handleLockScreen}>Log Out...</MenubarItem>
       </MenubarContent>
     </MenubarMenu>
   );
