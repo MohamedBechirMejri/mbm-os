@@ -4,7 +4,7 @@ import { useCallback, useRef, useState } from "react";
 import { focusWin, moveWin } from "./api";
 import { useDesktop } from "./store";
 import type { Bounds, WinInstance } from "./types";
-import { MENU_BAR_HEIGHT, clamp } from "./utils";
+import { clamp, MENU_BAR_HEIGHT } from "./utils";
 
 export function useWindowDrag(
   win: WinInstance,
