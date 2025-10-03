@@ -9,7 +9,12 @@ import type {
   WinInstance,
   WinState,
 } from "./types";
-import { cascadeOrigin, computeSnapRect, viewportRect } from "./utils";
+import {
+  MENU_BAR_HEIGHT,
+  cascadeOrigin,
+  computeSnapRect,
+  viewportRect,
+} from "./utils";
 
 export function registerApps(apps: AppMeta[]) {
   store.set((s) => ({
@@ -118,7 +123,12 @@ export function setWinState(id: string, st: WinState) {
       bounds: (() => {
         const b =
           st === "maximized"
-            ? { x: 0, y: 0, w: r.width, h: r.height }
+            ? {
+                x: 0,
+                y: MENU_BAR_HEIGHT,
+                w: r.width,
+                h: r.height - MENU_BAR_HEIGHT,
+              }
             : { x: 0, y: 0, w: window.innerWidth, h: window.innerHeight };
         return {
           ...b,

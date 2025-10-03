@@ -2,6 +2,9 @@
 
 import type { Bounds, Snap, WinInstance } from "./types";
 
+// Menu bar height in pixels (h-7 = 1.75rem = 28px)
+export const MENU_BAR_HEIGHT = 28;
+
 export function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
 }
@@ -37,9 +40,9 @@ export function cascadeOrigin(
 
 export function computeSnapRect(snap: Snap, rootRect: DOMRect): Bounds {
   const W = rootRect.width;
-  const H = rootRect.height;
+  const H = rootRect.height - MENU_BAR_HEIGHT;
   const x0 = 0;
-  const y0 = 0;
+  const y0 = MENU_BAR_HEIGHT;
   const halfW = Math.floor(W / 2);
   const halfH = Math.floor(H / 2);
   const qW = Math.floor(W / 2);
@@ -53,15 +56,15 @@ export function computeSnapRect(snap: Snap, rootRect: DOMRect): Bounds {
     case "top-half":
       return { x: x0, y: y0, w: W, h: halfH };
     case "bottom-half":
-      return { x: x0, y: y0 + H - halfH, w: W, h: halfH };
+      return { x: x0, y: y0 + halfH, w: W, h: halfH };
     case "tl-quarter":
       return { x: x0, y: y0, w: qW, h: qH };
     case "tr-quarter":
       return { x: x0 + W - qW, y: y0, w: qW, h: qH };
     case "bl-quarter":
-      return { x: x0, y: y0 + H - qH, w: qW, h: qH };
+      return { x: x0, y: y0 + qH, w: qW, h: qH };
     case "br-quarter":
-      return { x: x0 + W - qW, y: y0 + H - qH, w: qW, h: qH };
+      return { x: x0 + W - qW, y: y0 + qH, w: qW, h: qH };
     default:
       return { x: 80, y: 80, w: Math.floor(W * 0.6), h: Math.floor(H * 0.6) };
   }
