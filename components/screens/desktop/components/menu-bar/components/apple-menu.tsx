@@ -56,7 +56,7 @@ export function AppleMenu() {
         <MenubarItem disabled className="opacity-50">
           System Preferences...
         </MenubarItem>
-        <MenubarItem onClick={() => DesktopAPI.launch("app-store")}>
+        <MenubarItem onClick={() => DesktopAPI.launch("softwarecenter")}>
           App Store
         </MenubarItem>
         <MenubarSeparator />

@@ -9,19 +9,31 @@ import {
   MenubarTrigger,
 } from "@/components/ui/menubar";
 import { DesktopAPI } from "../../window-manager";
+import { useActiveApp } from "../hooks/use-active-app";
 import { useMenuActions } from "../hooks/use-menu-actions";
 
 export function AppMenus() {
   const { minimizeActiveWindow, closeActiveWindow, tileLeft, tileRight } =
     useMenuActions();
+  const { appTitle, appId } = useActiveApp();
+
+  // Dynamic app-specific actions
+  const newWindowLabel = appId ? `New ${appTitle} Window` : "New Finder Window";
+  const newWindowAction = () => {
+    if (appId) {
+      DesktopAPI.launch(appId);
+    } else {
+      DesktopAPI.launch("file-manager");
+    }
+  };
 
   return (
     <>
       <MenubarMenu>
-        <MenubarTrigger className="font-semibold">Finder</MenubarTrigger>
+        <MenubarTrigger className="font-semibold">{appTitle}</MenubarTrigger>
         <MenubarContent>
           <MenubarItem disabled className="opacity-50">
-            About Finder
+            About {appTitle}
           </MenubarItem>
           <MenubarSeparator />
           <MenubarItem disabled className="opacity-50">
@@ -29,15 +41,11 @@ export function AppMenus() {
           </MenubarItem>
           <MenubarSeparator />
           <MenubarItem disabled className="opacity-50">
-            Empty Trash...
-          </MenubarItem>
-          <MenubarSeparator />
-          <MenubarItem disabled className="opacity-50">
             Services
           </MenubarItem>
           <MenubarSeparator />
           <MenubarItem onClick={minimizeActiveWindow}>
-            Hide Finder <MenubarShortcut>⌘H</MenubarShortcut>
+            Hide {appTitle} <MenubarShortcut>⌘H</MenubarShortcut>
           </MenubarItem>
           <MenubarItem disabled className="opacity-50">
             Hide Others <MenubarShortcut>⌥⌘H</MenubarShortcut>
@@ -51,14 +59,8 @@ export function AppMenus() {
       <MenubarMenu>
         <MenubarTrigger>File</MenubarTrigger>
         <MenubarContent>
-          <MenubarItem onClick={() => DesktopAPI.launch("finder")}>
-            New Finder Window <MenubarShortcut>⌘N</MenubarShortcut>
-          </MenubarItem>
-          <MenubarItem disabled className="opacity-50">
-            New Folder <MenubarShortcut>⇧⌘N</MenubarShortcut>
-          </MenubarItem>
-          <MenubarItem disabled className="opacity-50">
-            New Smart Folder
+          <MenubarItem onClick={newWindowAction}>
+            {newWindowLabel} <MenubarShortcut>⌘N</MenubarShortcut>
           </MenubarItem>
           <MenubarItem disabled className="opacity-50">
             New Tab <MenubarShortcut>⌘T</MenubarShortcut>
@@ -72,14 +74,10 @@ export function AppMenus() {
           </MenubarItem>
           <MenubarSeparator />
           <MenubarItem disabled className="opacity-50">
-            Get Info <MenubarShortcut>⌘I</MenubarShortcut>
+            Save <MenubarShortcut>⌘S</MenubarShortcut>
           </MenubarItem>
           <MenubarItem disabled className="opacity-50">
-            Rename
-          </MenubarItem>
-          <MenubarSeparator />
-          <MenubarItem disabled className="opacity-50">
-            Find <MenubarShortcut>⌘F</MenubarShortcut>
+            Print <MenubarShortcut>⌘P</MenubarShortcut>
           </MenubarItem>
         </MenubarContent>
       </MenubarMenu>
@@ -166,7 +164,7 @@ export function AppMenus() {
           <MenubarItem disabled className="opacity-50">
             Downloads <MenubarShortcut>⌥⌘L</MenubarShortcut>
           </MenubarItem>
-          <MenubarItem onClick={() => DesktopAPI.launch("app-store")}>
+          <MenubarItem onClick={() => DesktopAPI.launch("softwarecenter")}>
             Applications <MenubarShortcut>⇧⌘A</MenubarShortcut>
           </MenubarItem>
           <MenubarItem disabled className="opacity-50">
