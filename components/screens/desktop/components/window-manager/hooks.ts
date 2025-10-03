@@ -4,7 +4,7 @@ import { useCallback, useRef, useState } from "react";
 import { focusWin, moveWin } from "./api";
 import { useDesktop } from "./store";
 import type { Bounds, WinInstance } from "./types";
-import { clamp } from "./utils";
+import { MENU_BAR_HEIGHT, clamp } from "./utils";
 
 export function useWindowDrag(
   win: WinInstance,
@@ -39,7 +39,7 @@ export function useWindowDrag(
       const dy = e.clientY - startRef.current.y;
       const next = {
         x: startRef.current.bounds.x + dx,
-        y: startRef.current.bounds.y + dy,
+        y: Math.max(MENU_BAR_HEIGHT, startRef.current.bounds.y + dy),
       };
       pendingRef.current = next;
       if (rafRef.current == null) {
@@ -124,7 +124,7 @@ export function useWindowResize(
       if (edge.includes("t")) {
         const newH = clamp(start.bounds.h - dy, minH, maxH);
         h = newH;
-        y = startBottom - newH;
+        y = Math.max(MENU_BAR_HEIGHT, startBottom - newH);
       } else if (edge.includes("b")) {
         h = clamp(start.bounds.h + dy, minH, maxH);
       }

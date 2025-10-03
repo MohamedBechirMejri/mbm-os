@@ -10,9 +10,9 @@ import type {
   WinState,
 } from "./types";
 import {
-  MENU_BAR_HEIGHT,
   cascadeOrigin,
   computeSnapRect,
+  MENU_BAR_HEIGHT,
   viewportRect,
 } from "./utils";
 
