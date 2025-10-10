@@ -25,15 +25,23 @@ export function TitlebarPortalProvider({
 // Render children into the current window's titlebar area
 export function TitlebarPortal({ children }: { children: React.ReactNode }) {
   const ref = useContext(TitlebarPortalContext);
-  const [, force] = useState(0);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (ref?.current) return; // already mounted
+    if (ref?.current) {
+      setMounted(true);
+      return;
+    }
+
+    // If ref isn't ready yet, wait for it
     let alive = true;
     const loop = () => {
       if (!alive) return;
-      if (ref?.current) force((n) => n + 1);
-      else requestAnimationFrame(loop);
+      if (ref?.current) {
+        setMounted(true);
+      } else {
+        requestAnimationFrame(loop);
+      }
     };
     requestAnimationFrame(loop);
     return () => {
@@ -41,6 +49,6 @@ export function TitlebarPortal({ children }: { children: React.ReactNode }) {
     };
   }, [ref]);
 
-  if (!ref?.current) return null;
+  if (!mounted || !ref?.current) return null;
   return createPortal(children, ref.current);
 }

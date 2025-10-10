@@ -132,8 +132,8 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
     <div className="flex h-full w-full flex-col overflow-hidden">
       {/* Titlebar toolbar */}
       <TitlebarPortal>
-        <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3 w-full py-1.5 px-2">
-          <div className="flex items-center gap-1">
+        <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3 w-full py-1.5 px-2 pointer-events-none">
+          <div className="flex items-center gap-1 pointer-events-auto">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -168,7 +168,7 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
           </div>
 
           <div className="flex min-w-0 items-center gap-2">
-            <nav className="hidden md:flex min-w-0 items-center gap-1 text-[13px] text-white/80">
+            <nav className="hidden md:flex min-w-0 items-center gap-1 text-[13px] text-white/80 pointer-events-auto">
               {crumbs.map((c, i) => (
                 <div key={c.id} className="flex items-center gap-1 min-w-0">
                   <button
@@ -188,7 +188,7 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
                 </div>
               ))}
             </nav>
-            <div className="ml-auto flex items-center gap-1 rounded-lg bg-white/5 p-1">
+            <div className="ml-auto flex items-center gap-1 rounded-lg bg-white/5 p-1 pointer-events-auto">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
@@ -240,7 +240,7 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
                 <Button
                   size="icon"
                   variant={showPreview ? "default" : "ghost"}
-                  className="size-7 rounded-lg"
+                  className="size-7 rounded-lg pointer-events-auto"
                   aria-label="Toggle preview"
                   onClick={() => setShowPreview(!showPreview)}
                 >
@@ -255,7 +255,7 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
                 {showPreview ? "Hide preview" : "Show preview"}
               </TooltipContent>
             </Tooltip>
-            <div className="relative w-[14rem] max-w-[40vw]">
+            <div className="relative w-[14rem] max-w-[40vw] pointer-events-auto">
               <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-white/50" />
               <Input
                 value={query}
