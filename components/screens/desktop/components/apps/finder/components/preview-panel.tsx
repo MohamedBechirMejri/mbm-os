@@ -13,8 +13,8 @@ interface PreviewPanelProps {
 export function PreviewPanel({ node }: PreviewPanelProps) {
   if (!node) {
     return (
-      <div className="flex h-full w-80 flex-col items-center justify-center border-l border-white/10 bg-gradient-to-b from-white/5 to-transparent p-6 text-white/40">
-        <File className="mb-2 size-12" />
+      <div className="flex h-full w-80 flex-col items-center justify-center border-l border-white/10 bg-gradient-to-b from-white/5 to-transparent p-6 text-white/40 backdrop-blur-xl">
+        <File className="mb-2 size-12 opacity-50" />
         <p className="text-sm">Select an item to preview</p>
       </div>
     );
@@ -24,11 +24,11 @@ export function PreviewPanel({ node }: PreviewPanelProps) {
   const canPreview = file && (file.kind === "image" || file.kind === "video");
 
   return (
-    <div className="flex h-full w-80 flex-col gap-4 border-l border-white/10 bg-gradient-to-b from-white/5 to-transparent p-6">
+    <div className="flex h-full w-80 flex-col gap-4 border-l border-white/10 bg-gradient-to-b from-white/5 to-transparent p-6 backdrop-blur-xl animate-in fade-in duration-200">
       {/* Preview */}
       <div className="flex flex-col items-center gap-4">
         {canPreview && file ? (
-          <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-white/10 bg-black/20">
+          <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-white/20 bg-black/30 shadow-2xl shadow-black/50">
             {file.kind === "image" ? (
               <Image
                 src={file.path}
@@ -49,7 +49,7 @@ export function PreviewPanel({ node }: PreviewPanelProps) {
             )}
           </div>
         ) : (
-          <div className="flex aspect-square w-full items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 to-white/5">
+          <div className="flex aspect-square w-full items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 to-white/5 shadow-xl">
             <FileIcon node={node} size={96} />
           </div>
         )}

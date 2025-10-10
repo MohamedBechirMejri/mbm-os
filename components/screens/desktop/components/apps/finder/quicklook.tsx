@@ -28,7 +28,7 @@ export function QuickLook({
       {file ? (
         <motion.div
           key="ql-overlay"
-          className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/70 backdrop-blur-md"
           role="dialog"
           aria-modal="true"
           initial={{ opacity: 0 }}
@@ -38,11 +38,11 @@ export function QuickLook({
         >
           <motion.section
             key="ql-content"
-            className="relative max-h-[80vh] max-w-[80vw] rounded-xl bg-black/70 p-4 shadow-2xl"
+            className="relative max-h-[85vh] max-w-[85vw] rounded-2xl bg-gradient-to-b from-white/10 to-white/5 p-6 shadow-2xl backdrop-blur-xl border border-white/20"
             aria-label="Quick Look preview"
-            initial={{ opacity: 0, y: 12, scale: 0.98 }}
+            initial={{ opacity: 0, y: 20, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 12, scale: 0.98 }}
+            exit={{ opacity: 0, y: 20, scale: 0.96 }}
             transition={{
               type: "spring",
               stiffness: 260,
@@ -51,8 +51,10 @@ export function QuickLook({
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="text-white/80 mb-2 text-sm">{file.name}</div>
-            <div className="flex items-center justify-center overflow-hidden rounded-lg bg-black/40">
+            <div className="mb-4 text-center text-white/90 text-base font-medium">
+              {file.name}
+            </div>
+            <div className="flex items-center justify-center overflow-hidden rounded-xl bg-black/40 shadow-xl">
               {file.kind === "image" && (
                 <div className="relative max-h-[68vh] max-w-[76vw]">
                   <Image
@@ -101,8 +103,11 @@ export function QuickLook({
                 />
               )}
             </div>
-            <div className="mt-3 text-center text-white/70 text-xs">
-              Press Space to close
+            <div className="mt-4 flex items-center justify-center gap-2 text-white/50 text-xs">
+              <kbd className="rounded bg-white/10 px-2 py-1">Space</kbd>
+              <span>or</span>
+              <kbd className="rounded bg-white/10 px-2 py-1">Esc</kbd>
+              <span>to close</span>
             </div>
           </motion.section>
         </motion.div>

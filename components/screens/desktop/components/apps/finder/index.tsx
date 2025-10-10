@@ -4,11 +4,13 @@ import {
   ChevronLeft,
   ChevronRight,
   Columns3,
+  Eye,
+  EyeOff,
   Grid2X2,
   List,
   Search,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -20,8 +22,9 @@ import { TitlebarPortal } from "../../window-manager/components/window-view/titl
 import { FileIcon } from "./components/file-icon";
 import { PreviewPanel } from "./components/preview-panel";
 import { Sidebar } from "./components/sidebar";
-import type { FSNode, FSPath } from "./fs";
+import type { FSFile, FSNode, FSPath } from "./fs";
 import { FS, findNodeByPath, getBreadcrumbs, isFile, isFolder } from "./fs";
+import { QuickLook } from "./quicklook";
 
 type ViewMode = "grid" | "list" | "columns";
 
@@ -30,7 +33,8 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
   const [view, setView] = useState<ViewMode>("grid");
   const [selected, setSelected] = useState<string | null>(null);
   const [query, setQuery] = useState("");
-  const [showPreview] = useState(true);
+  const [showPreview, setShowPreview] = useState(true);
+  const [quickLookFile, setQuickLookFile] = useState<FSFile | null>(null);
 
   const folder = useMemo(() => findNodeByPath(FS, path), [path]);
   const crumbs = useMemo(() => getBreadcrumbs(FS, path), [path]);
@@ -46,34 +50,83 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
     return items.find((n) => n.id === selected) || null;
   }, [selected, items]);
 
-  function openFolder(id: string) {
-    const node = folder.children.find(
-      (c) => c.id === id && c.type === "folder",
-    );
-    if (!node) return;
-    setPath((prev) => [...prev, id]);
-    setSelected(null);
-  }
+  const openFolder = useCallback(
+    (id: string) => {
+      const node = folder.children.find(
+        (c) => c.id === id && c.type === "folder",
+      );
+      if (!node) return;
+      setPath((prev) => [...prev, id]);
+      setSelected(null);
+    },
+    [folder.children],
+  );
 
-  function goUp() {
+  const goUp = useCallback(() => {
     setPath((prev) => prev.slice(0, -1));
     setSelected(null);
-  }
+  }, []);
 
-  function handleNavigate(newPath: FSPath) {
+  const handleNavigate = useCallback((newPath: FSPath) => {
     setPath(newPath);
     setSelected(null);
-  }
+  }, []);
 
-  function handleItemClick(node: FSNode) {
+  const handleItemClick = useCallback((node: FSNode) => {
     setSelected(node.id);
-  }
+  }, []);
 
-  function handleItemDoubleClick(node: FSNode) {
-    if (isFolder(node)) {
-      openFolder(node.id);
-    }
-  }
+  const handleItemDoubleClick = useCallback(
+    (node: FSNode) => {
+      if (isFolder(node)) {
+        openFolder(node.id);
+      } else if (isFile(node)) {
+        setQuickLookFile(node as FSFile);
+      }
+    },
+    [openFolder],
+  );
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if typing in search
+      if ((e.target as HTMLElement)?.tagName === "INPUT") return;
+
+      // Space: Quick Look
+      if (e.key === " " && selected) {
+        e.preventDefault();
+        const node = selectedNode;
+        if (node && isFile(node)) {
+          setQuickLookFile(node as FSFile);
+        }
+      }
+
+      // Enter: Open folder or file
+      if (e.key === "Enter" && selected) {
+        const node = selectedNode;
+        if (node && isFolder(node)) {
+          openFolder(node.id);
+        } else if (node && isFile(node)) {
+          setQuickLookFile(node as FSFile);
+        }
+      }
+
+      // Backspace or Cmd+Up: Go up
+      if (e.key === "Backspace" || (e.key === "ArrowUp" && e.metaKey)) {
+        e.preventDefault();
+        goUp();
+      }
+
+      // Escape: Deselect
+      if (e.key === "Escape") {
+        setSelected(null);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selected, selectedNode, openFolder, goUp]);
 
   return (
     <div className="flex h-full w-full flex-col overflow-hidden">
@@ -182,6 +235,26 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
           </div>
 
           <div className="flex items-center gap-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="icon"
+                  variant={showPreview ? "default" : "ghost"}
+                  className="size-7 rounded-lg"
+                  aria-label="Toggle preview"
+                  onClick={() => setShowPreview(!showPreview)}
+                >
+                  {showPreview ? (
+                    <Eye className="size-3.5" />
+                  ) : (
+                    <EyeOff className="size-3.5" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {showPreview ? "Hide preview" : "Show preview"}
+              </TooltipContent>
+            </Tooltip>
             <div className="relative w-[14rem] max-w-[40vw]">
               <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-white/50" />
               <Input
@@ -242,6 +315,9 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
 
         {showPreview && <PreviewPanel node={selectedNode} />}
       </div>
+
+      {/* Quick Look */}
+      <QuickLook file={quickLookFile} onClose={() => setQuickLookFile(null)} />
     </div>
   );
 }
