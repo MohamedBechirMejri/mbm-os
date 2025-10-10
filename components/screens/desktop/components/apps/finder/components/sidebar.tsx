@@ -77,33 +77,33 @@ export function Sidebar({ path, onNavigate }: SidebarProps) {
         },
       ],
     },
-    {
-      title: "Tags",
-      collapsible: true,
-      items: [
-        {
-          id: "tag-red",
-          label: "Red",
-          icon: <Tag className="size-4 text-red-400" />,
-          path: [],
-          color: "text-red-400",
-        },
-        {
-          id: "tag-orange",
-          label: "Orange",
-          icon: <Tag className="size-4 text-orange-400" />,
-          path: [],
-          color: "text-orange-400",
-        },
-        {
-          id: "tag-blue",
-          label: "Blue",
-          icon: <Tag className="size-4 text-blue-400" />,
-          path: [],
-          color: "text-blue-400",
-        },
-      ],
-    },
+    // {
+    //   title: "Tags",
+    //   collapsible: true,
+    //   items: [
+    //     {
+    //       id: "tag-red",
+    //       label: "Red",
+    //       icon: <Tag className="size-4 text-red-400" />,
+    //       path: [],
+    //       color: "text-red-400",
+    //     },
+    //     {
+    //       id: "tag-orange",
+    //       label: "Orange",
+    //       icon: <Tag className="size-4 text-orange-400" />,
+    //       path: [],
+    //       color: "text-orange-400",
+    //     },
+    //     {
+    //       id: "tag-blue",
+    //       label: "Blue",
+    //       icon: <Tag className="size-4 text-blue-400" />,
+    //       path: [],
+    //       color: "text-blue-400",
+    //     },
+    //   ],
+    // },
     {
       title: "Devices",
       collapsible: true,
