@@ -1,8 +1,7 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, Grid2X2, List, Search } from "lucide-react";
-import Image from "next/image";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight, Columns3, Grid2X2, List, Search } from "lucide-react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,28 +10,20 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { TitlebarPortal } from "../../window-manager/components/window-view/titlebar-portal";
-import type { FSFile, FSFolder, FSNode, FSPath } from "./fs";
+import type { FSNode, FSPath } from "./fs";
 import { FS, findNodeByPath, getBreadcrumbs, isFile, isFolder } from "./fs";
-import { QuickLook } from "./quicklook";
+import { FileIcon } from "./components/file-icon";
+import { PreviewPanel } from "./components/preview-panel";
+import { Sidebar } from "./components/sidebar";
 
-type ViewMode = "grid" | "list";
-
-function useKey(handler: (e: KeyboardEvent) => void) {
-  useEffect(() => {
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [handler]);
-}
+type ViewMode = "grid" | "list" | "columns";
 
 export function FinderApp({ instanceId: _ }: { instanceId: string }) {
-  const [path, setPath] = useState<FSPath>([]); // from root
+  const [path, setPath] = useState<FSPath>([]);
   const [view, setView] = useState<ViewMode>("grid");
   const [selected, setSelected] = useState<string | null>(null);
-  const [qlFile, setQlFile] = useState<ReturnType<typeof pickFile> | null>(
-    null,
-  );
   const [query, setQuery] = useState("");
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [showPreview] = useState(true);
 
   const folder = useMemo(() => findNodeByPath(FS, path), [path]);
   const crumbs = useMemo(() => getBreadcrumbs(FS, path), [path]);
@@ -43,41 +34,15 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
     return base.filter((n) => (n as FSNode).name.toLowerCase().includes(q));
   }, [folder, query]);
 
-  useKey((e) => {
-    if ((e.target as HTMLElement | null)?.tagName === "INPUT") return;
-    if (e.key === "Backspace") {
-      e.preventDefault();
-      goUp();
-    }
-    if (e.key === "ArrowLeft" && (e.metaKey || e.altKey)) {
-      e.preventDefault();
-      goUp();
-    }
-    if (e.key === "Enter" && selected) {
-      const node = items.find((n) => n.id === selected);
-      if (node && isFolder(node)) openFolder(node.id);
-    }
-    if (e.key === " ") {
-      e.preventDefault();
-      if (selected) {
-        const file = pickFile(items, selected);
-        if (file) setQlFile(file);
-      }
-    }
-    if (e.key === "Escape") {
-      setSelected(null);
-    }
-  });
-
-  function pickFile(nodes: FSNode[], id: string) {
-    const n = nodes.find((x) => x.id === id);
-    return n && isFile(n) ? n : null;
-  }
+  const selectedNode = useMemo(() => {
+    if (!selected) return null;
+    return items.find((n) => n.id === selected) || null;
+  }, [selected, items]);
 
   function openFolder(id: string) {
     const node = folder.children.find(
       (c) => c.id === id && c.type === "folder",
-    ) as FSFolder | undefined;
+    );
     if (!node) return;
     setPath((prev) => [...prev, id]);
     setSelected(null);
@@ -88,18 +53,33 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
     setSelected(null);
   }
 
+  function handleNavigate(newPath: FSPath) {
+    setPath(newPath);
+    setSelected(null);
+  }
+
+  function handleItemClick(node: FSNode) {
+    setSelected(node.id);
+  }
+
+  function handleItemDoubleClick(node: FSNode) {
+    if (isFolder(node)) {
+      openFolder(node.id);
+    }
+  }
+
   return (
     <div className="flex h-full w-full flex-col overflow-hidden">
       {/* Titlebar toolbar */}
       <TitlebarPortal>
-        <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2 w-full py-1.5">
+        <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3 w-full py-1.5 px-2">
           <div className="flex items-center gap-1">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="size-7 rounded-full text-white/90 hover:bg-white/10"
+                  className="size-7 rounded-full text-white/90 hover:bg-white/10 disabled:opacity-30"
                   onClick={goUp}
                   disabled={path.length === 0}
                   aria-label="Go Back"
@@ -115,7 +95,7 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="size-7 rounded-full text-white/90 hover:bg-white/10"
+                    className="size-7 rounded-full text-white/90 hover:bg-white/10 disabled:opacity-30"
                     disabled
                     aria-label="Go Forward"
                   >
@@ -133,9 +113,9 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
                 <div key={c.id} className="flex items-center gap-1 min-w-0">
                   <button
                     type="button"
-                    className="truncate rounded px-2 py-1 hover:bg-white/10"
+                    className="truncate rounded-md px-2 py-1 hover:bg-white/10 transition-colors"
                     onClick={() =>
-                      setPath((_) =>
+                      setPath(
                         i === 0 ? [] : crumbs.slice(1, i + 1).map((x) => x.id),
                       )
                     }
@@ -143,41 +123,65 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
                     {c.name}
                   </button>
                   {i < crumbs.length - 1 ? (
-                    <span className="text-white/40">›</span>
+                    <span className="text-white/30">›</span>
                   ) : null}
                 </div>
               ))}
             </nav>
-            <div className="ml-auto flex items-center gap-1">
-              <Button
-                size="icon"
-                variant={view === "grid" ? "default" : "ghost"}
-                className="size-7 rounded-lg"
-                aria-label="Grid view"
-                onClick={() => setView("grid")}
-              >
-                <Grid2X2 className="size-4" />
-              </Button>
-              <Button
-                size="icon"
-                variant={view === "list" ? "default" : "ghost"}
-                className="size-7 rounded-lg"
-                aria-label="List view"
-                onClick={() => setView("list")}
-              >
-                <List className="size-4" />
-              </Button>
+            <div className="ml-auto flex items-center gap-1 rounded-lg bg-white/5 p-1">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant={view === "grid" ? "default" : "ghost"}
+                    className="size-6 rounded-md"
+                    aria-label="Grid view"
+                    onClick={() => setView("grid")}
+                  >
+                    <Grid2X2 className="size-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Grid view</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant={view === "list" ? "default" : "ghost"}
+                    className="size-6 rounded-md"
+                    aria-label="List view"
+                    onClick={() => setView("list")}
+                  >
+                    <List className="size-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>List view</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant={view === "columns" ? "default" : "ghost"}
+                    className="size-6 rounded-md"
+                    aria-label="Column view"
+                    onClick={() => setView("columns")}
+                  >
+                    <Columns3 className="size-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Column view</TooltipContent>
+              </Tooltip>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="relative w-[18rem] max-w-[40vw]">
-              <Search className="pointer-events-none absolute left-2 top-1/2 size-4 -translate-y-1/2 text-white/60" />
+            <div className="relative w-[14rem] max-w-[40vw]">
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-white/50" />
               <Input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search"
-                className="h-8 w-full rounded-lg bg-black/25 pl-8 text-white placeholder:text-white/60"
+                className="h-7 w-full rounded-lg bg-black/20 pl-8 text-[13px] text-white placeholder:text-white/50 border-white/10"
               />
             </div>
           </div>
@@ -186,126 +190,77 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
 
       {/* Body */}
       <div className="flex h-full w-full overflow-hidden">
-        {/* Sidebar */}
-        <aside className="hidden md:flex w-52 flex-col gap-1 border-r border-white/10 bg-white/5 p-2 text-sm text-white/80">
-          {[
-            { id: "home", label: "Home", to: [] as FSPath },
-            { id: "desktop", label: "Desktop", to: ["desktop"] as FSPath },
-            {
-              id: "documents",
-              label: "Documents",
-              to: ["documents"] as FSPath,
-            },
-            {
-              id: "downloads",
-              label: "Downloads",
-              to: ["downloads"] as FSPath,
-            },
-            { id: "pictures", label: "Pictures", to: ["pictures"] as FSPath },
-          ].map((s) => (
-            <button
-              key={s.id}
-              type="button"
-              onClick={() => setPath(s.to)}
-              className={`flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left hover:bg-white/10 ${
-                JSON.stringify(path) === JSON.stringify(s.to)
-                  ? "bg-white/10"
-                  : ""
-              }`}
-            >
-              <span>{s.label}</span>
-            </button>
-          ))}
-        </aside>
+        <Sidebar path={path} onNavigate={handleNavigate} />
 
         {/* Content */}
-        <section
-          ref={containerRef}
-          className="relative flex-1 overflow-auto p-3"
-        >
-          {view === "grid" ? (
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-4">
-              {items.map((n) => (
-                <FileTile
-                  key={n.id}
-                  node={n}
-                  selected={selected === n.id}
-                  onOpen={() =>
-                    isFolder(n)
-                      ? openFolder(n.id)
-                      : setQlFile(isFile(n) ? n : null)
-                  }
-                  onSelect={() => setSelected(n.id)}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="divide-y divide-white/10 rounded-lg bg-white/5">
-              {items.map((n) => (
-                <ListRow
-                  key={n.id}
-                  node={n}
-                  selected={selected === n.id}
-                  onOpen={() =>
-                    isFolder(n)
-                      ? openFolder(n.id)
-                      : setQlFile(isFile(n) ? n : null)
-                  }
-                  onSelect={() => setSelected(n.id)}
+        <section className="relative flex-1 overflow-auto">
+          {view === "grid" && (
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-3 p-4">
+              {items.map((node) => (
+                <GridItem
+                  key={node.id}
+                  node={node}
+                  selected={selected === node.id}
+                  onClick={() => handleItemClick(node)}
+                  onDoubleClick={() => handleItemDoubleClick(node)}
                 />
               ))}
             </div>
           )}
-        </section>
-      </div>
 
-      <QuickLook file={qlFile} onClose={() => setQlFile(null)} />
+          {view === "list" && (
+            <div className="flex flex-col p-2">
+              {items.map((node) => (
+                <ListItem
+                  key={node.id}
+                  node={node}
+                  selected={selected === node.id}
+                  onClick={() => handleItemClick(node)}
+                  onDoubleClick={() => handleItemDoubleClick(node)}
+                />
+              ))}
+            </div>
+          )}
+
+          {view === "columns" && (
+            <ColumnView
+              path={path}
+              items={items}
+              selected={selected}
+              onSelect={setSelected}
+              onNavigate={handleNavigate}
+            />
+          )}
+        </section>
+
+        {showPreview && <PreviewPanel node={selectedNode} />}
+      </div>
     </div>
   );
 }
 
-function FileTile({
-  node,
-  selected,
-  onOpen,
-  onSelect,
-}: {
+interface GridItemProps {
   node: FSNode;
   selected: boolean;
-  onOpen: () => void;
-  onSelect: () => void;
-}) {
-  const isDir = isFolder(node);
-  const thumb = isDir ? null : node.kind === "image" ? node.path : null;
+  onClick: () => void;
+  onDoubleClick: () => void;
+}
+
+function GridItem({ node, selected, onClick, onDoubleClick }: GridItemProps) {
   return (
     <button
       type="button"
-      tabIndex={0}
-      onDoubleClick={onOpen}
-      onClick={onSelect}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") onOpen();
-        if (e.key === " ") onSelect();
-      }}
-      className={`flex cursor-default select-none flex-col items-center gap-2 rounded-lg p-2 ${selected ? "bg-white/15" : "hover:bg-white/10"}`}
+      onClick={onClick}
+      onDoubleClick={onDoubleClick}
+      className={`flex cursor-default select-none flex-col items-center gap-2 rounded-xl p-3 transition-all ${
+        selected
+          ? "bg-gradient-to-br from-blue-500/20 to-blue-600/20 ring-1 ring-blue-400/40 shadow-lg shadow-blue-500/10"
+          : "hover:bg-white/5"
+      }`}
     >
-      <div className="relative h-20 w-20 overflow-hidden rounded-lg bg-black/30">
-        {thumb ? (
-          <Image
-            src={thumb}
-            alt={node.name}
-            fill
-            sizes="80px"
-            className="object-cover"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-white/50">
-            {isDir ? "📁" : "📄"}
-          </div>
-        )}
-      </div>
+      <FileIcon node={node} size={64} />
       <div
-        className="w-full truncate text-center text-xs text-white/90"
+        className="w-full truncate text-center text-[11px] text-white/90 leading-tight"
         title={node.name}
       >
         {node.name}
@@ -314,49 +269,102 @@ function FileTile({
   );
 }
 
-function ListRow({
-  node,
-  selected,
-  onOpen,
-  onSelect,
-}: {
+interface ListItemProps {
   node: FSNode;
   selected: boolean;
-  onOpen: () => void;
-  onSelect: () => void;
-}) {
-  const isDir = isFolder(node);
+  onClick: () => void;
+  onDoubleClick: () => void;
+}
+
+function ListItem({ node, selected, onClick, onDoubleClick }: ListItemProps) {
+  const file = isFile(node) ? node : null;
+
   return (
     <button
       type="button"
-      onDoubleClick={onOpen}
-      onClick={onSelect}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") onOpen();
-        if (e.key === " ") onSelect();
-      }}
-      className={`grid grid-cols-[auto_1fr_auto] items-center gap-3 px-3 py-2 text-left ${selected ? "bg-white/15" : "hover:bg-white/10"}`}
+      onClick={onClick}
+      onDoubleClick={onDoubleClick}
+      className={`grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-lg px-3 py-2 text-left transition-all ${
+        selected
+          ? "bg-gradient-to-r from-blue-500/15 to-blue-600/10 ring-1 ring-blue-400/30"
+          : "hover:bg-white/5"
+      }`}
     >
-      <div className="relative h-8 w-8 overflow-hidden rounded bg-black/30">
-        {!isDir && node.kind === "image" ? (
-          <Image
-            src={(node as FSFile).path}
-            alt={node.name}
-            fill
-            sizes="32px"
-            className="object-cover"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-white/50">
-            {isDir ? "📁" : "📄"}
-          </div>
-        )}
-      </div>
-      <div className="truncate text-sm text-white/90">{node.name}</div>
-      <div className="text-xs text-white/50">
-        {isDir ? "Folder" : (node as FSFile).kind}
+      <FileIcon node={node} size={32} />
+      <div className="truncate text-[13px] text-white/90">{node.name}</div>
+      <div className="text-[11px] text-white/40 capitalize">
+        {isFolder(node) ? "Folder" : file?.kind || "File"}
       </div>
     </button>
+  );
+}
+
+interface ColumnViewProps {
+  path: FSPath;
+  items: FSNode[];
+  selected: string | null;
+  onSelect: (id: string) => void;
+  onNavigate: (path: FSPath) => void;
+}
+
+function ColumnView({ path, selected, onSelect, onNavigate }: ColumnViewProps) {
+  const columns: FSNode[][] = useMemo(() => {
+    const cols: FSNode[][] = [];
+    let currentPath: FSPath = [];
+    
+    // Build column hierarchy
+    for (let i = 0; i <= path.length; i++) {
+      const node = findNodeByPath(FS, currentPath);
+      if (node.type === "folder") {
+        cols.push(node.children);
+      }
+      if (i < path.length) {
+        currentPath = [...currentPath, path[i]];
+      }
+    }
+    
+    return cols;
+  }, [path]);
+
+  return (
+    <div className="flex h-full overflow-x-auto">
+      {columns.map((columnItems, columnIndex) => (
+        <div
+          key={`col-${columnIndex}-${path[columnIndex] || 'root'}`}
+          className="flex h-full min-w-[200px] flex-col border-r border-white/10 bg-gradient-to-b from-white/5 to-transparent"
+        >
+          {columnItems.map((node) => {
+            const isSelected = path[columnIndex] === node.id || selected === node.id;
+            
+            return (
+              <button
+                key={node.id}
+                type="button"
+                onClick={() => {
+                  if (isFolder(node)) {
+                    const newPath = path.slice(0, columnIndex);
+                    newPath.push(node.id);
+                    onNavigate(newPath);
+                  }
+                  onSelect(node.id);
+                }}
+                className={`flex items-center gap-2 border-b border-white/5 px-3 py-2 text-left transition-all ${
+                  isSelected
+                    ? "bg-blue-500/20 text-white/95"
+                    : "text-white/70 hover:bg-white/5 hover:text-white/90"
+                }`}
+              >
+                <FileIcon node={node} size={20} />
+                <span className="flex-1 truncate text-[12px]">{node.name}</span>
+                {isFolder(node) && (
+                  <ChevronRight className="size-3 text-white/40" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      ))}
+    </div>
   );
 }
 
