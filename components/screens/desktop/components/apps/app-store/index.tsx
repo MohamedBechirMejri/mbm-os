@@ -1,105 +1,114 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { DesktopAPI, useDesktop } from "../../window-manager";
-import { CATALOG, type CatalogEntry } from "./catalog";
+import { CATEGORIES, EXPERIMENT_APPS, getFeaturedApps } from "./data";
+import type { Category, CategoryInfo, ExperimentApp } from "./types";
 
-type Section =
-  | "discover"
-  | "arcade"
-  | "create"
-  | "work"
-  | "play"
-  | "develop"
-  | "categories"
-  | "updates";
+type View = "discover" | "category" | "app-detail";
+
+interface ViewState {
+  type: View;
+  categoryId?: Category;
+  appId?: string;
+}
 
 export function AppStoreApp({ instanceId: _ }: { instanceId: string }) {
-  const apps = useDesktop((s) => s.apps);
-  const [active, setActive] = useState<Section>("discover");
-  const installed = useMemo(() => new Set(Object.keys(apps)), [apps]);
+  const [view, setView] = useState<ViewState>({ type: "discover" });
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const entries = useMemo(() => CATALOG, []);
-
-  function doInstall(entry: CatalogEntry) {
-    // No-op if already installed
-    if (installed.has(entry.meta.id)) return;
-    DesktopAPI.registerApps([entry.meta]);
-  }
-
-  function open(entry: CatalogEntry) {
-    DesktopAPI.launch(entry.meta.id);
-  }
+  const filteredApps = searchQuery
+    ? EXPERIMENT_APPS.filter(
+        (app) =>
+          app.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          app.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          app.tags.some((tag) =>
+            tag.toLowerCase().includes(searchQuery.toLowerCase()),
+          ),
+      )
+    : null;
 
   return (
-    <div className="grid h-full w-full grid-cols-[240px_minmax(0,1fr)] overflow-hidden bg-[#0E1116]/60 text-white">
+    <div className="grid h-full w-full grid-cols-[220px_minmax(0,1fr)] overflow-hidden bg-gradient-to-br from-[#0A0E27]/95 via-[#0E1116]/95 to-[#1A1625]/95 text-white backdrop-blur-xl">
       {/* Sidebar */}
-      <aside className="flex h-full flex-col gap-1 border-r border-white/10 bg-white/5 p-3">
-        <SearchBox />
-        <nav className="mt-2 flex flex-col gap-1 text-[14px]">
-          {(
-            [
-              ["discover", "Discover"],
-              ["arcade", "Arcade"],
-              ["create", "Create"],
-              ["work", "Work"],
-              ["play", "Play"],
-              ["develop", "Develop"],
-              ["categories", "Categories"],
-              ["updates", "Updates"],
-            ] as Array<[Section, string]>
-          ).map(([id, label]) => (
+      <aside className="flex h-full flex-col gap-2 border-r border-white/5 bg-white/[0.02] p-3 backdrop-blur-sm">
+        <div className="mb-1 px-2 py-1">
+          <div className="text-[0.75rem] font-semibold tracking-wide text-white/50">
+            EXPERIMENT LAB
+          </div>
+        </div>
+
+        <nav className="flex flex-col gap-0.5">
+          <SidebarItem
+            label="Discover"
+            icon="emblem-favorite"
+            active={view.type === "discover"}
+            onClick={() => setView({ type: "discover" })}
+          />
+
+          <div className="mb-1 mt-3 px-2 py-1">
+            <div className="text-[0.7rem] font-semibold tracking-wider text-white/40">
+              CATEGORIES
+            </div>
+          </div>
+
+          {CATEGORIES.map((cat) => (
             <SidebarItem
-              key={id}
-              label={label}
-              active={active === id}
-              onClick={() => setActive(id)}
+              key={cat.id}
+              label={cat.name}
+              icon={cat.icon}
+              active={view.type === "category" && view.categoryId === cat.id}
+              onClick={() => setView({ type: "category", categoryId: cat.id })}
+              accentColor={cat.color}
             />
           ))}
         </nav>
-        <div className="mt-auto text-xs text-white/50">
-          <div className="truncate">Mohamed Bechir Mejri</div>
-          <div className="truncate">App Store</div>
+
+        <div className="mt-auto space-y-1 rounded-lg bg-white/5 p-3 text-[0.7rem] text-white/60">
+          <div className="font-medium text-white/80">Experiment Lab</div>
+          <div>A collection of web experiments</div>
+          <div className="pt-1 text-white/40">by Mohamed Bechir Mejri</div>
         </div>
       </aside>
 
-      {/* Content */}
+      {/* Main Content */}
       <main className="relative h-full overflow-auto">
-        <div className="mx-auto max-w-[1200px] px-6 py-6">
-          <h1 className="text-[28px] font-semibold tracking-tight">Discover</h1>
-
-          {/* Hero card */}
-          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-            <HeroCard />
-            <WelcomeCard />
+        {/* Search Bar */}
+        <div className="sticky top-0 z-10 border-b border-white/5 bg-[#0E1116]/80 px-6 py-3 backdrop-blur-xl">
+          <div className="relative mx-auto max-w-[1200px]">
+            <input
+              type="text"
+              placeholder="Search experiments..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="h-10 w-full rounded-lg border border-white/10 bg-black/30 px-4 text-[0.875rem] text-white placeholder:text-white/50 outline-none transition-all focus:border-white/20 focus:bg-black/40"
+            />
           </div>
+        </div>
 
-          {/* App list */}
-          <section className="mt-6">
-            <div className="mb-2 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-white/90">
-                Apps That Look Great on macOS Tahoe
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {entries.map((e: CatalogEntry) => {
-                const isInstalled = installed.has(e.meta.id);
-                return (
-                  <AppCard
-                    key={e.meta.id}
-                    entry={e}
-                    installed={isInstalled}
-                    onInstall={() => doInstall(e)}
-                    onOpen={() => open(e)}
-                  />
-                );
-              })}
-            </div>
-          </section>
+        <div className="mx-auto max-w-[1200px] px-6 py-6">
+          {filteredApps ? (
+            <SearchResults
+              apps={filteredApps}
+              onViewApp={(id) => setView({ type: "app-detail", appId: id })}
+            />
+          ) : view.type === "discover" ? (
+            <DiscoverView
+              onViewApp={(id) => setView({ type: "app-detail", appId: id })}
+            />
+          ) : view.type === "category" && view.categoryId ? (
+            <CategoryView
+              categoryId={view.categoryId}
+              onViewApp={(id) => setView({ type: "app-detail", appId: id })}
+            />
+          ) : view.type === "app-detail" && view.appId ? (
+            <AppDetailView
+              appId={view.appId}
+              onBack={() => setView({ type: "discover" })}
+            />
+          ) : null}
         </div>
       </main>
     </div>
@@ -108,136 +117,355 @@ export function AppStoreApp({ instanceId: _ }: { instanceId: string }) {
 
 function SidebarItem({
   label,
+  icon,
   active,
   onClick,
+  accentColor,
 }: {
   label: string;
+  icon?: string;
   active?: boolean;
   onClick?: () => void;
+  accentColor?: string;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
       className={cn(
-        "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-white/80 hover:bg-white/10",
-        active && "bg-white/15 text-white",
+        "group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-[0.8125rem] text-white/70 transition-all hover:bg-white/8",
+        active && "bg-white/10 text-white shadow-sm",
       )}
     >
-      <span className="h-[18px] w-[18px] rounded-md bg-white/20" />
-      <span>{label}</span>
+      {icon && (
+        <Image
+          src={`/assets/icons/apps/${icon}.ico`}
+          alt=""
+          width={18}
+          height={18}
+          className="rounded-sm opacity-80 group-hover:opacity-100"
+          style={
+            accentColor
+              ? { filter: `drop-shadow(0 0 4px ${accentColor}40)` }
+              : {}
+          }
+        />
+      )}
+      <span className="font-medium">{label}</span>
     </button>
   );
 }
 
-function SearchBox() {
+function DiscoverView({ onViewApp }: { onViewApp: (id: string) => void }) {
+  const featured = getFeaturedApps();
+
   return (
-    <div className="relative">
-      <input
-        placeholder="Search"
-        className="h-9 w-full rounded-lg border border-white/10 bg-black/25 px-3 text-[14px] text-white placeholder:text-white/60 outline-none"
-      />
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-[2rem] font-semibold tracking-tight">
+          Welcome to the Lab
+        </h1>
+        <p className="mt-2 text-[0.9375rem] text-white/60">
+          A collection of web experiments, interactive demos, and creative
+          coding projects
+        </p>
+      </div>
+
+      {/* Featured */}
+      {featured.length > 0 && (
+        <section>
+          <h2 className="mb-4 text-[1.25rem] font-semibold">
+            Featured Experiments
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {featured.map((app) => (
+              <FeaturedCard
+                key={app.id}
+                app={app}
+                onClick={() => onViewApp(app.id)}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Categories Grid */}
+      <section>
+        <h2 className="mb-4 text-[1.25rem] font-semibold">
+          Browse by Category
+        </h2>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {CATEGORIES.map((cat) => (
+            <CategoryCard key={cat.id} category={cat} />
+          ))}
+        </div>
+      </section>
+
+      {/* All Apps */}
+      <section>
+        <h2 className="mb-4 text-[1.25rem] font-semibold">All Experiments</h2>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {EXPERIMENT_APPS.map((app) => (
+            <AppCard key={app.id} app={app} onClick={() => onViewApp(app.id)} />
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
 
-function HeroCard() {
+function CategoryView({
+  categoryId,
+  onViewApp,
+}: {
+  categoryId: Category;
+  onViewApp: (id: string) => void;
+}) {
+  const category = CATEGORIES.find((c) => c.id === categoryId);
+  const apps = EXPERIMENT_APPS.filter((a) => a.category === categoryId);
+
+  if (!category) return null;
+
   return (
-    <div className="relative overflow-hidden rounded-xl border border-white/10 bg-white/5 p-0">
-      <div className="px-5 py-4">
-        <div className="text-[12px] font-semibold tracking-wide text-white/70">
-          MAJOR UPDATE
+    <div className="space-y-6">
+      <div>
+        <div className="flex items-center gap-3">
+          <Image
+            src={`/assets/icons/apps/${category.icon}.ico`}
+            alt=""
+            width={48}
+            height={48}
+            className="rounded-xl"
+          />
+          <div>
+            <h1 className="text-[2rem] font-semibold tracking-tight">
+              {category.name}
+            </h1>
+            <p className="text-[0.9375rem] text-white/60">
+              {category.description}
+            </p>
+          </div>
         </div>
-        <div className="mt-1 text-[22px] font-semibold">
-          See What’s New in macOS Tahoe
-        </div>
-        <p className="mt-2 text-[13px] text-white/70 max-w-prose">
-          A gorgeous new look, a supercharged Spotlight, and more.
-        </p>
       </div>
-      <div className="relative h-[160px] w-full overflow-hidden">
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {apps.map((app) => (
+          <AppCard key={app.id} app={app} onClick={() => onViewApp(app.id)} />
+        ))}
+      </div>
+
+      {apps.length === 0 && (
+        <div className="py-12 text-center text-white/50">
+          No experiments in this category yet. Check back soon!
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AppDetailView({
+  appId,
+  onBack,
+}: {
+  appId: string;
+  onBack: () => void;
+}) {
+  const app = EXPERIMENT_APPS.find((a) => a.id === appId);
+
+  if (!app) return null;
+
+  const category = CATEGORIES.find((c) => c.id === app.category);
+
+  return (
+    <div className="space-y-6">
+      <button
+        type="button"
+        onClick={onBack}
+        className="text-[0.875rem] text-white/60 hover:text-white"
+      >
+        ← Back
+      </button>
+
+      <div className="flex items-start gap-6">
         <Image
-          src="/assets/Tahoe%20default%20wallpapers/macOS%20Tahoe%2026%20Light%20Wallpaper.png"
-          alt="Tahoe"
-          fill
-          className="object-cover"
+          src={`/assets/icons/apps/${app.icon}.ico`}
+          alt={app.name}
+          width={120}
+          height={120}
+          className="rounded-2xl"
         />
+        <div className="flex-1">
+          <h1 className="text-[2.5rem] font-bold tracking-tight">{app.name}</h1>
+          <p className="mt-2 text-[1.125rem] text-white/70">{app.tagline}</p>
+
+          <div className="mt-4 flex items-center gap-3">
+            <Button
+              disabled={!app.available}
+              className="rounded-full px-8 disabled:opacity-50"
+            >
+              {app.available ? "Download" : "Coming Soon"}
+            </Button>
+            {category && (
+              <span className="text-[0.875rem] text-white/50">
+                {category.name}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-white/10 bg-white/5 p-6">
+        <h2 className="mb-3 text-[1.125rem] font-semibold">About</h2>
+        <p className="text-[0.9375rem] leading-relaxed text-white/70">
+          {app.description}
+        </p>
+
+        {app.tags.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {app.tags.map((tag) => (
+              <span
+                key={tag}
+                className="rounded-full bg-white/10 px-3 py-1 text-[0.75rem] text-white/80"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-function WelcomeCard() {
+function SearchResults({
+  apps,
+  onViewApp,
+}: {
+  apps: ExperimentApp[];
+  onViewApp: (id: string) => void;
+}) {
   return (
-    <div className="grid grid-rows-2 gap-4">
-      <div className="rounded-xl border border-white/10 bg-white/5 p-5">
-        <div className="text-[12px] text-white/70">GET STARTED</div>
-        <div className="mt-1 text-[18px] font-semibold">
-          The Apple Games App Is Your New Home for Play
-        </div>
-        <p className="mt-2 text-[13px] text-white/70">
-          Find new favorites, play with friends—it’s all here.
-        </p>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-[2rem] font-semibold tracking-tight">
+          Search Results
+        </h1>
+        <p className="mt-1 text-white/60">Found {apps.length} experiments</p>
       </div>
-      <div className="rounded-xl border border-white/10 bg-white/5 p-5">
-        <div className="text-[12px] text-white/70">FROM THE EDITORS</div>
-        <div className="mt-1 text-[18px] font-semibold">
-          Welcome to the Mac App Store!
+
+      {apps.length > 0 ? (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {apps.map((app) => (
+            <AppCard key={app.id} app={app} onClick={() => onViewApp(app.id)} />
+          ))}
         </div>
-        <p className="mt-2 text-[13px] text-white/70">
-          Take a tour and find your next favorite app.
-        </p>
-      </div>
+      ) : (
+        <div className="py-12 text-center text-white/50">
+          No experiments found. Try a different search term.
+        </div>
+      )}
     </div>
   );
 }
 
 function AppCard({
-  entry,
-  installed,
-  onInstall,
-  onOpen,
+  app,
+  onClick,
 }: {
-  entry: CatalogEntry;
-  installed: boolean;
-  onInstall: () => void;
-  onOpen: () => void;
+  app: ExperimentApp;
+  onClick: () => void;
 }) {
-  const { meta, subtitle } = entry;
   return (
-    <div className="group relative overflow-hidden rounded-xl border border-white/10 bg-white/5 p-4">
-      <div className="flex items-center gap-3">
+    <button
+      type="button"
+      onClick={onClick}
+      className="group relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-white/5 to-white/[0.02] p-4 text-left transition-all hover:border-white/20 hover:bg-white/10"
+    >
+      <div className="flex items-start gap-3">
         <Image
-          src={`/assets/icons/apps/${meta.icon}.ico`}
-          alt="icon"
+          src={`/assets/icons/apps/${app.icon}.ico`}
+          alt={app.name}
           width={56}
           height={56}
-          className="rounded-lg"
+          className="rounded-xl"
         />
         <div className="min-w-0 flex-1">
-          <div className="truncate text-[15px] font-semibold">{meta.title}</div>
-          <div className="truncate text-[12px] text-white/70">{subtitle}</div>
-        </div>
-        <div className="flex items-center gap-2">
-          {installed ? (
-            <Button
-              size="sm"
-              className="rounded-full bg-white text-black hover:bg-white/90"
-              onClick={onOpen}
-            >
-              Open
-            </Button>
-          ) : (
-            <Button size="sm" className="rounded-full" onClick={onInstall}>
-              Get
-            </Button>
+          <div className="truncate text-[0.9375rem] font-semibold text-white">
+            {app.name}
+          </div>
+          <div className="mt-0.5 line-clamp-2 text-[0.8125rem] leading-snug text-white/60">
+            {app.tagline}
+          </div>
+          {!app.available && (
+            <div className="mt-2 text-[0.75rem] text-white/40">Coming Soon</div>
           )}
         </div>
       </div>
-      <Separator className="my-3 bg-white/10" />
-      <div className="flex items-center justify-between text-[12px] text-white/60">
-        <div className="truncate">In-App Purchases</div>
-        <div className="truncate">Utilities</div>
+    </button>
+  );
+}
+
+function FeaturedCard({
+  app,
+  onClick,
+}: {
+  app: ExperimentApp;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 to-white/5 p-6 text-left transition-all hover:border-white/20 hover:shadow-lg"
+    >
+      <div className="flex items-start gap-4">
+        <Image
+          src={`/assets/icons/apps/${app.icon}.ico`}
+          alt={app.name}
+          width={80}
+          height={80}
+          className="rounded-2xl"
+        />
+        <div className="flex-1">
+          <div className="text-[0.6875rem] font-semibold tracking-wider text-white/50">
+            FEATURED
+          </div>
+          <div className="mt-1 text-[1.25rem] font-bold text-white">
+            {app.name}
+          </div>
+          <div className="mt-2 line-clamp-2 text-[0.875rem] leading-relaxed text-white/70">
+            {app.description}
+          </div>
+        </div>
+      </div>
+    </button>
+  );
+}
+
+function CategoryCard({ category }: { category: CategoryInfo }) {
+  return (
+    <div
+      className="group relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-white/5 to-transparent p-5 transition-all hover:border-white/20"
+      style={{
+        background: `linear-gradient(135deg, ${category.color}15, transparent)`,
+      }}
+    >
+      <div className="flex items-center gap-3">
+        <Image
+          src={`/assets/icons/apps/${category.icon}.ico`}
+          alt={category.name}
+          width={40}
+          height={40}
+          className="rounded-lg"
+        />
+        <div>
+          <div className="text-[1rem] font-semibold text-white">
+            {category.name}
+          </div>
+          <div className="mt-0.5 text-[0.8125rem] text-white/60">
+            {category.description}
+          </div>
+        </div>
       </div>
     </div>
   );
