@@ -18,9 +18,9 @@ export function FileIcon({ node, size = 32 }: FileIconProps) {
         className="flex items-center justify-center rounded-lg"
         style={{ width: size, height: size }}
       >
-        <Folder 
-          className="text-blue-400" 
-          style={{ width: iconSize, height: iconSize }} 
+        <Folder
+          className="text-blue-400"
+          style={{ width: iconSize, height: iconSize }}
         />
       </div>
     );
@@ -68,9 +68,9 @@ export function FileIcon({ node, size = 32 }: FileIconProps) {
       className="flex items-center justify-center rounded-lg bg-white/5"
       style={{ width: size, height: size }}
     >
-      <Icon 
-        className={iconColor} 
-        style={{ width: iconSize, height: iconSize }} 
+      <Icon
+        className={iconColor}
+        style={{ width: iconSize, height: iconSize }}
       />
     </div>
   );

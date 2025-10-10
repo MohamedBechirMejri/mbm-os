@@ -74,7 +74,7 @@ export function PreviewPanel({ node }: PreviewPanelProps) {
             </div>
           </div>
         </div>
-        
+
         {file?.size && (
           <div className="flex items-center gap-3">
             <HardDrive className="size-4 text-white/40" />
@@ -102,5 +102,5 @@ function formatBytes(bytes: number): string {
   const k = 1024;
   const sizes = ["Bytes", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${Math.round(bytes / k ** i * 100) / 100} ${sizes[i]}`;
+  return `${Math.round((bytes / k ** i) * 100) / 100} ${sizes[i]}`;
 }

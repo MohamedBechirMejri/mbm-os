@@ -1,6 +1,13 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, Columns3, Grid2X2, List, Search } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Columns3,
+  Grid2X2,
+  List,
+  Search,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,11 +17,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { TitlebarPortal } from "../../window-manager/components/window-view/titlebar-portal";
-import type { FSNode, FSPath } from "./fs";
-import { FS, findNodeByPath, getBreadcrumbs, isFile, isFolder } from "./fs";
 import { FileIcon } from "./components/file-icon";
 import { PreviewPanel } from "./components/preview-panel";
 import { Sidebar } from "./components/sidebar";
+import type { FSNode, FSPath } from "./fs";
+import { FS, findNodeByPath, getBreadcrumbs, isFile, isFolder } from "./fs";
 
 type ViewMode = "grid" | "list" | "columns";
 
@@ -311,7 +318,7 @@ function ColumnView({ path, selected, onSelect, onNavigate }: ColumnViewProps) {
   const columns: FSNode[][] = useMemo(() => {
     const cols: FSNode[][] = [];
     let currentPath: FSPath = [];
-    
+
     // Build column hierarchy
     for (let i = 0; i <= path.length; i++) {
       const node = findNodeByPath(FS, currentPath);
@@ -322,7 +329,7 @@ function ColumnView({ path, selected, onSelect, onNavigate }: ColumnViewProps) {
         currentPath = [...currentPath, path[i]];
       }
     }
-    
+
     return cols;
   }, [path]);
 
@@ -330,12 +337,13 @@ function ColumnView({ path, selected, onSelect, onNavigate }: ColumnViewProps) {
     <div className="flex h-full overflow-x-auto">
       {columns.map((columnItems, columnIndex) => (
         <div
-          key={`col-${columnIndex}-${path[columnIndex] || 'root'}`}
+          key={`col-${columnIndex}-${path[columnIndex] || "root"}`}
           className="flex h-full min-w-[200px] flex-col border-r border-white/10 bg-gradient-to-b from-white/5 to-transparent"
         >
           {columnItems.map((node) => {
-            const isSelected = path[columnIndex] === node.id || selected === node.id;
-            
+            const isSelected =
+              path[columnIndex] === node.id || selected === node.id;
+
             return (
               <button
                 key={node.id}

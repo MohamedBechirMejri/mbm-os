@@ -149,7 +149,8 @@ export function Sidebar({ path, onNavigate }: SidebarProps) {
           {!collapsed[section.title] && (
             <div className="flex flex-col gap-0.5">
               {section.items.map((item) => {
-                const isActive = JSON.stringify(path) === JSON.stringify(item.path);
+                const isActive =
+                  JSON.stringify(path) === JSON.stringify(item.path);
                 return (
                   <button
                     key={item.id}
