@@ -36,20 +36,6 @@ export const catalogApps: AppMeta[] = [
     Component: AppStoreApp,
     minSize: { w: 940, h: 640 },
   },
-  // {
-  //   id: "calendar",
-  //   title: "Calendar",
-  //   icon: "calendar",
-  //   Component: CalculatorApp,
-  //   minSize: { w: 320, h: 240 },
-  // },
-  {
-    id: "game-center",
-    title: "Game Center",
-    icon: "game-center",
-    Component: CalculatorApp,
-    minSize: { w: 320, h: 240 },
-  },
   {
     id: "terminal",
     title: "Terminal",
@@ -69,14 +55,6 @@ export const catalogApps: AppMeta[] = [
     resizable: false,
     floatingActionBar: true,
   },
-
-  // {
-  //   id: "chess",
-  //   title: "Chess",
-  //   icon: "chess",
-  //   Component: CalculatorApp,
-  //   minSize: { w: 320, h: 240 },
-  // },
 
   // add more apps here
 ];
