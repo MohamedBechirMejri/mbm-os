@@ -35,7 +35,12 @@ export const catalogApps: AppMeta[] = [
     icon: "softwarecenter",
     Component: AppStoreApp,
     minSize: { w: 940, h: 640 },
-    floatingActionBar: true
+    floatingActionBar: true,
+    actionButtonsStyle: {
+      top: 22,
+      left: 16,
+      position: "absolute",
+    },
   },
   {
     id: "terminal",

@@ -58,7 +58,7 @@ export function WindowTitlebar({
       aria-label="Window title bar"
     >
       {/* Traffic lights */}
-      <div className="flex gap-2 pr-1.5">
+      <div className="flex gap-2 pr-1.5" style={meta?.actionButtonsStyle}>
         <ActionButton
           label="Close"
           onClick={() => closeWin(win.id)}

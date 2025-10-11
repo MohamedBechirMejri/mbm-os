@@ -12,6 +12,7 @@ export interface AppMeta {
   resizable?: boolean; // if false: hide resize handles and disable maximize/zoom
   floatingActionBar?: boolean; // if true: the app's action bar floats over content (like macOS Calculator)
   titlebarHeight?: number; // height of the titlebar in px, default is 36
+  actionButtonsStyle?: React.CSSProperties; // custom style for the window action buttons (close, minimize, maximize)
 }
 
 export type WinState =

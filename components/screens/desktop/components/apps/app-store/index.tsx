@@ -64,9 +64,9 @@ export function AppStoreApp({ instanceId: _ }: { instanceId: string }) {
       {/* Body */}
       <div className="flex h-full w-full overflow-hidden">
         {/* Sidebar */}
-        <aside className="flex w-[180px] flex-col border-r border-white/5 bg-white/[0.02] rounded-2xl m-2 mb-3 mt-0 mr-0">
+        <aside className="flex w-[180px] flex-col border-r border-white/5 bg-white/[0.02] rounded-2xl m-2 mb-3 mt-0 mr-0 pt-6">
           <div className="flex flex-col gap-4 p-3">
-            <div className="relative w-[14rem] max-w-[40vw] pointer-events-auto">
+            <div className="relative w-full max-w-[40vw] pointer-events-auto">
               <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-white/50" />
               <Input
                 value={searchQuery}
