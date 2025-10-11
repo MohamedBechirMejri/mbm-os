@@ -9,7 +9,13 @@ import {
   useSpring,
   useTransform,
 } from "motion/react";
-import React, { type PropsWithChildren, useRef } from "react";
+import React, {
+  createContext,
+  type PropsWithChildren,
+  useContext,
+  useMemo,
+  useRef,
+} from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -30,6 +36,15 @@ const dockVariants = cva(
   "supports-backdrop-blur:bg-white/10 supports-backdrop-blur:dark:bg-black/10 mx-auto mt-8 flex h-[58px] w-max items-center justify-center gap-2 rounded-2xl border p-2 backdrop-blur-md",
 );
 
+interface DockContextValue {
+  size: number;
+  magnification: number;
+  distance: number;
+  mouseX: MotionValue<number>;
+}
+
+const DockContext = createContext<DockContextValue | null>(null);
+
 const Dock = React.forwardRef<HTMLDivElement, DockProps>(
   (
     {
@@ -44,42 +59,32 @@ const Dock = React.forwardRef<HTMLDivElement, DockProps>(
     ref,
   ) => {
     const mouseX = useMotionValue(Infinity);
-
-    const renderChildren = () => {
-      return React.Children.map(children, (child) => {
-        if (
-          React.isValidElement<DockIconProps>(child) &&
-          child.type === DockIcon
-        ) {
-          const childProps = child.props as DockIconProps;
-
-          // Child-provided props should win; fall back to Dock defaults when absent.
-          return React.cloneElement(child, {
-            size: childProps.size ?? iconSize,
-            magnification: childProps.magnification ?? iconMagnification,
-            distance: childProps.distance ?? iconDistance,
-            mouseX: childProps.mouseX ?? mouseX,
-            ...child.props,
-          });
-        }
-        return child;
-      });
-    };
+    const contextValue = useMemo<DockContextValue>(
+      () => ({
+        size: iconSize,
+        magnification: iconMagnification,
+        distance: iconDistance,
+        mouseX,
+      }),
+      [iconDistance, iconMagnification, iconSize, mouseX],
+    );
 
     return (
-      <motion.div
-        ref={ref}
-        onMouseMove={(e) => mouseX.set(e.pageX)}
-        onMouseLeave={() => mouseX.set(Infinity)}
-        {...props}
-        className={cn(dockVariants({ className }), {
-          "items-start": direction === "top",
-          "items-center": direction === "middle",
-          "items-end": direction === "bottom",
-        })}
-      >
-        {renderChildren()}
-      </motion.div>
+      <DockContext.Provider value={contextValue}>
+        <motion.div
+          ref={ref}
+          onMouseMove={(e) => mouseX.set(e.pageX)}
+          onMouseLeave={() => mouseX.set(Infinity)}
+          {...props}
+          className={cn(dockVariants({ className }), {
+            "items-start": direction === "top",
+            "items-center": direction === "middle",
+            "items-end": direction === "bottom",
+          })}
+        >
+          {children}
+        </motion.div>
+      </DockContext.Provider>
     );
   },
 );
@@ -98,28 +103,39 @@ export interface DockIconProps
 }
 
 const DockIcon = ({
-  size = DEFAULT_SIZE,
-  magnification = DEFAULT_MAGNIFICATION,
-  distance = DEFAULT_DISTANCE,
+  size,
+  magnification,
+  distance,
   mouseX,
   className,
   children,
   ...props
 }: DockIconProps) => {
+  const dock = useContext(DockContext);
+  const effectiveSize = size ?? dock?.size ?? DEFAULT_SIZE;
+  const effectiveMagnification =
+    magnification ?? dock?.magnification ?? DEFAULT_MAGNIFICATION;
+  const effectiveDistance = distance ?? dock?.distance ?? DEFAULT_DISTANCE;
   const ref = useRef<HTMLDivElement>(null);
-  const padding = Math.max(6, size * 0.2);
+  const padding = Math.max(6, effectiveSize * 0.2);
   const defaultMouseX = useMotionValue(Infinity);
-
-  const distanceCalc = useTransform(mouseX ?? defaultMouseX, (val: number) => {
+  const sharedMouseX = mouseX ?? dock?.mouseX ?? defaultMouseX;
+  const distanceCalc = useTransform(sharedMouseX, (val: number) => {
     const bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 };
     return val - bounds.x - bounds.width / 2;
   });
 
   const sizeTransform = useTransform(
     distanceCalc,
-    [-distance, 0, distance],
+    [-effectiveDistance, 0, effectiveDistance],
     // Interpret small magnification values (<=10) as a scale factor; otherwise treat as absolute px.
-    [size, magnification <= 10 ? size * magnification : magnification, size],
+    [
+      effectiveSize,
+      effectiveMagnification <= 10
+        ? effectiveSize * effectiveMagnification
+        : effectiveMagnification,
+      effectiveSize,
+    ],
   );
 
   const scaleSize = useSpring(sizeTransform, {
