@@ -1,16 +1,16 @@
 "use client";
 
+import { ChevronLeft, ChevronRight, Clock3, Monitor } from "lucide-react";
+import { motion } from "motion/react";
+import Image from "next/image";
+import { type ReactNode, useCallback, useMemo, useState } from "react";
 import {
-  BarChart2,
-  ChevronLeft,
-  ChevronRight,
-  CloudSun,
-  Droplets,
-  Sunrise,
-  Wind,
-} from "lucide-react";
-import { type ReactNode, useMemo, useState } from "react";
-
+  type AppMeta,
+  DesktopAPI,
+  useDesktop,
+  type WinInstance,
+} from "@/components/screens/desktop/components/window-manager";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 type CalendarPanelProps = {
@@ -23,110 +23,10 @@ type CalendarCell = {
   isToday: boolean;
 };
 
-type QuickEvent = {
-  id: string;
-  timeLabel: string;
-  description: string;
-};
-
-type WeatherPoint = {
-  time: string;
-  temperature: number;
-};
-
-type ActivitySlice = {
-  id: string;
-  label: string;
-  duration: string;
-  percentage: number;
-  color: string;
-};
-
 const DAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"] as const;
-
-const QUICK_EVENTS: QuickEvent[] = [
-  {
-    id: "standup",
-    timeLabel: "09:30",
-    description: "Design leadership sync",
-  },
-  {
-    id: "ship",
-    timeLabel: "13:00",
-    description: "Ship Tahoe wallpapers",
-  },
-  {
-    id: "coffee",
-    timeLabel: "16:30",
-    description: "Golden hour espresso",
-  },
-];
-
-const WEATHER_POINTS: WeatherPoint[] = [
-  { time: "6 PM", temperature: 24 },
-  { time: "7 PM", temperature: 23 },
-  { time: "8 PM", temperature: 22 },
-  { time: "9 PM", temperature: 21 },
-];
-
-const ACTIVITY_BREAKDOWN: ActivitySlice[] = [
-  {
-    id: "productivity",
-    label: "Productivity & Finance",
-    duration: "5h 20m",
-    percentage: 62,
-    color: "from-sky-400/85 to-sky-500/60",
-  },
-  {
-    id: "entertainment",
-    label: "Entertainment",
-    duration: "1h 40m",
-    percentage: 19,
-    color: "from-purple-400/85 to-fuchsia-500/60",
-  },
-  {
-    id: "other",
-    label: "Other",
-    duration: "54m",
-    percentage: 12,
-    color: "from-white/60 to-white/20",
-  },
-];
 
 const tileBase =
   "relative overflow-hidden rounded-3xl border border-white/12 bg-[linear-gradient(145deg,rgba(255,255,255,0.35)_0%,rgba(255,255,255,0.12)_45%,rgba(92,139,255,0.08)_100%)] p-5 shadow-[0_1.25rem_2.75rem_rgba(15,23,42,0.36)] backdrop-blur-3xl";
-
-function buildCalendar(date: Date, referenceDate: Date): CalendarCell[] {
-  const year = date.getFullYear();
-  const month = date.getMonth();
-  const firstDay = new Date(year, month, 1);
-  const startOffset = firstDay.getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const totalCells = Math.ceil((startOffset + daysInMonth) / 7) * 7;
-
-  return Array.from({ length: totalCells }, (_, index) => {
-    const dayNumber = index - startOffset + 1;
-    const cellDate = new Date(year, month, dayNumber);
-    const isCurrentMonth = cellDate.getMonth() === month;
-    const isToday =
-      cellDate.getFullYear() === referenceDate.getFullYear() &&
-      cellDate.getMonth() === referenceDate.getMonth() &&
-      cellDate.getDate() === referenceDate.getDate();
-
-    return {
-      date: cellDate,
-      isCurrentMonth,
-      isToday,
-    };
-  });
-}
-
-function getMonthLabel(date: Date) {
-  return date.toLocaleDateString("en-US", {
-    month: "long",
-    year: "numeric",
-  });
-}
 
 function GlassTile({
   children,
@@ -139,13 +39,80 @@ function GlassTile({
     <div className={cn(tileBase, className)}>
       <div className="pointer-events-none absolute inset-0 rounded-[inherit] border border-white/10" />
       <div className="pointer-events-none absolute -top-16 left-6 h-32 w-32 rounded-full bg-white/20 blur-3xl" />
-      <div className="relative z-10">{children}</div>
+      <div className="relative z-10 h-full">{children}</div>
     </div>
   );
 }
 
+function AppGlyph({ app }: { app: AppMeta }) {
+  if (typeof app.icon === "string") {
+    return (
+      <Image
+        src={`/assets/icons/apps/${app.icon}.ico`}
+        alt={app.title}
+        width={32}
+        height={32}
+        className="rounded-xl"
+      />
+    );
+  }
+
+  if (app.icon) {
+    return <span className="text-white/80">{app.icon}</span>;
+  }
+
+  return (
+    <span className="text-sm font-semibold text-white/80">
+      {app.title.slice(0, 1)}
+    </span>
+  );
+}
+
+function buildCalendar(month: Date, today: Date): CalendarCell[] {
+  const firstOfMonth = new Date(month.getFullYear(), month.getMonth(), 1);
+  const start = new Date(firstOfMonth);
+  start.setDate(firstOfMonth.getDate() - firstOfMonth.getDay());
+
+  const cells: CalendarCell[] = [];
+
+  for (let index = 0; index < 42; index += 1) {
+    const cellDate = new Date(start);
+    cellDate.setDate(start.getDate() + index);
+
+    cells.push({
+      date: cellDate,
+      isCurrentMonth: cellDate.getMonth() === month.getMonth(),
+      isToday:
+        cellDate.getFullYear() === today.getFullYear() &&
+        cellDate.getMonth() === today.getMonth() &&
+        cellDate.getDate() === today.getDate(),
+    });
+  }
+
+  return cells;
+}
+
+function describeState(win: WinInstance): string {
+  switch (win.state) {
+    case "fullscreen":
+      return "Fullscreen";
+    case "maximized":
+      return "Maximized";
+    case "minimized":
+      return "Minimized";
+    case "hidden":
+      return "Hidden";
+    default:
+      return "Active";
+  }
+}
+
 export function CalendarPanel({ referenceDate }: CalendarPanelProps) {
   const [monthOffset, setMonthOffset] = useState(0);
+
+  const apps = useDesktop((state) => state.apps);
+  const windows = useDesktop((state) => state.windows);
+  const activeId = useDesktop((state) => state.activeId);
 
   const visibleMonth = useMemo(() => {
     const base = new Date(
@@ -162,193 +129,271 @@ export function CalendarPanel({ referenceDate }: CalendarPanelProps) {
     () => buildCalendar(visibleMonth, referenceDate),
     [visibleMonth, referenceDate],
   );
-  const dayNumber = referenceDate.getDate();
-  const dayLabel = referenceDate.toLocaleDateString("en-US", {
+
+  const orderedWindows = useMemo(() => {
+    return Object.values(windows).sort((first, second) => {
+      if (first.createdAt === second.createdAt) {
+        return second.z - first.z;
+      }
+
+      return second.createdAt - first.createdAt;
+    });
+  }, [windows]);
+
+  const todayKey = referenceDate.toDateString();
+
+  const todayWindows = useMemo(() => {
+    return orderedWindows.filter((win) => {
+      return new Date(win.createdAt).toDateString() === todayKey;
+    });
+  }, [orderedWindows, todayKey]);
+
+  const activeWindow = activeId ? (windows[activeId] ?? null) : null;
+  const activeMeta = activeWindow ? apps[activeWindow.appId] : undefined;
+
+  const uniqueApps = useMemo(() => {
+    return new Set(orderedWindows.map((win) => win.appId));
+  }, [orderedWindows]);
+
+  const timeZone = useMemo(() => {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  }, []);
+
+  const timeFormatter = useMemo(
+    () =>
+      new Intl.DateTimeFormat(undefined, {
+        hour: "numeric",
+        minute: "2-digit",
+      }),
+    [],
+  );
+
+  const monthLabel = visibleMonth.toLocaleDateString(undefined, {
+    month: "long",
+    year: "numeric",
+  });
+
+  const dayLabel = referenceDate.toLocaleDateString(undefined, {
     weekday: "long",
   });
-  const monthLabel = referenceDate.toLocaleDateString("en-US", {
-    month: "long",
-  });
+
+  const dayNumber = referenceDate.getDate();
+
+  const handleAdjustMonth = useCallback((delta: number) => {
+    setMonthOffset((offset) => offset + delta);
+  }, []);
+
+  const handleFocusWindow = useCallback((win: WinInstance) => {
+    if (win.state === "minimized" || win.state === "hidden") {
+      DesktopAPI.setState(win.id, "normal");
+    }
+
+    DesktopAPI.focus(win.id);
+  }, []);
+
+  const sessionStats = [
+    { label: "Open Windows", value: orderedWindows.length.toString() },
+    { label: "Unique Apps", value: uniqueApps.size.toString() },
+    { label: "Active App", value: activeMeta?.title ?? "None" },
+  ];
 
   return (
-    <section className="w-[26rem] space-y-4 text-white">
-      <div className="flex items-center justify-between px-1">
-        <p className="text-sm font-medium text-white/60">Today at a glance</p>
-        <button
-          type="button"
-          className="rounded-full border border-white/15 bg-white/12 px-3 py-1 text-xs font-medium text-white/70 transition-colors hover:bg-white/20"
-          onClick={() => setMonthOffset(0)}
-        >
-          Jump to today
-        </button>
-      </div>
-
-      <div className="grid grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] gap-4">
-        <GlassTile className="flex flex-col justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-white/60">
-              {dayLabel}
-            </p>
-            <p className="mt-2 text-[3.25rem] font-semibold leading-none">
+    <GlassTile className="w-[30rem] text-white">
+      <div className="flex items-start justify-between gap-6">
+        <div>
+          <p className="text-xs uppercase tracking-[0.22rem] text-white/60">
+            {dayLabel}
+          </p>
+          <div className="mt-3 flex items-baseline gap-3">
+            <span className="text-5xl font-semibold leading-none">
               {dayNumber}
-            </p>
-            <p className="mt-2 text-lg text-white/70">
-              {monthLabel} • {referenceDate.getFullYear()}
-            </p>
+            </span>
+            <span className="text-lg text-white/70">{monthLabel}</span>
           </div>
-
-          <div className="mt-6 flex flex-wrap gap-4 text-xs text-white/70">
-            <div className="flex items-center gap-2">
-              <CloudSun className="size-4" />
-              Mostly cloudy, 25°
-            </div>
-            <div className="flex items-center gap-2">
-              <Sunrise className="size-4" />
-              Sunset 5:48 PM
-            </div>
-            <div className="flex items-center gap-2">
-              <Droplets className="size-4" />
-              Humidity 62%
-            </div>
-            <div className="flex items-center gap-2">
-              <Wind className="size-4" />
-              Breeze 9 km/h
-            </div>
+          <p className="mt-3 text-xs text-white/60">
+            {timeFormatter.format(referenceDate)} • {timeZone}
+          </p>
+        </div>
+        <div className="flex flex-col items-end gap-3">
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => handleAdjustMonth(-1)}
+              className="rounded-2xl border border-white/15 bg-white/10 text-white/70 transition hover:border-white/25 hover:bg-white/20 hover:text-white"
+              aria-label="Previous month"
+            >
+              <ChevronLeft className="size-4" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => handleAdjustMonth(1)}
+              className="rounded-2xl border border-white/15 bg-white/10 text-white/70 transition hover:border-white/25 hover:bg-white/20 hover:text-white"
+              aria-label="Next month"
+            >
+              <ChevronRight className="size-4" />
+            </Button>
           </div>
-        </GlassTile>
-
-        <GlassTile className="p-0">
-          <div className="flex items-center justify-between px-5 pt-5">
-            <div>
-              <p className="text-sm font-semibold leading-tight">
-                {getMonthLabel(visibleMonth)}
-              </p>
-              <p className="text-xs text-white/60">Mini calendar</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                className="flex size-8 items-center justify-center rounded-full border border-white/15 bg-white/12 text-white/70 transition-colors hover:bg-white/20"
-                onClick={() => setMonthOffset((offset) => offset - 1)}
-                aria-label="Previous month"
-              >
-                <ChevronLeft className="size-4" />
-              </button>
-              <button
-                type="button"
-                className="flex size-8 items-center justify-center rounded-full border border-white/15 bg-white/12 text-white/70 transition-colors hover:bg-white/20"
-                onClick={() => setMonthOffset((offset) => offset + 1)}
-                aria-label="Next month"
-              >
-                <ChevronRight className="size-4" />
-              </button>
-            </div>
-          </div>
-
-          <div className="px-5 pb-5">
-            <div className="grid grid-cols-7 gap-y-2 text-center text-[0.75rem] text-white/60">
-              {DAY_LABELS.map((label) => (
-                <span
-                  key={label}
-                  className="font-medium uppercase tracking-wide"
-                >
-                  {label}
-                </span>
-              ))}
-            </div>
-
-            <div className="mt-3 grid grid-cols-7 gap-y-2 text-center text-sm">
-              {cells.map((cell) => {
-                const dayValue = cell.date.getDate();
-                const key = `${cell.date.getFullYear()}-${cell.date.getMonth()}-${dayValue}`;
-
-                return (
-                  <span
-                    key={key}
-                    className={cn(
-                      "mx-auto flex h-9 w-9 items-center justify-center rounded-full text-sm transition-colors",
-                      cell.isToday &&
-                        "bg-white text-slate-950 shadow-[0_0.6rem_1.6rem_rgba(255,255,255,0.55)]",
-                      !cell.isToday && cell.isCurrentMonth
-                        ? "text-white/80 hover:bg-white/16"
-                        : "text-white/30",
-                    )}
-                  >
-                    {dayValue}
-                  </span>
-                );
-              })}
-            </div>
-          </div>
-        </GlassTile>
+          <span className="rounded-2xl border border-white/15 bg-white/10 px-4 py-1 text-xs text-white/70">
+            {orderedWindows.length} window
+            {orderedWindows.length === 1 ? "" : "s"} open
+          </span>
+        </div>
       </div>
 
-      <GlassTile>
-        <div className="flex items-center justify-between text-sm font-semibold text-white/80">
-          <span>Hourly outlook</span>
-          <span className="text-xs text-white/60">Feels like 24°</span>
-        </div>
-        <div className="mt-4 grid grid-cols-4 gap-3 text-center text-sm text-white/70">
-          {WEATHER_POINTS.map((point) => (
-            <div key={point.time} className="rounded-2xl bg-white/10 p-3">
-              <p className="text-xs text-white/60">{point.time}</p>
-              <div className="mt-2 flex items-center justify-center gap-1 text-base font-semibold">
-                <CloudSun className="size-4" />
-                {point.temperature}°
-              </div>
-            </div>
-          ))}
-        </div>
-      </GlassTile>
-
-      <GlassTile>
-        <div className="flex items-center justify-between text-sm font-semibold text-white/80">
-          <span>Up next</span>
-          <span className="text-xs text-white/60">Auto-sync with Calendar</span>
-        </div>
-        <ul className="mt-4 space-y-2">
-          {QUICK_EVENTS.map((event) => (
-            <li
-              key={event.id}
-              className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/10 px-4 py-2 text-sm"
-            >
-              <span className="font-medium text-white/75">
-                {event.description}
+      <div className="mt-6 grid gap-5">
+        <section className="rounded-3xl border border-white/12 bg-white/10 p-4">
+          <header className="flex items-center justify-between text-xs uppercase tracking-[0.2rem] text-white/60">
+            <span>Calendar</span>
+            <span>{monthLabel}</span>
+          </header>
+          <div className="mt-4 grid grid-cols-7 gap-2">
+            {DAY_LABELS.map((label) => (
+              <span
+                key={label}
+                className="text-center text-xs font-semibold text-white/55"
+              >
+                {label}
               </span>
-              <span className="text-xs text-white/60">{event.timeLabel}</span>
-            </li>
-          ))}
-        </ul>
-      </GlassTile>
-
-      <GlassTile>
-        <div className="flex items-center justify-between text-sm font-semibold text-white/80">
-          <div className="flex items-center gap-2">
-            <BarChart2 className="size-4" />
-            Screen time
+            ))}
           </div>
-          <span className="text-xs text-white/60">16h 58m today</span>
-        </div>
-        <div className="mt-4 space-y-3">
-          {ACTIVITY_BREAKDOWN.map((slice) => (
-            <div key={slice.id}>
-              <div className="flex items-center justify-between text-xs text-white/60">
-                <span>{slice.label}</span>
-                <span>{slice.duration}</span>
-              </div>
-              <div className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-white/12">
-                <div
-                  className={cn(
-                    "h-full rounded-full bg-gradient-to-r",
-                    slice.color,
-                  )}
-                  style={{ width: `${slice.percentage}%` }}
-                />
-              </div>
+          <div className="mt-2 grid grid-cols-7 gap-2">
+            {cells.map((cell) => (
+              <span
+                key={cell.date.toISOString()}
+                className={cn(
+                  "flex aspect-square w-full items-center justify-center rounded-2xl text-sm transition",
+                  cell.isToday
+                    ? "border border-white/45 bg-white/20 text-white shadow-[0_0.75rem_1.75rem_rgba(15,23,42,0.2)]"
+                    : "border border-white/10 bg-white/6 text-white/75",
+                  !cell.isCurrentMonth && "text-white/35",
+                )}
+              >
+                {cell.date.getDate()}
+              </span>
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded-3xl border border-white/12 bg-white/10 p-4">
+          <header className="flex items-center justify-between text-xs uppercase tracking-[0.2rem] text-white/60">
+            <span>Active Session</span>
+            <span>
+              {uniqueApps.size} app
+              {uniqueApps.size === 1 ? "" : "s"}
+            </span>
+          </header>
+          <motion.div
+            layout
+            className="mt-4 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/12 p-4"
+          >
+            <span className="flex size-11 items-center justify-center rounded-xl border border-white/15 bg-white/10">
+              {activeMeta ? (
+                <AppGlyph app={activeMeta} />
+              ) : (
+                <Monitor className="size-4 text-white/70" />
+              )}
+            </span>
+            <div className="flex-1">
+              <p className="text-sm font-semibold">
+                {activeWindow ? activeWindow.title : "Nothing focused"}
+              </p>
+              <p className="text-xs text-white/65">
+                {activeWindow && activeMeta
+                  ? `${activeMeta.title} • ${describeState(activeWindow)}`
+                  : "Pick a window to bring it to the front."}
+              </p>
             </div>
-          ))}
-        </div>
-      </GlassTile>
-    </section>
+            {activeWindow ? (
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => handleFocusWindow(activeWindow)}
+                className="rounded-xl border border-white/15 bg-white/10 px-3 py-1 text-xs text-white/75 transition hover:border-white/25 hover:bg-white/20 hover:text-white"
+              >
+                Focus
+              </Button>
+            ) : null}
+          </motion.div>
+
+          <div className="mt-4 grid grid-cols-3 gap-3">
+            {sessionStats.map((stat) => (
+              <div
+                key={stat.label}
+                className="rounded-2xl border border-white/10 bg-white/12 px-4 py-3"
+              >
+                <p className="text-xs text-white/55">{stat.label}</p>
+                <p className="mt-1 text-base font-semibold text-white">
+                  {stat.value}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded-3xl border border-white/12 bg-white/10 p-4">
+          <header className="flex items-center justify-between text-xs uppercase tracking-[0.2rem] text-white/60">
+            <span className="flex items-center gap-2">
+              <Clock3 className="size-3.5" /> Today’s Flow
+            </span>
+            <span>
+              {todayWindows.length} session
+              {todayWindows.length === 1 ? "" : "s"}
+            </span>
+          </header>
+          <div className="mt-4 space-y-3">
+            {todayWindows.length === 0 ? (
+              <p className="text-sm text-white/65">
+                Launch an app to start logging today’s usage.
+              </p>
+            ) : (
+              todayWindows.slice(0, 5).map((win) => {
+                const meta = apps[win.appId];
+                const createdAt = new Date(win.createdAt);
+                return (
+                  <motion.button
+                    key={win.id}
+                    type="button"
+                    whileHover={{ translateY: -2 }}
+                    whileTap={{ translateY: 0 }}
+                    onClick={() => handleFocusWindow(win)}
+                    className="flex w-full items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/12 px-4 py-3 text-left text-white/80 transition hover:border-white/20 hover:bg-white/16 hover:text-white"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="flex size-10 items-center justify-center rounded-xl border border-white/15 bg-white/10">
+                        {meta ? (
+                          <AppGlyph app={meta} />
+                        ) : (
+                          <Monitor className="size-4 text-white/70" />
+                        )}
+                      </span>
+                      <div>
+                        <p className="text-sm font-semibold leading-tight">
+                          {win.title}
+                        </p>
+                        <p className="text-xs text-white/65">
+                          {timeFormatter.format(createdAt)}
+                          {meta ? ` • ${meta.title}` : ""}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end text-xs text-white/55">
+                      <span>{describeState(win)}</span>
+                      <span className="text-[0.65rem] uppercase tracking-wider">
+                        Focus
+                      </span>
+                    </div>
+                  </motion.button>
+                );
+              })
+            )}
+          </div>
+        </section>
+      </div>
+    </GlassTile>
   );
 }
