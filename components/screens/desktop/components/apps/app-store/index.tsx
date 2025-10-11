@@ -75,7 +75,7 @@ export function AppStoreApp({ instanceId: _ }: { instanceId: string }) {
       {/* Body */}
       <div className="flex h-full w-full overflow-hidden">
         {/* Sidebar */}
-        <aside className="flex w-[180px] flex-col border-r border-white/5 bg-white/[0.02]">
+        <aside className="flex w-[180px] flex-col border-r border-white/5 bg-white/[0.02] rounded-2xl m-2 mb-3 mt-0 mr-0">
           <div className="flex flex-col gap-4 p-3">
             <SidebarSection title="Discover">
               <SidebarItem
