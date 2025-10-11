@@ -34,16 +34,19 @@ function AppShell() {
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-    const easeOutCubic = (t: number) => 1 - (1 - t) ** 3;
-    const MIN_RATE = 0.1;
-    const SLOWDOWN_DURATION = 1400;
+    const easeOutQuint = (t: number) => 1 - (1 - t) ** 5;
+    const MIN_RATE = 0.35;
+    const SLOWDOWN_DURATION = 1800;
+    const FREEZE_DELAY = 200;
 
     let frameId: number | undefined;
+    let freezeTimeout: number | undefined;
     let cancelled = false;
 
     const cancelAnimation = () => {
       cancelled = true;
       if (frameId !== undefined) cancelAnimationFrame(frameId);
+      if (freezeTimeout !== undefined) clearTimeout(freezeTimeout);
     };
 
     if (isDesktop) {
@@ -67,7 +70,7 @@ function AppShell() {
 
           const elapsed = timestamp - startTime;
           const progress = Math.min(elapsed / SLOWDOWN_DURATION, 1);
-          const eased = easeOutCubic(progress);
+          const eased = easeOutQuint(progress);
           const rateDrop = initialRate - MIN_RATE;
           const nextRate = initialRate - rateDrop * eased;
 
@@ -76,8 +79,11 @@ function AppShell() {
           if (progress < 1) {
             frameId = requestAnimationFrame(step);
           } else {
-            video.pause();
-            video.playbackRate = 1;
+            freezeTimeout = window.setTimeout(() => {
+              if (cancelled) return;
+              video.pause();
+              video.playbackRate = 1;
+            }, FREEZE_DELAY);
           }
         };
 
