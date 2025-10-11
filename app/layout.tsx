@@ -28,7 +28,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${figtree.variable} antialiased`}>
+      <body
+        className={`${inter.variable} ${figtree.variable} antialiased font-[Figtree]`}
+      >
         <MotionConfig reducedMotion="never">{children}</MotionConfig>
 
         {/* SVG Filters */}
