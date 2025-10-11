@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Figtree, Inter } from "next/font/google";
 import "./globals.css";
 import { MotionConfig } from "motion/react";
 import LiquidGlassFilters from "@/components/screens/login/components/liquid-glass-filters";
@@ -9,9 +9,16 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
+const figtree = Figtree({
+  preload: true,
+  weight: "variable",
+  variable: "--font-figtree",
+});
+
 export const metadata: Metadata = {
-  title: "Mohamed Bechir Mejri",
-  description: "Personal website of Mohamed Bechir Mejri --Software Engineer",
+  title: "MBMOS",
+  description:
+    "A macOS-inspired desktop environment in your browser. a collection of web apps and experiences. created by Mohamed Bechir Mejri",
 };
 
 export default function RootLayout({
@@ -21,7 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} antialiased`}>
+      <body className={`${inter.variable} ${figtree.variable} antialiased`}>
         <MotionConfig reducedMotion="never">{children}</MotionConfig>
 
         {/* SVG Filters */}
