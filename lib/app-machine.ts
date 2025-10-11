@@ -4,7 +4,7 @@ export type AppScreen = "boot" | "login" | "desktop";
 
 export const appMachine = createMachine({
   id: "app",
-  initial: "desktop", // TODO: set this to boot when done.
+  initial: "boot", // TODO: set this to boot when done.
   states: {
     boot: {
       on: { BOOT_FINISHED: "login" },
