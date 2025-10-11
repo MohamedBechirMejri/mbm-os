@@ -2,7 +2,10 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
-
+import { CalendarPanel } from "@/components/screens/desktop/components/menu-bar/components/calendar-panel";
+import { ControlCenterPanel } from "@/components/screens/desktop/components/menu-bar/components/control-center-panel";
+import { SearchOverlay } from "@/components/screens/desktop/components/menu-bar/components/search-overlay";
+import { useDesktop } from "@/components/screens/desktop/components/window-manager";
 import { Menubar } from "@/components/ui/menubar";
 import {
   AppleMenu,
@@ -13,8 +16,6 @@ import {
   SearchIcon,
   WiFiIndicator,
 } from "./components";
-import { CalendarPanel } from "./components/calendar-panel";
-import { ControlCenterPanel } from "./components/control-center-panel";
 
 type MenuBarPanel = "calendar" | "control-center";
 
@@ -22,13 +23,23 @@ export default function MenuBar() {
   const menuBarRef = useRef<HTMLDivElement>(null);
   const [activePanel, setActivePanel] = useState<MenuBarPanel | null>(null);
   const [currentTime, setCurrentTime] = useState<Date>(() => new Date());
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const apps = useDesktop((state) => Object.values(state.apps));
+  const windows = useDesktop((state) => Object.values(state.windows));
 
-  const closePanels = useCallback(() => {
+  const closeOverlays = useCallback(() => {
     setActivePanel(null);
+    setIsSearchOpen(false);
   }, []);
 
   const togglePanel = useCallback((panel: MenuBarPanel) => {
+    setIsSearchOpen(false);
     setActivePanel((current) => (current === panel ? null : panel));
+  }, []);
+
+  const toggleSearch = useCallback(() => {
+    setActivePanel(null);
+    setIsSearchOpen((current) => !current);
   }, []);
 
   useEffect(() => {
@@ -42,7 +53,7 @@ export default function MenuBar() {
   }, []);
 
   useEffect(() => {
-    if (!activePanel) {
+    if (!activePanel && !isSearchOpen) {
       return;
     }
 
@@ -57,12 +68,12 @@ export default function MenuBar() {
         return;
       }
 
-      closePanels();
+      closeOverlays();
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        closePanels();
+        closeOverlays();
       }
     };
 
@@ -73,7 +84,7 @@ export default function MenuBar() {
       window.removeEventListener("pointerdown", handlePointerDown);
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [activePanel, closePanels]);
+  }, [activePanel, closeOverlays, isSearchOpen]);
 
   return (
     <div ref={menuBarRef} className="relative z-50">
@@ -89,10 +100,9 @@ export default function MenuBar() {
           <div
             onPointerDown={(event) => {
               event.stopPropagation();
-              closePanels();
             }}
           >
-            <SearchIcon />
+            <SearchIcon isActive={isSearchOpen} onToggle={toggleSearch} />
           </div>
           <ControlCenterButton
             isActive={activePanel === "control-center"}
@@ -101,7 +111,7 @@ export default function MenuBar() {
           <div
             onPointerDown={(event) => {
               event.stopPropagation();
-              closePanels();
+              closeOverlays();
             }}
           >
             <WiFiIndicator />
@@ -109,7 +119,7 @@ export default function MenuBar() {
           <div
             onPointerDown={(event) => {
               event.stopPropagation();
-              closePanels();
+              closeOverlays();
             }}
           >
             <BatteryIndicator />
@@ -133,7 +143,7 @@ export default function MenuBar() {
             className="absolute right-2 top-9"
             onPointerDown={(event) => event.stopPropagation()}
           >
-            <ControlCenterPanel onClose={closePanels} />
+            <ControlCenterPanel onClose={closeOverlays} />
           </motion.div>
         )}
 
@@ -151,6 +161,13 @@ export default function MenuBar() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <SearchOverlay
+        open={isSearchOpen}
+        apps={apps}
+        windows={windows}
+        onClose={closeOverlays}
+      />
     </div>
   );
 }
