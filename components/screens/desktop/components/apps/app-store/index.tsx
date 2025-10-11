@@ -6,7 +6,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { TitlebarPortal } from "../../window-manager/components/window-view/titlebar-portal";
 import { CATEGORIES, EXPERIMENT_APPS, getFeaturedApps } from "./data";
 import type { Category, CategoryInfo, ExperimentApp } from "./types";
 
