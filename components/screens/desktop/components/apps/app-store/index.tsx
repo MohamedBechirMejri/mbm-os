@@ -59,16 +59,6 @@ export function AppStoreApp({ instanceId: _ }: { instanceId: string }) {
             </div>
           )}
         </div>
-
-        <div className="relative w-[14rem] max-w-[40vw] pointer-events-auto">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-white/50" />
-          <Input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search experiments..."
-            className="h-7 w-full rounded-lg bg-black/20 pl-8 text-[0.8125rem] text-white placeholder:text-white/50 border-white/10"
-          />
-        </div>
       </div>
 
       {/* Body */}
@@ -76,6 +66,15 @@ export function AppStoreApp({ instanceId: _ }: { instanceId: string }) {
         {/* Sidebar */}
         <aside className="flex w-[180px] flex-col border-r border-white/5 bg-white/[0.02] rounded-2xl m-2 mb-3 mt-0 mr-0">
           <div className="flex flex-col gap-4 p-3">
+            <div className="relative w-[14rem] max-w-[40vw] pointer-events-auto">
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-white/50" />
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search experiments..."
+                className="h-7 w-full rounded-lg bg-black/20 pl-8 text-[0.8125rem] text-white placeholder:text-white/50 border-white/10"
+              />
+            </div>
             <SidebarSection title="Discover">
               <SidebarItem
                 label="Featured"
