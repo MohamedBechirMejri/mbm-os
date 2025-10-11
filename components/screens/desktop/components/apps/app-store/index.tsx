@@ -38,7 +38,7 @@ export function AppStoreApp({ instanceId: _ }: { instanceId: string }) {
       : null;
 
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden bg-[#0E1116aa]">
+    <div className="flex h-full w-full flex-col overflow-hidden bg-[#1D1F21]">
       {/* Titlebar toolbar */}
       <div className="flex w-full items-center justify-between gap-3 px-3 py-1.5 pointer-events-none">
         <div className="flex items-center gap-2 pl-16">
