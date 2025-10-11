@@ -39,40 +39,38 @@ export function AppStoreApp({ instanceId: _ }: { instanceId: string }) {
       : null;
 
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden bg-[#0E1116]">
+    <div className="flex h-full w-full flex-col overflow-hidden bg-[#0E1116aa]">
       {/* Titlebar toolbar */}
-      <TitlebarPortal>
-        <div className="flex w-full items-center justify-between gap-3 px-2 py-1.5 pointer-events-none">
-          <div className="flex items-center gap-2">
-            {view.type !== "discover" && (
-              <Button
-                size="icon"
-                variant="ghost"
-                className="size-7 rounded-full text-white/90 hover:bg-white/10 pointer-events-auto"
-                onClick={() => setView({ type: "discover" })}
-                aria-label="Back to Discover"
-              >
-                <ArrowLeft className="size-4" />
-              </Button>
-            )}
-            {currentCategory && (
-              <div className="flex items-center gap-2 text-[0.8125rem] text-white/80 pointer-events-none">
-                <span>{currentCategory.name}</span>
-              </div>
-            )}
-          </div>
-
-          <div className="relative w-[14rem] max-w-[40vw] pointer-events-auto">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-white/50" />
-            <Input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search experiments..."
-              className="h-7 w-full rounded-lg bg-black/20 pl-8 text-[0.8125rem] text-white placeholder:text-white/50 border-white/10"
-            />
-          </div>
+      <div className="flex w-full items-center justify-between gap-3 px-3 py-1.5 pointer-events-none">
+        <div className="flex items-center gap-2 pl-16">
+          {view.type !== "discover" && (
+            <Button
+              size="icon"
+              variant="ghost"
+              className="size-7 rounded-full text-white/90 hover:bg-white/10 pointer-events-auto"
+              onClick={() => setView({ type: "discover" })}
+              aria-label="Back to Discover"
+            >
+              <ArrowLeft className="size-4" />
+            </Button>
+          )}
+          {currentCategory && (
+            <div className="flex items-center gap-2 text-[0.8125rem] text-white/80 pointer-events-none">
+              <span>{currentCategory.name}</span>
+            </div>
+          )}
         </div>
-      </TitlebarPortal>
+
+        <div className="relative w-[14rem] max-w-[40vw] pointer-events-auto">
+          <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-white/50" />
+          <Input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search experiments..."
+            className="h-7 w-full rounded-lg bg-black/20 pl-8 text-[0.8125rem] text-white placeholder:text-white/50 border-white/10"
+          />
+        </div>
+      </div>
 
       {/* Body */}
       <div className="flex h-full w-full overflow-hidden">
