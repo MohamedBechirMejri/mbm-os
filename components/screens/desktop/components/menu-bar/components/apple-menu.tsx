@@ -1,6 +1,5 @@
 "use client";
 
-import { useMachine } from "@xstate/react";
 import {
   MenubarContent,
   MenubarItem,
@@ -9,17 +8,22 @@ import {
   MenubarShortcut,
   MenubarTrigger,
 } from "@/components/ui/menubar";
-import { appMachine } from "@/lib/app-machine";
+import { useAppActor } from "@/lib/app-machine-context";
 import { DesktopAPI } from "../../window-manager";
 import { useMenuActions } from "../hooks/use-menu-actions";
 
 export function AppleMenu() {
-  const [, send] = useMachine(appMachine);
+  const appActor = useAppActor();
   const { closeAllWindows } = useMenuActions();
 
   const handleLockScreen = () => {
     closeAllWindows();
-    send({ type: "BOOT_FINISHED" }); // Go to login screen
+    appActor.send({ type: "LOCK" });
+  };
+
+  const handleLogOut = () => {
+    closeAllWindows();
+    appActor.send({ type: "LOGOUT" });
   };
 
   const handleRestart = () => {
@@ -75,7 +79,7 @@ export function AppleMenu() {
         <MenubarItem onClick={handleLockScreen}>
           Lock Screen <MenubarShortcut>⌃⌘Q</MenubarShortcut>
         </MenubarItem>
-        <MenubarItem onClick={handleLockScreen}>Log Out...</MenubarItem>
+        <MenubarItem onClick={handleLogOut}>Log Out...</MenubarItem>
       </MenubarContent>
     </MenubarMenu>
   );

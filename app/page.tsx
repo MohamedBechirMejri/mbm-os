@@ -1,35 +1,119 @@
 "use client";
 
-import { useMachine } from "@xstate/react";
 import { AnimatePresence } from "motion/react";
+import { useEffect, useRef } from "react";
 import BootScreen from "@/components/screens/boot";
 import Desktop from "@/components/screens/desktop";
 import LoginScreen from "@/components/screens/login";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { appMachine } from "@/lib/app-machine";
+import {
+  AppMachineProvider,
+  useAppActor,
+  useAppSnapshot,
+} from "@/lib/app-machine-context";
 import { cn } from "@/lib/utils";
 
-export default function AppShell() {
-  const [state, send] = useMachine(appMachine);
+export default function AppShellRoot() {
+  return (
+    <AppMachineProvider>
+      <AppShell />
+    </AppMachineProvider>
+  );
+}
 
+function AppShell() {
+  const appActor = useAppActor();
+  const state = useAppSnapshot();
   const isMobile = useIsMobile();
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  const isBoot = state.matches("boot");
+  const isLogin = state.matches("login");
+  const isDesktop = state.matches("desktop");
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const easeOutCubic = (t: number) => 1 - (1 - t) ** 3;
+    const MIN_RATE = 0.1;
+    const SLOWDOWN_DURATION = 1400;
+
+    let frameId: number | undefined;
+    let cancelled = false;
+
+    const cancelAnimation = () => {
+      cancelled = true;
+      if (frameId !== undefined) cancelAnimationFrame(frameId);
+    };
+
+    if (isDesktop) {
+      const runSlowdown = async () => {
+        try {
+          video.playbackRate = 1;
+          if (video.paused) {
+            await video.play();
+          }
+        } catch {
+          // Autoplay might be blocked; nothing we can do except bail quietly.
+          return;
+        }
+
+        const initialRate = video.playbackRate || 1;
+        let startTime: number | null = null;
+
+        const step = (timestamp: number) => {
+          if (cancelled) return;
+          if (startTime === null) startTime = timestamp;
+
+          const elapsed = timestamp - startTime;
+          const progress = Math.min(elapsed / SLOWDOWN_DURATION, 1);
+          const eased = easeOutCubic(progress);
+          const rateDrop = initialRate - MIN_RATE;
+          const nextRate = initialRate - rateDrop * eased;
+
+          video.playbackRate = Math.max(nextRate, MIN_RATE);
+
+          if (progress < 1) {
+            frameId = requestAnimationFrame(step);
+          } else {
+            video.pause();
+            video.playbackRate = 1;
+          }
+        };
+
+        frameId = requestAnimationFrame(step);
+      };
+
+      runSlowdown();
+
+      return () => cancelAnimation();
+    }
+
+    cancelAnimation();
+    video.playbackRate = 1;
+    if (video.paused) {
+      void video.play().catch(() => {});
+    }
+
+    return () => cancelAnimation();
+  }, [isDesktop]);
 
   const renderScreen = () => {
-    if (state.matches("boot"))
+    if (isBoot)
       return (
         <BootScreen
           onDone={() => {
-            send({ type: "BOOT_FINISHED" });
+            appActor.send({ type: "BOOT_FINISHED" });
             console.log("Boot finished");
           }}
         />
       );
 
-    if (state.matches("login"))
+    if (isLogin)
       return (
         <LoginScreen
           key="login"
-          onSuccess={() => send({ type: "LOGIN_SUCCESS" })}
+          onSuccess={() => appActor.send({ type: "LOGIN_SUCCESS" })}
         />
       );
 
@@ -47,16 +131,16 @@ export default function AppShell() {
   return (
     <main className="font-sans flex items-center justify-center h-screen w-full bg-black">
       <video
+        ref={videoRef}
         src="/assets/videos/3089895-hd_1920_1080_30fps.mp4"
         className={cn(
           "absolute inset-0 object-cover w-full h-full",
-          state.matches("boot")
-            ? "opacity-0"
-            : "opacity-100 transition-opacity duration-500",
+          isBoot ? "opacity-0" : "opacity-100 transition-opacity duration-500",
         )}
         autoPlay
         loop
         muted
+        playsInline
       />
 
       <AnimatePresence mode="wait">{renderScreen()}</AnimatePresence>
