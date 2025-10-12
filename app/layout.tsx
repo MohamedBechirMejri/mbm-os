@@ -29,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.variable} ${figtree.variable} antialiased font-[Figtree]`}
+        className={`${inter.variable} ${figtree.variable} antialiased font-[Figtree] overflow-hidden overscroll-none`}
       >
         <MotionConfig reducedMotion="never">{children}</MotionConfig>
 
