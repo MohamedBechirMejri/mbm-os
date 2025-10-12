@@ -23,7 +23,15 @@ type CalendarCell = {
   isToday: boolean;
 };
 
-const DAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"] as const;
+const DAY_LABELS = [
+  { id: "sun", label: "S" },
+  { id: "mon", label: "M" },
+  { id: "tue", label: "T" },
+  { id: "wed", label: "W" },
+  { id: "thu", label: "T" },
+  { id: "fri", label: "F" },
+  { id: "sat", label: "S" },
+] as const;
 
 const tileBase =
   "relative overflow-hidden rounded-3xl border border-white/12 bg-[linear-gradient(145deg,rgba(255,255,255,0.35)_0%,rgba(255,255,255,0.12)_45%,rgba(92,139,255,0.08)_100%)] p-5 shadow-[0_1.25rem_2.75rem_rgba(15,23,42,0.36)] backdrop-blur-3xl";
@@ -251,12 +259,12 @@ export function CalendarPanel({ referenceDate }: CalendarPanelProps) {
             <span>{monthLabel}</span>
           </header>
           <div className="mt-4 grid grid-cols-7 gap-2">
-            {DAY_LABELS.map((label) => (
+            {DAY_LABELS.map((day) => (
               <span
-                key={label}
+                key={day.id}
                 className="text-center text-xs font-semibold text-white/55"
               >
-                {label}
+                {day.label}
               </span>
             ))}
           </div>
