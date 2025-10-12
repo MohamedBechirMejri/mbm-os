@@ -16,7 +16,7 @@ const figtree = Figtree({
 });
 
 export const metadata: Metadata = {
-  title: "MBMOS",
+  title: "mbmOS",
   description:
     "A macOS-inspired desktop environment in your browser. a collection of web apps and experiences. created by Mohamed Bechir Mejri",
 };
