@@ -21,7 +21,7 @@ export function CalendarSummary({
   onAdjustMonth,
 }: CalendarSummaryProps) {
   return (
-    <div className="flex items-start justify-between">
+    <div className="grid grid-cols-[auto_minmax(0,1fr)] items-start justify-between gap-4">
       <div className="bg-[#F4F4F4] rounded-4xl px-8 py-4 flex flex-col items-center shadow-xl">
         <p className="capitalize gap-1 flex font-bold items-center text-2xl">
           <span className="text-rose-500">{dayLabel.slice(0, 3)}</span>
@@ -31,7 +31,7 @@ export function CalendarSummary({
           {dayNumber}
         </h1>
       </div>
-      <div className="flex flex-col items-end gap-3">
+      <div className="flex flex-col items-end gap-3 bg-[#F4F4F4] w-full h-full p-4 rounded-4xl shadow-xl">
         <div className="flex gap-2">
           <Button
             type="button"
