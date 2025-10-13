@@ -22,14 +22,14 @@ export function CalendarSummary({
 }: CalendarSummaryProps) {
   return (
     <div className="flex items-start justify-between gap-6">
-      <div>
-        <p className="text-xs uppercase tracking-[0.22rem]">{dayLabel}</p>
-        <div className="mt-3 flex items-baseline gap-3">
-          <span className="text-5xl font-semibold leading-none">
-            {dayNumber}
-          </span>
-          <span className="text-lg">{monthLabel}</span>
-        </div>
+      <div className="bg-[#F4F4F4] rounded-2xl px-4 py-3 flex flex-col items-center">
+        <p className="capitalize gap-1 flex font-bold text-xl">
+          <span className="text-rose-500">{dayLabel.slice(0, 3)}</span>
+          <span className="text-gray-500">{monthLabel.slice(0, 3)}</span>
+        </p>
+        <h1 className="flex items-baseline gap-3 text-7xl font-semibold leading-none">
+          {dayNumber}
+        </h1>
       </div>
       <div className="flex flex-col items-end gap-3">
         <div className="flex gap-2">

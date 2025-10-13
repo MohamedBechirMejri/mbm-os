@@ -11,16 +11,13 @@ type CalendarSectionProps = {
 export function CalendarSection({ monthLabel, cells }: CalendarSectionProps) {
   return (
     <section className="rounded-3xl p-4">
-      <header className="flex items-center justify-between text-xs uppercase tracking-[0.2rem]">
+      <header className="flex items-center justify-between text-xs uppercase tracking-[0.2rem] bg-[#F4F4F4]">
         <span>Calendar</span>
         <span>{monthLabel}</span>
       </header>
       <div className="mt-4 grid grid-cols-7 gap-2">
         {DAY_LABELS.map((day) => (
-          <span
-            key={day.id}
-            className="text-center text-xs font-semibold"
-          >
+          <span key={day.id} className="text-center text-xs font-semibold">
             {day.label}
           </span>
         ))}
@@ -31,9 +28,7 @@ export function CalendarSection({ monthLabel, cells }: CalendarSectionProps) {
             key={cell.date.toISOString()}
             className={cn(
               "flex aspect-square w-full items-center justify-center rounded-2xl text-sm transition",
-              cell.isToday
-                ? ""
-                : "",
+              cell.isToday ? "" : "",
               !cell.isCurrentMonth && "",
             )}
           >
