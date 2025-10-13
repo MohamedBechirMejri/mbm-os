@@ -1,4 +1,4 @@
-import { motion, useMotionValue, useSpring } from "framer-motion";
+import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -48,46 +48,34 @@ function generateTicks({ width, height }: { width: number; height: number }) {
   return ticks;
 }
 
-function calculateOpacity(tickIndex: number, currentSecond: number): number {
-  // Calculate distance considering wrapping
-  let distance = tickIndex - currentSecond;
-  if (distance > TICK_COUNT / 2) distance -= TICK_COUNT;
-  if (distance < -TICK_COUNT / 2) distance += TICK_COUNT;
+function calculateOpacity(tickProgress: number, currentSecond: number): number {
+  const currentProgress = (currentSecond % TICK_COUNT) / TICK_COUNT;
 
-  // Future ticks (not yet reached)
-  if (distance > 0) return 0.2;
+  // Wrap distance on the unit circle so the highlight glides smoothly past 0 → 1.
+  let distance = Math.abs(tickProgress - currentProgress);
+  distance = Math.min(distance, 1 - distance);
 
-  // Current and near-past ticks with gradient
-  const gradientRange = 2;
-  if (distance >= -gradientRange) {
-    // Smooth interpolation from 1.0 (current) to 0.5 (edge of gradient)
-    const progress = Math.abs(distance) / gradientRange;
-    return 1 - progress * 0.5; // 1.0 → 0.5
-  }
+  // Soft falloff tuned to feel glassy rather than "snake"-like.
+  const glowRadius = 0.12;
+  const normalized = Math.max(0, 1 - distance / glowRadius);
+  const smootherstep = normalized * normalized * (3 - 2 * normalized);
 
-  // Past ticks
-  return 0.5;
+  const baseOpacity = 0.18;
+  const peakOpacity = 1;
+
+  return baseOpacity + (peakOpacity - baseOpacity) * smootherstep;
 }
 
 function Tick({
   tick,
   index,
-  seconds,
+  fractionalSeconds,
 }: {
   tick: { x: number; y: number; rotation: number; progress: number };
   index: number;
-  seconds: number;
+  fractionalSeconds: number;
 }) {
-  const targetOpacity = calculateOpacity(index, seconds);
-  const opacity = useMotionValue(targetOpacity);
-  const smoothOpacity = useSpring(opacity, {
-    stiffness: 100,
-    damping: 30,
-    mass: 0.5,
-  });
-
-  // Update target opacity when seconds change
-  opacity.set(targetOpacity);
+  const opacity = calculateOpacity(tick.progress, fractionalSeconds);
 
   return (
     <motion.span
@@ -102,7 +90,7 @@ function Tick({
         top: `${tick.y}px`,
         transform: `translate(-50%, -50%) rotate(${tick.rotation}deg)`,
         backgroundColor: "black",
-        opacity: smoothOpacity,
+        opacity,
       }}
     />
   );
@@ -119,6 +107,7 @@ export default function ClockWidget({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [fractionalSeconds, setFractionalSeconds] = useState(seconds);
 
   // Measure container dimensions
   useEffect(() => {
@@ -142,6 +131,22 @@ export default function ClockWidget({
     return () => observer.disconnect();
   }, []);
 
+  // Update fractional seconds continuously for smooth animation
+  useEffect(() => {
+    let rafId: number;
+
+    const updateFractionalSeconds = () => {
+      const now = Date.now();
+      const fractional = (now / 1000) % 60;
+      setFractionalSeconds(fractional);
+      rafId = requestAnimationFrame(updateFractionalSeconds);
+    };
+
+    rafId = requestAnimationFrame(updateFractionalSeconds);
+
+    return () => cancelAnimationFrame(rafId);
+  }, []);
+
   const ticks =
     dimensions.width > 0
       ? generateTicks({ width: dimensions.width, height: dimensions.height })
@@ -159,7 +164,7 @@ export default function ClockWidget({
             key={`${tick.x}-${tick.y}-${index}`}
             tick={tick}
             index={index}
-            seconds={seconds}
+            fractionalSeconds={fractionalSeconds}
           />
         ))}
       </div>
