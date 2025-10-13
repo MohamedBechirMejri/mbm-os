@@ -174,7 +174,7 @@ export default function ClockWidget({
           />
         ))}
       </div>
-      <p className="flex flex-col items-center">
+      <div className="flex flex-col items-center">
         <div className="text-3xl font-semibold tracking-tight flex items-center">
           <Counter
             value={hours}
@@ -191,7 +191,7 @@ export default function ClockWidget({
           />
         </div>
         <span className="text-sm text-black/60">{timeZone}</span>
-      </p>
+      </div>
     </div>
   );
 }
