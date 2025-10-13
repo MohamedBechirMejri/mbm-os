@@ -1,4 +1,5 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { motion, useMotionValue, useSpring } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 const TICK_COUNT = 60;
@@ -47,6 +48,66 @@ function generateTicks({ width, height }: { width: number; height: number }) {
   return ticks;
 }
 
+function calculateOpacity(tickIndex: number, currentSecond: number): number {
+  // Calculate distance considering wrapping
+  let distance = tickIndex - currentSecond;
+  if (distance > TICK_COUNT / 2) distance -= TICK_COUNT;
+  if (distance < -TICK_COUNT / 2) distance += TICK_COUNT;
+
+  // Future ticks (not yet reached)
+  if (distance > 0) return 0.2;
+
+  // Current and near-past ticks with gradient
+  const gradientRange = 2;
+  if (distance >= -gradientRange) {
+    // Smooth interpolation from 1.0 (current) to 0.5 (edge of gradient)
+    const progress = Math.abs(distance) / gradientRange;
+    return 1 - progress * 0.5; // 1.0 → 0.5
+  }
+
+  // Past ticks
+  return 0.5;
+}
+
+function Tick({
+  tick,
+  index,
+  seconds,
+}: {
+  tick: { x: number; y: number; rotation: number; progress: number };
+  index: number;
+  seconds: number;
+}) {
+  const targetOpacity = calculateOpacity(index, seconds);
+  const opacity = useMotionValue(targetOpacity);
+  const smoothOpacity = useSpring(opacity, {
+    stiffness: 100,
+    damping: 30,
+    mass: 0.5,
+  });
+
+  // Update target opacity when seconds change
+  opacity.set(targetOpacity);
+
+  return (
+    <motion.span
+      className={cn(
+        "absolute origin-center",
+        index % 5 === 0
+          ? "h-4 w-[0.1875rem] rounded-full"
+          : "h-2 w-[0.125rem] rounded-full",
+      )}
+      style={{
+        left: `${tick.x}px`,
+        top: `${tick.y}px`,
+        transform: `translate(-50%, -50%) rotate(${tick.rotation}deg)`,
+        backgroundColor: "black",
+        opacity: smoothOpacity,
+      }}
+    />
+  );
+}
+
 export default function ClockWidget({
   formattedTime,
   timeZone,
@@ -59,20 +120,24 @@ export default function ClockWidget({
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
-  useLayoutEffect(() => {
+  // Measure container dimensions
+  useEffect(() => {
     if (!containerRef.current) return;
 
-    const updateDimensions = () => {
-      const rect = containerRef.current?.getBoundingClientRect();
-      if (rect) {
-        setDimensions({ width: rect.width, height: rect.height });
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (entry) {
+        setDimensions({
+          width: entry.contentRect.width,
+          height: entry.contentRect.height,
+        });
       }
-    };
+    });
 
-    updateDimensions();
-
-    const observer = new ResizeObserver(updateDimensions);
     observer.observe(containerRef.current);
+    // Initial measurement
+    const rect = containerRef.current.getBoundingClientRect();
+    setDimensions({ width: rect.width, height: rect.height });
 
     return () => observer.disconnect();
   }, []);
@@ -89,47 +154,14 @@ export default function ClockWidget({
         aria-hidden="true"
         className="pointer-events-none absolute inset-3 z-20 rounded-[2.5rem]"
       >
-        {ticks.map((tick, index) => {
-          // Calculate smooth opacity based on distance from current second
-          const distanceFromCurrent = Math.abs(index - seconds);
-          const wrapDistance = Math.min(
-            distanceFromCurrent,
-            TICK_COUNT - distanceFromCurrent,
-          );
-
-          // Smooth gradient: fully dark at current, gradually lighter within 3 ticks
-          const gradientRange = 3;
-          let opacity: number;
-
-          if (wrapDistance === 0) {
-            opacity = 1; // Current second - fully dark
-          } else if (wrapDistance <= gradientRange) {
-            // Gradient zone - smooth transition
-            opacity = 0.5 + (1 - wrapDistance / gradientRange) * 0.5;
-          } else if (index < seconds) {
-            opacity = 0.5; // Past seconds
-          } else {
-            opacity = 0.2; // Future seconds
-          }
-
-          return (
-            <span
-              key={`${tick.progress}${tick.x}${tick.y}`}
-              className={cn(
-                "absolute origin-center transition-opacity duration-1000 ease-out",
-                index % 5 === 0
-                  ? "h-4 w-[0.1875rem] rounded-full"
-                  : "h-2 w-[0.125rem] rounded-full",
-              )}
-              style={{
-                left: `${tick.x}px`,
-                top: `${tick.y}px`,
-                transform: `translate(-50%, -50%) rotate(${tick.rotation}deg)`,
-                backgroundColor: `rgba(0, 0, 0, ${opacity})`,
-              }}
-            />
-          );
-        })}
+        {ticks.map((tick, index) => (
+          <Tick
+            key={`${tick.x}-${tick.y}-${index}`}
+            tick={tick}
+            index={index}
+            seconds={seconds}
+          />
+        ))}
       </div>
       <p className="flex flex-col items-center">
         <span className="text-5xl font-semibold tracking-tight">
