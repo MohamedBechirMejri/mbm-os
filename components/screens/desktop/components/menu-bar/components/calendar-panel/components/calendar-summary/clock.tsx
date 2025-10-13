@@ -4,6 +4,8 @@ import Counter from "@/components/ui/counter";
 import { cn } from "@/lib/utils";
 
 const TICK_COUNT = 60;
+const BASE_OPACITY = 0.18;
+const HIGHLIGHT_OPACITY = 1;
 
 function generateTicks({ width, height }: { width: number; height: number }) {
   const ticks = [];
@@ -49,37 +51,33 @@ function generateTicks({ width, height }: { width: number; height: number }) {
   return ticks;
 }
 
-function calculateOpacity(tickProgress: number, currentSecond: number): number {
-  const currentProgress = (currentSecond % TICK_COUNT) / TICK_COUNT;
+type HighlightState = {
+  currentIndex: number;
+};
 
-  // Wrap distance on the unit circle so the highlight glides smoothly past 0 → 1.
-  let distance = Math.abs(tickProgress - currentProgress);
-  distance = Math.min(distance, 1 - distance);
+function getTickOpacity(index: number, state: HighlightState): number {
+  if (index < state.currentIndex) {
+    return HIGHLIGHT_OPACITY;
+  }
 
-  // Soft falloff tuned to feel glassy rather than "snake"-like.
-  const glowRadius = 0.12;
-  const normalized = Math.max(0, 1 - distance / glowRadius);
-  const smootherstep = normalized * normalized * (3 - 2 * normalized);
+  if (index === state.currentIndex) {
+    // Keep the active tick fully lit while we wait for the next second.
+    return HIGHLIGHT_OPACITY;
+  }
 
-  const baseOpacity = 0.18;
-  const peakOpacity = 1;
-
-  return baseOpacity + (peakOpacity - baseOpacity) * smootherstep;
+  return BASE_OPACITY;
 }
 
 function Tick({
   tick,
   index,
-  fractionalSeconds,
+  highlightState,
 }: {
   tick: { x: number; y: number; rotation: number; progress: number };
   index: number;
-  fractionalSeconds: number;
+  highlightState: HighlightState;
 }) {
-  const opacity =
-    index < fractionalSeconds - 1
-      ? 1
-      : calculateOpacity(tick.progress, fractionalSeconds);
+  const opacity = getTickOpacity(index, highlightState);
 
   return (
     <motion.span
@@ -89,12 +87,14 @@ function Tick({
           ? "h-4 w-[0.1875rem] rounded-full"
           : "h-2 w-[0.125rem] rounded-full",
       )}
+      initial={false}
+      animate={{ opacity }}
+      transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
       style={{
         left: `${tick.x}px`,
         top: `${tick.y}px`,
         transform: `translate(-50%, -50%) rotate(${tick.rotation}deg)`,
         backgroundColor: "black",
-        opacity,
       }}
     />
   );
@@ -112,6 +112,10 @@ export default function ClockWidget({
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [fractionalSeconds, setFractionalSeconds] = useState(seconds);
+  const secondsRef = useRef(seconds);
+  const lastTickTsRef = useRef<number>(
+    typeof performance !== "undefined" ? performance.now() : 0,
+  );
 
   // Measure container dimensions
   useEffect(() => {
@@ -135,13 +139,23 @@ export default function ClockWidget({
     return () => observer.disconnect();
   }, []);
 
-  // Update fractional seconds continuously for smooth animation
+  useEffect(() => {
+    secondsRef.current = seconds;
+    setFractionalSeconds(seconds);
+    lastTickTsRef.current =
+      typeof performance !== "undefined" ? performance.now() : Date.now();
+  }, [seconds]);
+
+  // Update fractional seconds continuously for smooth animation tied to provided seconds
   useEffect(() => {
     let rafId: number;
 
     const updateFractionalSeconds = () => {
-      const now = Date.now();
-      const fractional = (now / 1000) % 60;
+      const now =
+        typeof performance !== "undefined" ? performance.now() : Date.now();
+      const elapsed = (now - lastTickTsRef.current) / 1000;
+      const fractional =
+        (secondsRef.current + elapsed + TICK_COUNT) % TICK_COUNT;
       setFractionalSeconds(fractional);
       rafId = requestAnimationFrame(updateFractionalSeconds);
     };
@@ -158,6 +172,12 @@ export default function ClockWidget({
 
   const minutes = referenceDate.getMinutes();
   const hours = referenceDate.getHours() % 12;
+  const fractional =
+    ((fractionalSeconds % TICK_COUNT) + TICK_COUNT) % TICK_COUNT;
+  const currentIndex = Math.floor(fractional);
+  const highlightState: HighlightState = {
+    currentIndex,
+  };
 
   return (
     <div className="relative z-20 flex h-full w-full items-center justify-center rounded-4xl bg-[#F4F4F4] p-4 shadow-xl">
@@ -171,7 +191,7 @@ export default function ClockWidget({
             key={`${tick.x}-${tick.y}-${index}`}
             tick={tick}
             index={index}
-            fractionalSeconds={fractionalSeconds}
+            highlightState={highlightState}
           />
         ))}
       </div>
