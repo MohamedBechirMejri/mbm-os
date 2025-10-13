@@ -1,10 +1,8 @@
 "use client";
 
-import { ActiveSessionSection } from "./components/active-session-section";
 import { CalendarSection } from "./components/calendar-section";
 import { CalendarSummary } from "./components/calendar-summary";
 import { GlassTile } from "./components/glass-tile";
-import { TodayFlowSection } from "./components/today-flow-section";
 import { useCalendarPanel } from "./hooks/use-calendar-panel";
 
 type CalendarPanelProps = {
@@ -22,7 +20,6 @@ export function CalendarPanel({ referenceDate }: CalendarPanelProps) {
         dayNumber={summary.dayNumber}
         monthLabel={summary.monthLabel}
         referenceDate={summary.referenceDate}
-        formattedTime={summary.formattedTime}
         timeZone={summary.timeZone}
         seconds={summary.seconds}
         openWindowCount={summary.openWindowCount}

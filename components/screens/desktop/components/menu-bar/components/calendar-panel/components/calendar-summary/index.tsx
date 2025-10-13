@@ -6,7 +6,6 @@ type CalendarSummaryProps = {
   dayNumber: number;
   monthLabel: string;
   referenceDate: Date;
-  formattedTime: string;
   timeZone: string;
   seconds: number;
   openWindowCount: number;
@@ -18,7 +17,6 @@ export function CalendarSummary({
   dayNumber,
   monthLabel,
   referenceDate,
-  formattedTime,
   timeZone,
   seconds,
 }: CalendarSummaryProps) {
@@ -31,7 +29,6 @@ export function CalendarSummary({
       />
       <ClockWidget
         referenceDate={referenceDate}
-        formattedTime={formattedTime}
         timeZone={timeZone}
         seconds={seconds}
       />

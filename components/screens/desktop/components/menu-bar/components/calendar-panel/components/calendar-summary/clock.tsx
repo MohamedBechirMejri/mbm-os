@@ -98,12 +98,10 @@ function Tick({
 }
 
 export default function ClockWidget({
-  formattedTime,
   referenceDate,
   timeZone,
   seconds,
 }: {
-  formattedTime: string;
   referenceDate: Date;
   timeZone: string;
   seconds: number;
