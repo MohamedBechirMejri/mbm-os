@@ -56,7 +56,7 @@ function Digit({ place, value, height, digitStyle }: DigitProps) {
     height,
     position: "relative",
     width: "1ch",
-    fontVariantNumeric: "tabular-nums",
+    // fontVariantNumeric: "tabular-nums",
   };
 
   return (

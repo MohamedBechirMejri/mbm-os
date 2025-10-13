@@ -1,3 +1,5 @@
+import Counter from "@/components/ui/counter";
+
 export default function DateWidget({
   dayLabel,
   dayNumber,
@@ -13,7 +15,21 @@ export default function DateWidget({
         <span className="text-rose-500">{dayLabel.slice(0, 3)}</span>
         <span className="text-gray-500">{monthLabel.slice(0, 3)}</span>
       </p>
-      <h1 className="text-8xl leading-none font-semibold -mt-1">{dayNumber}</h1>
+
+      <Counter
+        value={dayNumber}
+        places={[10, 1]}
+        textColor="black"
+        fontSize={96}
+        gap={0}
+        digitStyle={{
+          width: 42,
+          textAlign: "center",
+          fontWeight: 600,
+          lineHeight: 1,
+          marginTop: -6,
+        }}
+      />
     </div>
   );
 }
