@@ -2,10 +2,8 @@
 
 import { ChevronLeft, ChevronRight, Clock3, Monitor } from "lucide-react";
 import { motion } from "motion/react";
-import Image from "next/image";
-import { type ReactNode, useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
-  type AppMeta,
   DesktopAPI,
   useDesktop,
   type WinInstance,
@@ -13,107 +11,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+import { AppGlyph } from "./components/app-glyph";
+import { GlassTile } from "./components/glass-tile";
+import { DAY_LABELS } from "./constants";
+import { buildCalendar, type CalendarCell } from "./utils/calendar";
+import { describeState } from "./utils/describe-state";
+
 type CalendarPanelProps = {
   referenceDate: Date;
 };
-
-type CalendarCell = {
-  date: Date;
-  isCurrentMonth: boolean;
-  isToday: boolean;
-};
-
-const DAY_LABELS = [
-  { id: "sun", label: "S" },
-  { id: "mon", label: "M" },
-  { id: "tue", label: "T" },
-  { id: "wed", label: "W" },
-  { id: "thu", label: "T" },
-  { id: "fri", label: "F" },
-  { id: "sat", label: "S" },
-] as const;
-
-const tileBase =
-  "relative overflow-hidden rounded-3xl border border-white/12 bg-[linear-gradient(145deg,rgba(255,255,255,0.35)_0%,rgba(255,255,255,0.12)_45%,rgba(92,139,255,0.08)_100%)] p-5 shadow-[0_1.25rem_2.75rem_rgba(15,23,42,0.36)] backdrop-blur-3xl";
-
-function GlassTile({
-  children,
-  className,
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
-  return (
-    <div className={cn(tileBase, className)}>
-      <div className="pointer-events-none absolute inset-0 rounded-[inherit] border border-white/10" />
-      <div className="pointer-events-none absolute -top-16 left-6 h-32 w-32 rounded-full bg-white/20 blur-3xl" />
-      <div className="relative z-10 h-full">{children}</div>
-    </div>
-  );
-}
-
-function AppGlyph({ app }: { app: AppMeta }) {
-  if (typeof app.icon === "string") {
-    return (
-      <Image
-        src={`/assets/icons/apps/${app.icon}.ico`}
-        alt={app.title}
-        width={32}
-        height={32}
-        className="rounded-xl"
-      />
-    );
-  }
-
-  if (app.icon) {
-    return <span className="text-white/80">{app.icon}</span>;
-  }
-
-  return (
-    <span className="text-sm font-semibold text-white/80">
-      {app.title.slice(0, 1)}
-    </span>
-  );
-}
-
-function buildCalendar(month: Date, today: Date): CalendarCell[] {
-  const firstOfMonth = new Date(month.getFullYear(), month.getMonth(), 1);
-  const start = new Date(firstOfMonth);
-  start.setDate(firstOfMonth.getDate() - firstOfMonth.getDay());
-
-  const cells: CalendarCell[] = [];
-
-  for (let index = 0; index < 42; index += 1) {
-    const cellDate = new Date(start);
-    cellDate.setDate(start.getDate() + index);
-
-    cells.push({
-      date: cellDate,
-      isCurrentMonth: cellDate.getMonth() === month.getMonth(),
-      isToday:
-        cellDate.getFullYear() === today.getFullYear() &&
-        cellDate.getMonth() === today.getMonth() &&
-        cellDate.getDate() === today.getDate(),
-    });
-  }
-
-  return cells;
-}
-
-function describeState(win: WinInstance): string {
-  switch (win.state) {
-    case "fullscreen":
-      return "Fullscreen";
-    case "maximized":
-      return "Maximized";
-    case "minimized":
-      return "Minimized";
-    case "hidden":
-      return "Hidden";
-    default:
-      return "Active";
-  }
-}
 
 export function CalendarPanel({ referenceDate }: CalendarPanelProps) {
   const [monthOffset, setMonthOffset] = useState(0);
@@ -133,7 +39,7 @@ export function CalendarPanel({ referenceDate }: CalendarPanelProps) {
     return base;
   }, [referenceDate, monthOffset]);
 
-  const cells = useMemo(
+  const cells: CalendarCell[] = useMemo(
     () => buildCalendar(visibleMonth, referenceDate),
     [visibleMonth, referenceDate],
   );
