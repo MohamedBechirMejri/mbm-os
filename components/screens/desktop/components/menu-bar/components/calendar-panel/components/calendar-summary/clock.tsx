@@ -9,8 +9,11 @@ function generateTicks({ width, height }: { width: number; height: number }) {
   const centerX = width / 2;
   const centerY = height / 2;
 
+  // Start from top center (offset by half of top edge)
+  const startOffset = width / 2;
+
   for (let i = 0; i < TICK_COUNT; i++) {
-    const distance = (i / TICK_COUNT) * perimeter;
+    const distance = ((i / TICK_COUNT) * perimeter + startOffset) % perimeter;
     const progress = i / TICK_COUNT;
 
     let x: number, y: number;
@@ -87,23 +90,42 @@ export default function ClockWidget({
         className="pointer-events-none absolute inset-3 z-20 rounded-[2.5rem]"
       >
         {ticks.map((tick, index) => {
-          const isActive = index === seconds;
-          const isPast = index < seconds;
+          // Calculate smooth opacity based on distance from current second
+          const distanceFromCurrent = Math.abs(index - seconds);
+          const wrapDistance = Math.min(
+            distanceFromCurrent,
+            TICK_COUNT - distanceFromCurrent,
+          );
+
+          // Smooth gradient: fully dark at current, gradually lighter within 3 ticks
+          const gradientRange = 3;
+          let opacity: number;
+
+          if (wrapDistance === 0) {
+            opacity = 1; // Current second - fully dark
+          } else if (wrapDistance <= gradientRange) {
+            // Gradient zone - smooth transition
+            opacity = 0.5 + (1 - wrapDistance / gradientRange) * 0.5;
+          } else if (index < seconds) {
+            opacity = 0.5; // Past seconds
+          } else {
+            opacity = 0.2; // Future seconds
+          }
 
           return (
             <span
               key={`${tick.progress}${tick.x}${tick.y}`}
               className={cn(
-                "absolute origin-center transition-colors duration-300",
+                "absolute origin-center transition-opacity duration-1000 ease-out",
                 index % 5 === 0
                   ? "h-4 w-[0.1875rem] rounded-full"
                   : "h-2 w-[0.125rem] rounded-full",
-                isActive ? "bg-black" : isPast ? "bg-black/50" : "bg-black/20",
               )}
               style={{
                 left: `${tick.x}px`,
                 top: `${tick.y}px`,
                 transform: `translate(-50%, -50%) rotate(${tick.rotation}deg)`,
+                backgroundColor: `rgba(0, 0, 0, ${opacity})`,
               }}
             />
           );
