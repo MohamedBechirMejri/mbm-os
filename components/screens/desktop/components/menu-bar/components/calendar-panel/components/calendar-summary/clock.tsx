@@ -79,7 +79,7 @@ export default function ClockWidget({
       : [];
 
   return (
-    <div className="relative z-20 flex h-full w-full flex-col items-end gap-3 rounded-4xl bg-[#F4F4F4] p-4 shadow-xl">
+    <div className="relative z-20 flex h-full w-full items-center justify-center rounded-4xl bg-[#F4F4F4] p-4 shadow-xl">
       <div
         ref={containerRef}
         aria-hidden="true"
@@ -89,8 +89,10 @@ export default function ClockWidget({
           <span
             key={`${tick.progress}${tick.x}${tick.y}`}
             className={cn(
-              "absolute origin-center bg-black/20",
-              index % 5 === 0 ? "h-3 w-1.5 rounded" : "h-2 w-1 rounded-sm",
+              "absolute origin-center bg-black/30",
+              index % 5 === 0
+                ? "h-4 w-[0.1875rem] rounded-full"
+                : "h-2 w-[0.125rem] rounded-full",
             )}
             style={{
               left: `${tick.x}px`,
@@ -100,9 +102,11 @@ export default function ClockWidget({
           />
         ))}
       </div>
-      <p className="flex flex-col items-end">
-        <span className="text-2xl font-semibold">{formattedTime}</span>
-        <span className="text-xs">{timeZone}</span>
+      <p className="flex flex-col items-center">
+        <span className="text-5xl font-semibold tracking-tight">
+          {formattedTime}
+        </span>
+        <span className="text-sm text-black/60">{timeZone}</span>
       </p>
     </div>
   );
