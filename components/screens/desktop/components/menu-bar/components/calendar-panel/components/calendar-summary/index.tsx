@@ -1,3 +1,4 @@
+import ClockWidget from "./clock";
 import DateWidget from "./date";
 
 type CalendarSummaryProps = {
@@ -24,12 +25,7 @@ export function CalendarSummary({
         dayNumber={dayNumber}
         monthLabel={monthLabel}
       />
-      <div className="flex flex-col items-end gap-3 bg-[#F4F4F4] w-full h-full p-4 rounded-4xl shadow-xl">
-        <p className="flex flex-col items-end">
-          <span className="font-semibold text-2xl">{formattedTime}</span>
-          <span className="text-xs"> {timeZone}</span>
-        </p>
-      </div>
+      <ClockWidget formattedTime={formattedTime} timeZone={timeZone} />
     </div>
   );
 }
