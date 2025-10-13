@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-const tileBase = "relative overflow-hidden rounded-3xl bg-white p-4";
+const tileBase = "relative overflow-hidden rounded-3xl backdrop-blur-xs p-4";
 
 type GlassTileProps = {
   children: ReactNode;
