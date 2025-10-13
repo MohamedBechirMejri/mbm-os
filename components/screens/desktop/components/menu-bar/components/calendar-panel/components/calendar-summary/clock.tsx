@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import Counter from "@/components/ui/counter";
 import { cn } from "@/lib/utils";
@@ -6,6 +5,8 @@ import { cn } from "@/lib/utils";
 const TICK_COUNT = 60;
 const BASE_OPACITY = 0.18;
 const HIGHLIGHT_OPACITY = 1;
+const NEXT_TICK_BLEND = 0; // fraction of highlight strength shared with the next tick
+const RESET_FADE_DURATION = 0.045; // seconds spent fading the previous cycle
 
 function generateTicks({ width, height }: { width: number; height: number }) {
   const ticks = [];
@@ -53,16 +54,88 @@ function generateTicks({ width, height }: { width: number; height: number }) {
 
 type HighlightState = {
   currentIndex: number;
+  fractionWithinTick: number;
+  fadeProgress: number | null;
+  fadeFromIndex: number | null;
 };
 
+function clamp01(value: number): number {
+  return Math.max(0, Math.min(1, value));
+}
+
+function easeOutCubic(value: number): number {
+  const clamped = clamp01(value);
+  return 1 - (1 - clamped) ** 3;
+}
+
+function isIndexComplete(
+  index: number,
+  currentIndex: number,
+  fadeFromIndex: number | null,
+): boolean {
+  if (fadeFromIndex === null) {
+    return index < currentIndex;
+  }
+
+  if (fadeFromIndex >= currentIndex) {
+    return index < currentIndex;
+  }
+
+  return index < currentIndex && index > fadeFromIndex;
+}
+
+function isInModuloRange(
+  value: number,
+  startExclusive: number,
+  endInclusive: number,
+): boolean {
+  if (startExclusive === endInclusive) {
+    return false;
+  }
+
+  if (startExclusive < endInclusive) {
+    return value > startExclusive && value <= endInclusive;
+  }
+
+  return value > startExclusive || value <= endInclusive;
+}
+
 function getTickOpacity(index: number, state: HighlightState): number {
-  if (index < state.currentIndex) {
+  const { currentIndex, fractionWithinTick, fadeProgress, fadeFromIndex } =
+    state;
+  const normalized = clamp01(fractionWithinTick);
+  const nextIndex = (currentIndex + 1) % TICK_COUNT;
+
+  if (isIndexComplete(index, currentIndex, fadeFromIndex)) {
     return HIGHLIGHT_OPACITY;
   }
 
-  if (index === state.currentIndex) {
-    // Keep the active tick fully lit while we wait for the next second.
-    return HIGHLIGHT_OPACITY;
+  if (index === currentIndex) {
+    return BASE_OPACITY + (HIGHLIGHT_OPACITY - BASE_OPACITY) * normalized;
+  }
+
+  const fadeOpacity =
+    fadeFromIndex !== null &&
+    fadeProgress !== null &&
+    isInModuloRange(index, currentIndex, fadeFromIndex)
+      ? BASE_OPACITY +
+        (HIGHLIGHT_OPACITY - BASE_OPACITY) * easeOutCubic(1 - fadeProgress)
+      : null;
+
+  if (index === nextIndex) {
+    const preview =
+      BASE_OPACITY +
+      (HIGHLIGHT_OPACITY - BASE_OPACITY) * normalized * NEXT_TICK_BLEND;
+
+    if (fadeOpacity !== null) {
+      return Math.min(preview, fadeOpacity);
+    }
+
+    return preview;
+  }
+
+  if (fadeOpacity !== null) {
+    return fadeOpacity;
   }
 
   return BASE_OPACITY;
@@ -80,21 +153,20 @@ function Tick({
   const opacity = getTickOpacity(index, highlightState);
 
   return (
-    <motion.span
+    <span
       className={cn(
         "absolute origin-center",
         index % 5 === 0
           ? "h-4 w-[0.1875rem] rounded-full"
           : "h-2 w-[0.125rem] rounded-full",
       )}
-      initial={false}
-      animate={{ opacity }}
-      transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
       style={{
         left: `${tick.x}px`,
         top: `${tick.y}px`,
         transform: `translate(-50%, -50%) rotate(${tick.rotation}deg)`,
         backgroundColor: "black",
+        opacity,
+        transition: "opacity 120ms ease-out",
       }}
     />
   );
@@ -116,6 +188,10 @@ export default function ClockWidget({
   const lastTickTsRef = useRef<number>(
     typeof performance !== "undefined" ? performance.now() : 0,
   );
+  const lastIndexRef = useRef<number>(seconds % TICK_COUNT);
+  const fadeStartTsRef = useRef<number | null>(null);
+  const fadeFromIndexRef = useRef<number | null>(null);
+  const fadeProgressRef = useRef<number>(0);
 
   // Measure container dimensions
   useEffect(() => {
@@ -144,6 +220,10 @@ export default function ClockWidget({
     setFractionalSeconds(seconds);
     lastTickTsRef.current =
       typeof performance !== "undefined" ? performance.now() : Date.now();
+    lastIndexRef.current = seconds % TICK_COUNT;
+    fadeStartTsRef.current = null;
+    fadeFromIndexRef.current = null;
+    fadeProgressRef.current = 0;
   }, [seconds]);
 
   // Update fractional seconds continuously for smooth animation tied to provided seconds
@@ -156,7 +236,22 @@ export default function ClockWidget({
       const elapsed = (now - lastTickTsRef.current) / 1000;
       const fractional =
         (secondsRef.current + elapsed + TICK_COUNT) % TICK_COUNT;
+
       setFractionalSeconds(fractional);
+
+      if (fadeStartTsRef.current !== null) {
+        const fadeElapsed = (now - fadeStartTsRef.current) / 1000;
+        const progress = Math.min(1, fadeElapsed / RESET_FADE_DURATION);
+        fadeProgressRef.current = progress;
+
+        if (progress >= 1) {
+          fadeStartTsRef.current = null;
+          fadeFromIndexRef.current = null;
+        }
+      } else {
+        fadeProgressRef.current = 0;
+      }
+
       rafId = requestAnimationFrame(updateFractionalSeconds);
     };
 
@@ -175,9 +270,41 @@ export default function ClockWidget({
   const fractional =
     ((fractionalSeconds % TICK_COUNT) + TICK_COUNT) % TICK_COUNT;
   const currentIndex = Math.floor(fractional);
+  const fractionWithinTick = fractional - currentIndex;
+  const fadeFromIndex = fadeFromIndexRef.current;
+  const fadeProgress = fadeFromIndex !== null ? fadeProgressRef.current : null;
+
   const highlightState: HighlightState = {
     currentIndex,
+    fractionWithinTick,
+    fadeFromIndex,
+    fadeProgress,
   };
+
+  useEffect(() => {
+    const previous = lastIndexRef.current;
+
+    if (currentIndex === previous) {
+      return;
+    }
+
+    if (currentIndex < previous) {
+      fadeFromIndexRef.current = previous;
+      fadeStartTsRef.current =
+        typeof performance !== "undefined" ? performance.now() : Date.now();
+      fadeProgressRef.current = 0;
+    } else if (currentIndex - previous > 1) {
+      fadeFromIndexRef.current = null;
+      fadeStartTsRef.current = null;
+      fadeProgressRef.current = 0;
+    } else {
+      fadeFromIndexRef.current = null;
+      fadeStartTsRef.current = null;
+      fadeProgressRef.current = 0;
+    }
+
+    lastIndexRef.current = currentIndex;
+  }, [currentIndex]);
 
   return (
     <div className="relative z-20 flex h-full w-full items-center justify-center rounded-4xl bg-[#F4F4F4] p-4 shadow-xl">
