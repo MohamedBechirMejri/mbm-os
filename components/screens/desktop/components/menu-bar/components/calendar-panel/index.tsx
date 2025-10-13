@@ -23,6 +23,7 @@ export function CalendarPanel({ referenceDate }: CalendarPanelProps) {
         monthLabel={summary.monthLabel}
         formattedTime={summary.formattedTime}
         timeZone={summary.timeZone}
+        seconds={summary.seconds}
         openWindowCount={summary.openWindowCount}
         onAdjustMonth={handlers.adjustMonth}
       />

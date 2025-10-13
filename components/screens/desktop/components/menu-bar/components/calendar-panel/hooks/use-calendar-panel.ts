@@ -28,6 +28,7 @@ type CalendarSummary = {
   monthLabel: string;
   timeZone: string;
   formattedTime: string;
+  seconds: number;
   openWindowCount: number;
 };
 
@@ -177,6 +178,7 @@ export function useCalendarPanel(referenceDate: Date): CalendarPanelData {
       monthLabel,
       timeZone,
       formattedTime: timeFormatter.format(referenceDate),
+      seconds: referenceDate.getSeconds(),
       openWindowCount,
     },
     calendar: {
