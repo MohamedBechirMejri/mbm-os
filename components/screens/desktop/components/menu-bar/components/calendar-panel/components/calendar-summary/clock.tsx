@@ -47,6 +47,7 @@ function generateTicks({ width, height }: { width: number; height: number }) {
 export default function ClockWidget({
   formattedTime,
   timeZone,
+  seconds,
 }: {
   formattedTime: string;
   timeZone: string;
@@ -85,22 +86,28 @@ export default function ClockWidget({
         aria-hidden="true"
         className="pointer-events-none absolute inset-3 z-20 rounded-[2.5rem]"
       >
-        {ticks.map((tick, index) => (
-          <span
-            key={`${tick.progress}${tick.x}${tick.y}`}
-            className={cn(
-              "absolute origin-center bg-black/30",
-              index % 5 === 0
-                ? "h-4 w-[0.1875rem] rounded-full"
-                : "h-2 w-[0.125rem] rounded-full",
-            )}
-            style={{
-              left: `${tick.x}px`,
-              top: `${tick.y}px`,
-              transform: `translate(-50%, -50%) rotate(${tick.rotation}deg)`,
-            }}
-          />
-        ))}
+        {ticks.map((tick, index) => {
+          const isActive = index === seconds;
+          const isPast = index < seconds;
+
+          return (
+            <span
+              key={`${tick.progress}${tick.x}${tick.y}`}
+              className={cn(
+                "absolute origin-center transition-colors duration-300",
+                index % 5 === 0
+                  ? "h-4 w-[0.1875rem] rounded-full"
+                  : "h-2 w-[0.125rem] rounded-full",
+                isActive ? "bg-black" : isPast ? "bg-black/50" : "bg-black/20",
+              )}
+              style={{
+                left: `${tick.x}px`,
+                top: `${tick.y}px`,
+                transform: `translate(-50%, -50%) rotate(${tick.rotation}deg)`,
+              }}
+            />
+          );
+        })}
       </div>
       <p className="flex flex-col items-center">
         <span className="text-5xl font-semibold tracking-tight">
