@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import Counter from "@/components/ui/counter";
 import { cn } from "@/lib/utils";
 
 const TICK_COUNT = 60;
@@ -170,7 +171,12 @@ export default function ClockWidget({
       </div>
       <p className="flex flex-col items-center">
         <span className="text-5xl font-semibold tracking-tight">
-          {formattedTime}
+          {formattedTime} -{" "}
+          <Counter
+            value={seconds}
+            places={[10, 1]}
+            textColor="black"
+          />
         </span>
         <span className="text-sm text-black/60">{timeZone}</span>
       </p>
