@@ -5,6 +5,7 @@ type CalendarSummaryProps = {
   dayLabel: string;
   dayNumber: number;
   monthLabel: string;
+  referenceDate: Date;
   formattedTime: string;
   timeZone: string;
   seconds: number;
@@ -16,6 +17,7 @@ export function CalendarSummary({
   dayLabel,
   dayNumber,
   monthLabel,
+  referenceDate,
   formattedTime,
   timeZone,
   seconds,
@@ -28,6 +30,7 @@ export function CalendarSummary({
         monthLabel={monthLabel}
       />
       <ClockWidget
+        referenceDate={referenceDate}
         formattedTime={formattedTime}
         timeZone={timeZone}
         seconds={seconds}

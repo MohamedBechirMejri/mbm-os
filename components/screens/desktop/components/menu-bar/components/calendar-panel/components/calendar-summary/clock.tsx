@@ -99,10 +99,12 @@ function Tick({
 
 export default function ClockWidget({
   formattedTime,
+  referenceDate,
   timeZone,
   seconds,
 }: {
   formattedTime: string;
+  referenceDate: Date;
   timeZone: string;
   seconds: number;
 }) {
@@ -153,6 +155,9 @@ export default function ClockWidget({
       ? generateTicks({ width: dimensions.width, height: dimensions.height })
       : [];
 
+  const minutes = referenceDate.getMinutes();
+  const hours = referenceDate.getHours() % 12;
+
   return (
     <div className="relative z-20 flex h-full w-full items-center justify-center rounded-4xl bg-[#F4F4F4] p-4 shadow-xl">
       <div
@@ -170,14 +175,21 @@ export default function ClockWidget({
         ))}
       </div>
       <p className="flex flex-col items-center">
-        <span className="text-5xl font-semibold tracking-tight">
-          {formattedTime} -{" "}
+        <div className="text-3xl font-semibold tracking-tight flex items-center">
           <Counter
-            value={seconds}
+            value={hours}
             places={[10, 1]}
             textColor="black"
+            fontSize={64}
           />
-        </span>
+          <span className=" text-black text-5xl">:</span>
+          <Counter
+            value={minutes}
+            places={[10, 1]}
+            textColor="black"
+            fontSize={64}
+          />
+        </div>
         <span className="text-sm text-black/60">{timeZone}</span>
       </p>
     </div>

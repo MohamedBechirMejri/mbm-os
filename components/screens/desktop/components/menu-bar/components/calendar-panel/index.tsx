@@ -21,6 +21,7 @@ export function CalendarPanel({ referenceDate }: CalendarPanelProps) {
         dayLabel={summary.dayLabel}
         dayNumber={summary.dayNumber}
         monthLabel={summary.monthLabel}
+        referenceDate={summary.referenceDate}
         formattedTime={summary.formattedTime}
         timeZone={summary.timeZone}
         seconds={summary.seconds}
