@@ -28,6 +28,60 @@ for i in range(0, 60):
 
  */
 
+function generateTicks({ width, height }) {
+  const length = (width + height) * 2;
+  const tickSpacing = length / TICK_COUNT;
+
+  // Define the segments of the rectangle
+  const segments = {
+    top_center: [width / 2, 0],
+    top_right: [width, 0],
+    bottom_right: [width, height],
+    bottom_center: [width / 2, height],
+    bottom_left: [0, height],
+    top_left: [0, 0],
+  };
+
+  const ticks = [];
+
+  for (let i = 0; i < TICK_COUNT; i++) {
+    const progress = i / TICK_COUNT;
+    const distance = i * tickSpacing;
+
+    let x, y;
+
+    if (distance <= width / 2) {
+      // Top center to top right
+      x = segments.top_center[0] + distance;
+      y = segments.top_center[1];
+    } else if (distance <= width + height / 2) {
+      // Top right to bottom right
+      x = segments.top_right[0];
+      y = segments.top_right[1] + (distance - width / 2);
+    } else if (distance <= width + height + width / 2) {
+      // Bottom right to bottom center
+      x = segments.bottom_right[0] - (distance - (width + height / 2));
+      y = segments.bottom_right[1];
+    } else if (distance <= width * 2 + height) {
+      // Bottom center to bottom left
+      x = segments.bottom_center[0] - (distance - (width + height + width / 2));
+      y = segments.bottom_center[1];
+    } else if (distance <= width * 2 + height + height / 2) {
+      // Bottom left to top left
+      x = segments.bottom_left[0];
+      y = segments.bottom_left[1] - (distance - (width * 2 + height));
+    } else {
+      // Top left to top center
+      x = segments.top_left[0] + (distance - (width * 2 + height + height / 2));
+      y = segments.top_left[1];
+    }
+
+    ticks.push({ x, y, progress });
+  }
+
+  return ticks;
+}
+
 export default function ClockWidget({
   formattedTime,
   timeZone,
@@ -37,6 +91,9 @@ export default function ClockWidget({
   timeZone: string;
   seconds: number;
 }) {
+  const ticks = generateTicks({ width: 200, height: 200 });
+  console.log(ticks);
+
   return (
     <div className="relative z-20 flex h-full w-full flex-col items-end gap-3 rounded-4xl bg-[#F4F4F4] p-4 shadow-xl">
       <div
