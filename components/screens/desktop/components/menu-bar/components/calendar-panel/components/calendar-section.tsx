@@ -10,8 +10,8 @@ type CalendarSectionProps = {
 
 export function CalendarSection({ monthLabel, cells }: CalendarSectionProps) {
   return (
-    <section className="rounded-3xl border border-white/12 bg-white/10 p-4">
-      <header className="flex items-center justify-between text-xs uppercase tracking-[0.2rem] text-white/60">
+    <section className="rounded-3xl p-4">
+      <header className="flex items-center justify-between text-xs uppercase tracking-[0.2rem]">
         <span>Calendar</span>
         <span>{monthLabel}</span>
       </header>
@@ -19,7 +19,7 @@ export function CalendarSection({ monthLabel, cells }: CalendarSectionProps) {
         {DAY_LABELS.map((day) => (
           <span
             key={day.id}
-            className="text-center text-xs font-semibold text-white/55"
+            className="text-center text-xs font-semibold"
           >
             {day.label}
           </span>
@@ -32,9 +32,9 @@ export function CalendarSection({ monthLabel, cells }: CalendarSectionProps) {
             className={cn(
               "flex aspect-square w-full items-center justify-center rounded-2xl text-sm transition",
               cell.isToday
-                ? "border border-white/45 bg-white/20 text-white shadow-[0_0.75rem_1.75rem_rgba(15,23,42,0.2)]"
-                : "border border-white/10 bg-white/6 text-white/75",
-              !cell.isCurrentMonth && "text-white/35",
+                ? ""
+                : "",
+              !cell.isCurrentMonth && "",
             )}
           >
             {cell.date.getDate()}

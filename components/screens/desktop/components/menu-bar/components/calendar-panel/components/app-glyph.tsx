@@ -19,11 +19,11 @@ export function AppGlyph({ app }: AppGlyphProps) {
   }
 
   if (app.icon) {
-    return <span className="text-white/80">{app.icon}</span>;
+    return <span className="">{app.icon}</span>;
   }
 
   return (
-    <span className="text-sm font-semibold text-white/80">
+    <span className="text-sm font-semibold">
       {app.title.slice(0, 1)}
     </span>
   );

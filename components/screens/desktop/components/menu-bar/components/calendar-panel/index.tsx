@@ -1,9 +1,9 @@
 "use client";
 
-import { GlassTile } from "./components/glass-tile";
 import { ActiveSessionSection } from "./components/active-session-section";
 import { CalendarSection } from "./components/calendar-section";
 import { CalendarSummary } from "./components/calendar-summary";
+import { GlassTile } from "./components/glass-tile";
 import { TodayFlowSection } from "./components/today-flow-section";
 import { useCalendarPanel } from "./hooks/use-calendar-panel";
 
@@ -16,7 +16,7 @@ export function CalendarPanel({ referenceDate }: CalendarPanelProps) {
     useCalendarPanel(referenceDate);
 
   return (
-    <GlassTile className="w-[30rem] text-white">
+    <GlassTile className="w-[30rem]">
       <CalendarSummary
         dayLabel={summary.dayLabel}
         dayNumber={summary.dayNumber}
@@ -28,8 +28,11 @@ export function CalendarPanel({ referenceDate }: CalendarPanelProps) {
       />
 
       <div className="mt-6 grid gap-5">
-        <CalendarSection monthLabel={calendar.monthLabel} cells={calendar.cells} />
-        <ActiveSessionSection
+        <CalendarSection
+          monthLabel={calendar.monthLabel}
+          cells={calendar.cells}
+        />
+        {/* <ActiveSessionSection
           activeWindow={session.activeWindow}
           activeMeta={session.activeMeta}
           activeStateLabel={session.activeStateLabel}
@@ -41,7 +44,7 @@ export function CalendarPanel({ referenceDate }: CalendarPanelProps) {
           totalCount={flow.totalCount}
           entries={flow.entries}
           onFocusWindow={handlers.focusWindow}
-        />
+        /> */}
       </div>
     </GlassTile>
   );
