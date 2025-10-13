@@ -2,6 +2,32 @@ import { cn } from "@/lib/utils";
 
 const TICK_COUNT = 60;
 
+/**
+
+we need to display ticks around the border of the container and not as a circle.
+
+we have to divide the container into 6 segments, each segment will have 10 ticks.
+
+we start from top-center and go clockwise.
+
+we have to calculate the width and height of the container to position the ticks correctly.
+
+we can use absolute positioning to position the ticks.
+
+we can use transform to rotate the ticks.
+
+we can use a loop to create the ticks.
+
+psuedo code:
+
+for i in range(0, 60):
+  angle = (i / 60) * 360
+  x = centerX + radius * cos(angle)
+  y = centerY + radius * sin(angle)
+  create tick at (x, y) with rotation angle
+
+ */
+
 export default function ClockWidget({
   formattedTime,
   timeZone,
