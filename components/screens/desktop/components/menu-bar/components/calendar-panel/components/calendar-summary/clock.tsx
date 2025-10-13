@@ -1,82 +1,41 @@
+import { useLayoutEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 const TICK_COUNT = 60;
 
-/**
-
-we need to display ticks around the border of the container and not as a circle.
-
-we have to divide the container into 6 segments, each segment will have 10 ticks.
-
-we start from top-center and go clockwise.
-
-we have to calculate the width and height of the container to position the ticks correctly.
-
-we can use absolute positioning to position the ticks.
-
-we can use transform to rotate the ticks.
-
-we can use a loop to create the ticks.
-
-psuedo code:
-
-for i in range(0, 60):
-  angle = (i / 60) * 360
-  x = centerX + radius * cos(angle)
-  y = centerY + radius * sin(angle)
-  create tick at (x, y) with rotation angle
-
- */
-
 function generateTicks({ width, height }: { width: number; height: number }) {
-  const length = (width + height) * 2;
-  const tickSpacing = length / TICK_COUNT;
-
-  // Define the segments of the rectangle
-  const segments = {
-    top_center: [width / 2, 0],
-    top_right: [width, 0],
-    bottom_right: [width, height],
-    bottom_center: [width / 2, height],
-    bottom_left: [0, height],
-    top_left: [0, 0],
-  };
-
   const ticks = [];
+  const perimeter = (width + height) * 2;
 
   for (let i = 0; i < TICK_COUNT; i++) {
+    const distance = (i / TICK_COUNT) * perimeter;
     const progress = i / TICK_COUNT;
-    const distance = i * tickSpacing;
 
-    let x: number, y: number;
+    let x: number, y: number, rotation: number;
 
-    if (distance <= width / 2) {
-      // Top center to top right
-      x = segments.top_center[0] + distance;
-      y = segments.top_center[1];
-    } else if (distance <= width + height / 2) {
-      // Top right to bottom right
-      x = segments.top_right[0];
-      y = segments.top_right[1] + (distance - width / 2);
-    } else if (distance <= width + height + width / 2) {
-      // Bottom right to bottom center
-      x = segments.bottom_right[0] - (distance - (width + height / 2));
-      y = segments.bottom_right[1];
-    } else if (distance <= width * 2 + height) {
-      // Bottom center to bottom left
-      x = segments.bottom_center[0] - (distance - (width + height + width / 2));
-      y = segments.bottom_center[1];
-    } else if (distance <= width * 2 + height + height / 2) {
-      // Bottom left to top left
-      x = segments.bottom_left[0];
-      y = segments.bottom_left[1] - (distance - (width * 2 + height));
+    if (distance < width) {
+      // Top edge: left to right
+      x = distance;
+      y = 0;
+      rotation = 0;
+    } else if (distance < width + height) {
+      // Right edge: top to bottom
+      x = width;
+      y = distance - width;
+      rotation = 90;
+    } else if (distance < width * 2 + height) {
+      // Bottom edge: right to left
+      x = width - (distance - width - height);
+      y = height;
+      rotation = 180;
     } else {
-      // Top left to top center
-      x = segments.top_left[0] + (distance - (width * 2 + height + height / 2));
-      y = segments.top_left[1];
+      // Left edge: bottom to top
+      x = 0;
+      y = height - (distance - width * 2 - height);
+      rotation = 270;
     }
 
-    ticks.push({ x, y, progress });
+    ticks.push({ x, y, rotation, progress });
   }
 
   return ticks;
@@ -85,18 +44,41 @@ function generateTicks({ width, height }: { width: number; height: number }) {
 export default function ClockWidget({
   formattedTime,
   timeZone,
-  seconds,
 }: {
   formattedTime: string;
   timeZone: string;
   seconds: number;
 }) {
-  const ticks = generateTicks({ width: 200, height: 200 });
-  console.log(ticks);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+
+  useLayoutEffect(() => {
+    if (!containerRef.current) return;
+
+    const updateDimensions = () => {
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (rect) {
+        setDimensions({ width: rect.width, height: rect.height });
+      }
+    };
+
+    updateDimensions();
+
+    const observer = new ResizeObserver(updateDimensions);
+    observer.observe(containerRef.current);
+
+    return () => observer.disconnect();
+  }, []);
+
+  const ticks =
+    dimensions.width > 0
+      ? generateTicks({ width: dimensions.width, height: dimensions.height })
+      : [];
 
   return (
     <div className="relative z-20 flex h-full w-full flex-col items-end gap-3 rounded-4xl bg-[#F4F4F4] p-4 shadow-xl">
       <div
+        ref={containerRef}
         aria-hidden="true"
         className="pointer-events-none absolute inset-3 z-20 rounded-[2.5rem]"
       >
@@ -104,14 +86,13 @@ export default function ClockWidget({
           <span
             key={`${tick.progress}${tick.x}${tick.y}`}
             className={cn(
-              "absolute bg-black/20",
-              index % 5 === 0 ? "w-1.5 h-3 rounded" : "w-1 h-2 rounded-sm",
+              "absolute origin-center bg-black/20",
+              index % 5 === 0 ? "h-3 w-1.5 rounded" : "h-2 w-1 rounded-sm",
             )}
             style={{
-              top: tick.y,
-              left: tick.x,
-              transform: `translate(-50%, -50%) rotate(${tick.progress * 360}deg)`,
-              transformOrigin: "center bottom",
+              left: `${tick.x}px`,
+              top: `${tick.y}px`,
+              transform: `translate(-50%, -50%) rotate(${tick.rotation}deg)`,
             }}
           />
         ))}
