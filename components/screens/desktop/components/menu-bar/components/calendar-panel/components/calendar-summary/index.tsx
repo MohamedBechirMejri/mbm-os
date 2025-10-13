@@ -21,7 +21,7 @@ export function CalendarSummary({
   seconds,
 }: CalendarSummaryProps) {
   return (
-    <div className="grid grid-cols-[auto_minmax(0,1fr)] items-start justify-between gap-4">
+    <div className="grid grid-cols-[auto_minmax(0,1fr)] items-start justify-between gap-4 select-none">
       <DateWidget
         dayLabel={dayLabel}
         dayNumber={dayNumber}
