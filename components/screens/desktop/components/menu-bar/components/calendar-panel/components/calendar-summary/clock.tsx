@@ -28,7 +28,7 @@ for i in range(0, 60):
 
  */
 
-function generateTicks({ width, height }) {
+function generateTicks({ width, height }: { width: number; height: number }) {
   const length = (width + height) * 2;
   const tickSpacing = length / TICK_COUNT;
 
@@ -48,7 +48,7 @@ function generateTicks({ width, height }) {
     const progress = i / TICK_COUNT;
     const distance = i * tickSpacing;
 
-    let x, y;
+    let x: number, y: number;
 
     if (distance <= width / 2) {
       // Top center to top right
@@ -100,28 +100,21 @@ export default function ClockWidget({
         aria-hidden="true"
         className="pointer-events-none absolute inset-3 z-20 rounded-[2.5rem]"
       >
-        {Array.from({ length: TICK_COUNT }, (_, index) => {
-          const isActive = index <= seconds;
-          const progress = index / TICK_COUNT;
-          const tickId = `tick-${progress.toFixed(4)}`;
-
-          return (
-            <div
-              key={tickId}
-              className="absolute inset-0"
-              style={{
-                transform: `rotate(${progress * 360}deg)`,
-              }}
-            >
-              <span
-                className={cn(
-                  "absolute left-1/2 top-0 h-3 w-0.5 -translate-x-1/2 rounded-full transition-colors duration-150",
-                  isActive ? "bg-zinc-900" : "bg-zinc-400/50",
-                )}
-              />
-            </div>
-          );
-        })}
+        {ticks.map((tick, index) => (
+          <span
+            key={`${tick.progress}${tick.x}${tick.y}`}
+            className={cn(
+              "absolute bg-black/20",
+              index % 5 === 0 ? "w-1.5 h-3 rounded" : "w-1 h-2 rounded-sm",
+            )}
+            style={{
+              top: tick.y,
+              left: tick.x,
+              transform: `translate(-50%, -50%) rotate(${tick.progress * 360}deg)`,
+              transformOrigin: "center bottom",
+            }}
+          />
+        ))}
       </div>
       <p className="flex flex-col items-end">
         <span className="text-2xl font-semibold">{formattedTime}</span>
