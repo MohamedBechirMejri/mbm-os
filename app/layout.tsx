@@ -1,13 +1,8 @@
 import type { Metadata } from "next";
-import { Figtree, Inter } from "next/font/google";
+import { Figtree } from "next/font/google";
 import "./globals.css";
 import { MotionConfig } from "motion/react";
 import LiquidGlassFilters from "@/components/screens/login/components/liquid-glass-filters";
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-});
 
 const figtree = Figtree({
   preload: true,
@@ -29,7 +24,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.variable} ${figtree.variable} antialiased font-[Figtree] overflow-hidden overscroll-none`}
+        className={`${figtree.variable} antialiased font-[Figtree] overflow-hidden overscroll-none`}
       >
         <MotionConfig reducedMotion="never">{children}</MotionConfig>
 
