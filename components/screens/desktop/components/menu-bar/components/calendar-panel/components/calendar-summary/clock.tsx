@@ -76,7 +76,10 @@ function Tick({
   index: number;
   fractionalSeconds: number;
 }) {
-  const opacity = calculateOpacity(tick.progress, fractionalSeconds);
+  const opacity =
+    index < fractionalSeconds - 1
+      ? 1
+      : calculateOpacity(tick.progress, fractionalSeconds);
 
   return (
     <motion.span
