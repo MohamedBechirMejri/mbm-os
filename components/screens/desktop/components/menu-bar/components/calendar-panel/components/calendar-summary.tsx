@@ -30,9 +30,6 @@ export function CalendarSummary({
           </span>
           <span className="text-lg">{monthLabel}</span>
         </div>
-        <p className="mt-3 text-xs">
-          {formattedTime} • {timeZone}
-        </p>
       </div>
       <div className="flex flex-col items-end gap-3">
         <div className="flex gap-2">
@@ -57,9 +54,10 @@ export function CalendarSummary({
             <ChevronRight className="size-4" />
           </Button>
         </div>
-        <span className="">
-          {openWindowCount} window{openWindowCount === 1 ? "" : "s"} open
-        </span>
+        <p className="flex flex-col items-end">
+          <span className="font-semibold text-2xl">{formattedTime}</span>
+          <span className="text-xs"> {timeZone}</span>
+        </p>
       </div>
     </div>
   );
