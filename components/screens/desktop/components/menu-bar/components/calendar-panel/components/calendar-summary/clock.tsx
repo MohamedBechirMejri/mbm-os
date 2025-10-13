@@ -6,34 +6,37 @@ const TICK_COUNT = 60;
 function generateTicks({ width, height }: { width: number; height: number }) {
   const ticks = [];
   const perimeter = (width + height) * 2;
+  const centerX = width / 2;
+  const centerY = height / 2;
 
   for (let i = 0; i < TICK_COUNT; i++) {
     const distance = (i / TICK_COUNT) * perimeter;
     const progress = i / TICK_COUNT;
 
-    let x: number, y: number, rotation: number;
+    let x: number, y: number;
 
     if (distance < width) {
       // Top edge: left to right
       x = distance;
       y = 0;
-      rotation = 0;
     } else if (distance < width + height) {
       // Right edge: top to bottom
       x = width;
       y = distance - width;
-      rotation = 90;
     } else if (distance < width * 2 + height) {
       // Bottom edge: right to left
       x = width - (distance - width - height);
       y = height;
-      rotation = 180;
     } else {
       // Left edge: bottom to top
       x = 0;
       y = height - (distance - width * 2 - height);
-      rotation = 270;
     }
+
+    // Calculate angle from tick to center (pointing inward)
+    const angleToCenter =
+      Math.atan2(centerY - y, centerX - x) * (180 / Math.PI);
+    const rotation = angleToCenter + 90; // +90 because the tick's default orientation is vertical
 
     ticks.push({ x, y, rotation, progress });
   }
