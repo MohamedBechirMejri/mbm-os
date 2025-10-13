@@ -13,10 +13,10 @@ export default function ClockWidget({
   seconds: number;
 }) {
   return (
-    <div className="relative h-full w-full">
+    <div className="relative z-20 flex h-full w-full flex-col items-end gap-3 rounded-4xl bg-[#F4F4F4] p-4 shadow-xl">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-10"
+        className="pointer-events-none absolute inset-0 z-20"
         style={
           {
             "--ring-radius": "calc(50% - 14px)",
@@ -48,13 +48,10 @@ export default function ClockWidget({
           );
         })}
       </div>
-
-      <div className="relative z-20 flex h-full w-full flex-col items-end gap-3 rounded-4xl bg-[#F4F4F4] p-4 shadow-xl">
-        <p className="flex flex-col items-end">
-          <span className="text-2xl font-semibold">{formattedTime}</span>
-          <span className="text-xs">{timeZone}</span>
-        </p>
-      </div>
+      <p className="flex flex-col items-end">
+        <span className="text-2xl font-semibold">{formattedTime}</span>
+        <span className="text-xs">{timeZone}</span>
+      </p>
     </div>
   );
 }
