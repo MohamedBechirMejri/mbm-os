@@ -30,10 +30,11 @@ function formatDate(date: Date) {
   const day = date.getDate();
   const hours = date.getHours();
   const minutes = date.getMinutes();
+  const seconds = date.getSeconds();
   const ampm = hours >= 12 ? "PM" : "AM";
   const displayHours = hours % 12 || 12;
 
-  return `${dayName} ${monthName} ${day}  ${displayHours}:${minutes.toString().padStart(2, "0")} ${ampm}`;
+  return `${dayName} ${monthName} ${day}  ${displayHours}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")} ${ampm}`;
 }
 
 export function Clock({ isActive, onToggle }: ClockProps) {
