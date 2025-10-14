@@ -1,7 +1,6 @@
 import { useMemo } from "react";
-
+import Counter from "@/components/ui/counter";
 import { cn } from "@/lib/utils";
-
 import {
   WEEKDAY_SYMBOLS,
   WEEKEND_DAY_INDICES,
@@ -33,8 +32,20 @@ export function CalendarSection({ monthLabel, cells }: CalendarSectionProps) {
 
   return (
     <section className="rounded-4xl bg-white p-5 shadow-xl">
-      <header className="text-left text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-[#FF3B30]">
-        {monthLabel}
+      <header className="text-left text-[0.65rem] font-bold uppercase  tracking-widest text-[#FF3B30] pl-1.5 flex justify-between">
+        <div className="flex items-center">
+          <h1>{monthLabel.split(" ")[0]}</h1>
+          <Counter
+            value={+monthLabel.split(" ")[1]}
+            places={[1000, 100, 10, 1]}
+            textColor="#FF3B30"
+            fontSize={12}
+            gap={0}
+          />
+        </div>
+        <div className="flex items-center">
+          <h1>{monthLabel.split(" ")[1]}</h1>
+        </div>
       </header>
       <div className="mt-4 grid grid-cols-7 gap-2">
         {headerDays.map((day) => (
