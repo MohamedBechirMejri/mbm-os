@@ -155,10 +155,10 @@ function Tick({
   return (
     <span
       className={cn(
-        "absolute origin-center",
+        "absolute origin-center rounded-full",
         index % 5 === 0
-          ? "h-4 w-[0.1875rem] rounded-full"
-          : "h-2 w-[0.125rem] rounded-full",
+          ? "h-3 w-[0.101875rem]"
+          : "h-2 w-[0.10125rem]",
       )}
       style={{
         left: `${tick.x}px`,
