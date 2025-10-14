@@ -138,10 +138,13 @@ export default function MenuBar() {
         {activePanel === "calendar" && (
           <motion.div
             key="calendar"
-            initial={{ opacity: 0, y: -12, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -12, scale: 0.98 }}
-            transition={{ duration: 0.16, ease: [0.4, 0, 0.2, 1] }}
+            initial={{ x: '100%' }}
+            animate={{ x: '0%' }}
+            exit={{ x: '100%' }}
+            transition={{
+              ease: 'easeOut',
+              duration: 0.3,
+            }}
             className="absolute right-2 top-9"
             onPointerDown={(event) => event.stopPropagation()}
           >
