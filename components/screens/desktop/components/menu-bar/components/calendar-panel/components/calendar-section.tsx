@@ -41,8 +41,8 @@ export function CalendarSection({ monthLabel, cells }: CalendarSectionProps) {
           <span
             key={day.key}
             className={cn(
-              "text-center text-[0.65rem] font-medium uppercase tracking-[0.25em] text-[#A1A1AA]",
-              day.isWeekend && "text-[#FF3B30]",
+              "text-center text-sm font-semibold uppercase tracking-[0.25em] text-black",
+              day.isWeekend && "text-black/40",
             )}
           >
             {day.label}
@@ -59,7 +59,7 @@ export function CalendarSection({ monthLabel, cells }: CalendarSectionProps) {
               className={cn(
                 "flex aspect-square w-full items-center justify-center rounded-full text-sm font-semibold transition-colors duration-200",
                 cell.isToday
-                  ? "bg-[#FF3B30] text-white shadow-[0_6px_18px_rgba(255,59,48,0.35)]"
+                  ? "bg-[#FF3B30] text-white"
                   : isWeekend
                     ? "text-[#FF3B30] hover:bg-[#FFECEF]"
                     : "text-[#1C1C1E] hover:bg-[#F2F2F7]",
