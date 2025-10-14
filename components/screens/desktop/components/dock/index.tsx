@@ -18,6 +18,7 @@ import React, {
 } from "react";
 
 import { cn } from "@/lib/utils";
+import GlassSurface from "@/components/ui/glass-surface";
 
 export interface DockProps extends VariantProps<typeof dockVariants> {
   className?: string;
@@ -33,7 +34,7 @@ const DEFAULT_MAGNIFICATION = 60;
 const DEFAULT_DISTANCE = 140;
 
 const dockVariants = cva(
-  "supports-backdrop-blur:bg-white/10 supports-backdrop-blur:dark:bg-black/10 mx-auto mt-8 flex h-[58px] w-max items-center justify-center gap-2 rounded-2xl border p-2 backdrop-blur-md",
+  "mx-auto mt-8 flex h-[58px] w-max items-center justify-center gap-2 rounded-2xl",
 );
 
 interface DockContextValue {
@@ -82,7 +83,14 @@ const Dock = React.forwardRef<HTMLDivElement, DockProps>(
             "items-end": direction === "bottom",
           })}
         >
-          {children}
+          <GlassSurface
+            width={'max-content'}
+            height={64}
+            borderRadius={24}
+            className="my-custom-class"
+          >
+            {children}
+          </GlassSurface>
         </motion.div>
       </DockContext.Provider>
     );
