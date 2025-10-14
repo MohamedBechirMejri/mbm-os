@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 import { DAY_LABELS } from "../constants";
-import { type CalendarCell } from "../utils/calendar";
+import type { CalendarCell } from "../utils/calendar";
 
 type CalendarSectionProps = {
   monthLabel: string;
@@ -10,8 +10,8 @@ type CalendarSectionProps = {
 
 export function CalendarSection({ monthLabel, cells }: CalendarSectionProps) {
   return (
-    <section className="rounded-3xl p-4">
-      <header className="flex items-center justify-between text-xs uppercase tracking-[0.2rem] bg-[#F4F4F4]">
+    <section className="rounded-3xl p-4 bg-[#F4F4F4]">
+      <header className="flex items-center justify-between text-xs uppercase tracking-[0.2rem]">
         <span>Calendar</span>
         <span>{monthLabel}</span>
       </header>

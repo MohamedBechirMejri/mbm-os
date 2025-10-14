@@ -14,7 +14,7 @@ export function CalendarPanel({ referenceDate }: CalendarPanelProps) {
     useCalendarPanel(referenceDate);
 
   return (
-    <GlassTile className="w-[30rem]">
+    <GlassTile className="w-[26rem]">
       <CalendarSummary
         dayLabel={summary.dayLabel}
         dayNumber={summary.dayNumber}

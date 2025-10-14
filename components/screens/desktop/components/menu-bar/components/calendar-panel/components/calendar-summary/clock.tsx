@@ -156,9 +156,9 @@ function Tick({
     <span
       className={cn(
         "absolute origin-center rounded-full",
-        index % 5 === 0
-          ? "h-3 w-[0.101875rem]"
-          : "h-2 w-[0.10125rem]",
+        index % 15 === 0
+          ? "h-3 w-0.75"
+          : "h-2 w-[0.050125rem]",
       )}
       style={{
         left: `${tick.x}px`,
@@ -328,19 +328,19 @@ export default function ClockWidget({
             value={hours}
             places={[10, 1]}
             textColor="black"
-            fontSize={64}
+            fontSize={42}
             gap={0}
           />
-          <span className=" text-black text-5xl">:</span>
+          <span className=" text-black text-4xl">:</span>
           <Counter
             value={minutes}
             places={[10, 1]}
             textColor="black"
-            fontSize={64}
+            fontSize={42}
             gap={0}
           />
         </div>
-        <span className="text-sm text-black/60">{timeZone}</span>
+        <span className="text-xs text-black/60">{timeZone}</span>
       </div>
     </div>
   );
