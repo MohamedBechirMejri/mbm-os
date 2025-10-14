@@ -329,6 +329,7 @@ export default function ClockWidget({
             places={[10, 1]}
             textColor="black"
             fontSize={64}
+            gap={0}
           />
           <span className=" text-black text-5xl">:</span>
           <Counter
@@ -336,6 +337,7 @@ export default function ClockWidget({
             places={[10, 1]}
             textColor="black"
             fontSize={64}
+            gap={0}
           />
         </div>
         <span className="text-sm text-black/60">{timeZone}</span>
