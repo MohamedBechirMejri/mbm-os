@@ -8,8 +8,6 @@ import { loginStyles } from "./styles/animations";
 import type { LoginScreenProps } from "./types";
 
 export default function LoginScreen({ onSuccess }: LoginScreenProps) {
-  const [now, setNow] = useState<Date>(new Date());
-
   // Login UI state
   const [pwd, setPwd] = useState("");
   const [displayPwd, setDisplayPwd] = useState("");
@@ -39,25 +37,6 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
     setDisplayPwd(displayValue);
   };
 
-  // Update time every second to keep the display current
-  useEffect(() => {
-    const intervalId = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(intervalId);
-  }, []);
-
-  // Format date and time in macOS lock screen style
-  const dateText = now.toLocaleDateString(undefined, {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-  });
-
-  const timeText = now.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-
   return (
     <motion.div
       key={"login-screen"}
@@ -71,7 +50,7 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
       <StatusBar />
 
       {/* Time and Date Display */}
-      <TimeDisplay date={dateText} time={timeText} />
+      <TimeDisplay />
 
       {/* Vignette overlay to improve text legibility on bright videos */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_50%_35%,rgba(0,0,0,0)_0%,rgba(0,0,0,0.18)_65%,rgba(0,0,0,0.45)_100%)]" />

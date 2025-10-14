@@ -1,7 +1,22 @@
-import { APPLE_FONT_STACK, APPLE_TEXT_FONT_STACK } from "../constants/fonts";
-import type { TimeDisplayProps } from "../types";
+import useCurrentTime from "../../desktop/components/menu-bar/hooks/use-current-time";
+import { APPLE_FONT_STACK, APPLE_TEXT_FONT_STACK } from "../constants/fonts"; 
 
-export default function TimeDisplay({ date, time }: TimeDisplayProps) {
+export default function TimeDisplay( ) {
+  const now = useCurrentTime();
+
+  // Format date and time in macOS lock screen style
+  const date = now.toLocaleDateString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
+
+  const time = now.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+
   return (
     <h1
       className="relative flex flex-col items-center justify-center text-8xl font-extrabold py-8 pt-12 tracking-tight"
