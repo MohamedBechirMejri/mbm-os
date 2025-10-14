@@ -7,7 +7,8 @@ export type CalendarCell = {
 export function buildCalendar(month: Date, today: Date): CalendarCell[] {
   const firstOfMonth = new Date(month.getFullYear(), month.getMonth(), 1);
   const start = new Date(firstOfMonth);
-  start.setDate(firstOfMonth.getDate() - firstOfMonth.getDay());
+  const dayOffset = (firstOfMonth.getDay() + 6) % 7; // align weeks to start on Monday
+  start.setDate(firstOfMonth.getDate() - dayOffset);
 
   const cells: CalendarCell[] = [];
 
