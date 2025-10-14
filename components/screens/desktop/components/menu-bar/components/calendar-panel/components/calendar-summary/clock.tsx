@@ -19,9 +19,9 @@ function generateTicks({ width, height }: { width: number; height: number }) {
 
   for (let i = 0; i < TICK_COUNT; i++) {
     const distance = ((i / TICK_COUNT) * perimeter + startOffset) % perimeter;
-    const progress = i / TICK_COUNT;
 
-    let x: number, y: number;
+    let x: number;
+    let y: number;
 
     if (distance < width) {
       // Top edge: left to right
@@ -46,7 +46,7 @@ function generateTicks({ width, height }: { width: number; height: number }) {
       Math.atan2(centerY - y, centerX - x) * (180 / Math.PI);
     const rotation = angleToCenter + 90; // +90 because the tick's default orientation is vertical
 
-    ticks.push({ x, y, rotation, progress });
+    ticks.push({ x, y, rotation });
   }
 
   return ticks;
@@ -141,35 +141,6 @@ function getTickOpacity(index: number, state: HighlightState): number {
   return BASE_OPACITY;
 }
 
-function Tick({
-  tick,
-  index,
-  highlightState,
-}: {
-  tick: { x: number; y: number; rotation: number; progress: number };
-  index: number;
-  highlightState: HighlightState;
-}) {
-  const opacity = getTickOpacity(index, highlightState);
-
-  return (
-    <span
-      className={cn(
-        "absolute origin-center rounded-full",
-        index % 15 === 0 ? "h-3 w-0.75" : "h-2 w-[0.050125rem]",
-      )}
-      style={{
-        left: `${tick.x}px`,
-        top: `${tick.y}px`,
-        transform: `translate(-50%, -50%) rotate(${tick.rotation}deg)`,
-        backgroundColor: "black",
-        opacity,
-        transition: "opacity 120ms ease-out",
-      }}
-    />
-  );
-}
-
 export default function ClockWidget({
   referenceDate,
   seconds,
@@ -179,11 +150,14 @@ export default function ClockWidget({
   seconds: number;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const tickRefs = useRef<Array<HTMLSpanElement | null>>(
+    Array(TICK_COUNT).fill(null),
+  );
+  const tickOpacityRef = useRef<number[]>(Array(TICK_COUNT).fill(BASE_OPACITY));
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-  const [fractionalSeconds, setFractionalSeconds] = useState(seconds);
   const secondsRef = useRef(seconds);
   const lastTickTsRef = useRef<number>(
-    typeof performance !== "undefined" ? performance.now() : 0,
+    typeof performance !== "undefined" ? performance.now() : Date.now(),
   );
   const lastIndexRef = useRef<number>(seconds % TICK_COUNT);
   const fadeStartTsRef = useRef<number | null>(null);
@@ -192,7 +166,9 @@ export default function ClockWidget({
 
   // Measure container dimensions
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current) {
+      return;
+    }
 
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];
@@ -214,7 +190,6 @@ export default function ClockWidget({
 
   useEffect(() => {
     secondsRef.current = seconds;
-    setFractionalSeconds(seconds);
     lastTickTsRef.current =
       typeof performance !== "undefined" ? performance.now() : Date.now();
     lastIndexRef.current = seconds % TICK_COUNT;
@@ -223,18 +198,56 @@ export default function ClockWidget({
     fadeProgressRef.current = 0;
   }, [seconds]);
 
-  // Update fractional seconds continuously for smooth animation tied to provided seconds
-  useEffect(() => {
-    let rafId: number;
+  const ticks = useMemo(() => {
+    return dimensions.width > 0
+      ? generateTicks({ width: dimensions.width, height: dimensions.height })
+      : [];
+  }, [dimensions]);
 
-    const updateFractionalSeconds = () => {
+  useEffect(() => {
+    if (!ticks.length) {
+      return;
+    }
+
+    let rafId = 0;
+
+    tickRefs.current.length = ticks.length;
+    tickOpacityRef.current = new Array(ticks.length).fill(BASE_OPACITY);
+    tickRefs.current.forEach((node, index) => {
+      if (node) {
+        node.style.opacity = tickOpacityRef.current[index].toString();
+      }
+    });
+
+    const updateTickVisuals = () => {
       const now =
         typeof performance !== "undefined" ? performance.now() : Date.now();
       const elapsed = (now - lastTickTsRef.current) / 1000;
       const fractional =
         (secondsRef.current + elapsed + TICK_COUNT) % TICK_COUNT;
 
-      setFractionalSeconds(fractional);
+      const currentIndex = Math.floor(fractional);
+      const fractionWithinTick = fractional - currentIndex;
+
+      const previous = lastIndexRef.current;
+
+      if (currentIndex !== previous) {
+        if (currentIndex < previous) {
+          fadeFromIndexRef.current = previous;
+          fadeStartTsRef.current = now;
+          fadeProgressRef.current = 0;
+        } else if (currentIndex - previous > 1) {
+          fadeFromIndexRef.current = null;
+          fadeStartTsRef.current = null;
+          fadeProgressRef.current = 0;
+        } else {
+          fadeFromIndexRef.current = null;
+          fadeStartTsRef.current = null;
+          fadeProgressRef.current = 0;
+        }
+
+        lastIndexRef.current = currentIndex;
+      }
 
       if (fadeStartTsRef.current !== null) {
         const fadeElapsed = (now - fadeStartTsRef.current) / 1000;
@@ -249,60 +262,41 @@ export default function ClockWidget({
         fadeProgressRef.current = 0;
       }
 
-      rafId = requestAnimationFrame(updateFractionalSeconds);
+      const fadeFromIndex = fadeFromIndexRef.current;
+      const fadeProgress =
+        fadeFromIndex !== null ? fadeProgressRef.current : null;
+
+      const highlightState: HighlightState = {
+        currentIndex,
+        fractionWithinTick,
+        fadeFromIndex,
+        fadeProgress,
+      };
+
+      for (let index = 0; index < tickRefs.current.length; index += 1) {
+        const node = tickRefs.current[index];
+        if (!node) {
+          continue;
+        }
+
+        const nextOpacity = getTickOpacity(index, highlightState);
+
+        if (tickOpacityRef.current[index] !== nextOpacity) {
+          tickOpacityRef.current[index] = nextOpacity;
+          node.style.opacity = nextOpacity.toString();
+        }
+      }
+
+      rafId = requestAnimationFrame(updateTickVisuals);
     };
 
-    rafId = requestAnimationFrame(updateFractionalSeconds);
+    rafId = requestAnimationFrame(updateTickVisuals);
 
     return () => cancelAnimationFrame(rafId);
-  }, []);
-
-  const ticks = useMemo(() => {
-    return dimensions.width > 0
-      ? generateTicks({ width: dimensions.width, height: dimensions.height })
-      : [];
-  }, [dimensions]);
+  }, [ticks]);
 
   const minutes = referenceDate.getMinutes();
   const hours = referenceDate.getHours() % 12;
-  const fractional =
-    ((fractionalSeconds % TICK_COUNT) + TICK_COUNT) % TICK_COUNT;
-  const currentIndex = Math.floor(fractional);
-  const fractionWithinTick = fractional - currentIndex;
-  const fadeFromIndex = fadeFromIndexRef.current;
-  const fadeProgress = fadeFromIndex !== null ? fadeProgressRef.current : null;
-
-  const highlightState: HighlightState = {
-    currentIndex,
-    fractionWithinTick,
-    fadeFromIndex,
-    fadeProgress,
-  };
-
-  useEffect(() => {
-    const previous = lastIndexRef.current;
-
-    if (currentIndex === previous) {
-      return;
-    }
-
-    if (currentIndex < previous) {
-      fadeFromIndexRef.current = previous;
-      fadeStartTsRef.current =
-        typeof performance !== "undefined" ? performance.now() : Date.now();
-      fadeProgressRef.current = 0;
-    } else if (currentIndex - previous > 1) {
-      fadeFromIndexRef.current = null;
-      fadeStartTsRef.current = null;
-      fadeProgressRef.current = 0;
-    } else {
-      fadeFromIndexRef.current = null;
-      fadeStartTsRef.current = null;
-      fadeProgressRef.current = 0;
-    }
-
-    lastIndexRef.current = currentIndex;
-  }, [currentIndex]);
 
   return (
     <div className="relative z-20 flex h-full w-full items-center justify-center rounded-4xl bg-[#F4F4F4] p-4 shadow-xl">
@@ -312,16 +306,28 @@ export default function ClockWidget({
         className="pointer-events-none absolute inset-3 z-20 rounded-[2.5rem]"
       >
         {ticks.map((tick, index) => (
-          <Tick
+          <span
             key={`${tick.x}-${tick.y}-${index}`}
-            tick={tick}
-            index={index}
-            highlightState={highlightState}
+            ref={(node: HTMLSpanElement | null) => {
+              tickRefs.current[index] = node;
+            }}
+            className={cn(
+              "absolute origin-center rounded-full",
+              index % 15 === 0 ? "h-3 w-0.75" : "h-2 w-[0.050125rem]",
+            )}
+            style={{
+              left: `${tick.x}px`,
+              top: `${tick.y}px`,
+              transform: `translate(-50%, -50%) rotate(${tick.rotation}deg)`,
+              backgroundColor: "black",
+              opacity: tickOpacityRef.current[index] ?? BASE_OPACITY,
+              transition: "opacity 120ms ease-out",
+            }}
           />
         ))}
       </div>
       <div className="flex flex-col items-center">
-        <div className="text-3xl font-semibold tracking-tight flex items-center flex-col">
+        <div className="flex flex-col items-center text-3xl font-semibold tracking-tight">
           <Counter
             value={hours}
             places={[10, 1]}
