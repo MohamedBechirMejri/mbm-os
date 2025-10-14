@@ -83,12 +83,7 @@ const Dock = React.forwardRef<HTMLDivElement, DockProps>(
             "items-end": direction === "bottom",
           })}
         >
-          <GlassSurface
-            width={'max-content'}
-            height={64}
-            borderRadius={24}
-            className="my-custom-class"
-          >
+          <GlassSurface width={"max-content"} height={64} borderRadius={24}>
             {children}
           </GlassSurface>
         </motion.div>
