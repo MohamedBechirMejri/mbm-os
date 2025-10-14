@@ -48,9 +48,7 @@ export function Clock({ isActive, onToggle }: ClockProps) {
   return (
     <button
       type="button"
-      className={`flex items-center gap-1 px-2 text-sm font-medium rounded transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 ${
-        isActive ? "bg-white/20 text-white" : "text-white/90 hover:bg-white/10"
-      }`}
+      className={`flex items-center gap-1 px-2 text-sm font-medium rounded transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 text-white/90 active:bg-white/10`}
       onPointerDown={handlePointerDown}
       aria-pressed={isActive}
       aria-haspopup="dialog"
