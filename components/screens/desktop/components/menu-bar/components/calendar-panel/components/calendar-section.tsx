@@ -10,7 +10,7 @@ type CalendarSectionProps = {
 
 export function CalendarSection({ monthLabel, cells }: CalendarSectionProps) {
   return (
-    <section className="rounded-3xl p-4 bg-[#F4F4F4]">
+    <section className="rounded-3xl p-4 bg-[#F6F6F6]">
       <header className="flex items-center justify-between text-xs uppercase tracking-[0.2rem]">
         <span>Calendar</span>
         <span>{monthLabel}</span>
