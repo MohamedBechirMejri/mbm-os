@@ -10,14 +10,16 @@ type CalendarSectionProps = {
 
 export function CalendarSection({ monthLabel, cells }: CalendarSectionProps) {
   return (
-    <section className="rounded-3xl p-4 bg-[#F6F6F6]">
-      <header className="flex items-center justify-between text-xs uppercase tracking-[0.2rem]">
-        <span>Calendar</span>
-        <span>{monthLabel}</span>
+    <section className="rounded-[28px] bg-white p-5 shadow-[0_12px_30px_rgba(28,28,30,0.12)]">
+      <header className="text-left text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-[#FF3B30]">
+        {monthLabel}
       </header>
       <div className="mt-4 grid grid-cols-7 gap-2">
         {DAY_LABELS.map((day) => (
-          <span key={day.id} className="text-center text-xs font-semibold">
+          <span
+            key={day.id}
+            className="text-center text-[0.65rem] font-medium uppercase tracking-[0.25em] text-[#A1A1AA]"
+          >
             {day.label}
           </span>
         ))}
@@ -27,9 +29,13 @@ export function CalendarSection({ monthLabel, cells }: CalendarSectionProps) {
           <span
             key={cell.date.toISOString()}
             className={cn(
-              "flex aspect-square w-full items-center justify-center rounded-2xl text-sm transition",
-              cell.isToday ? "" : "",
-              !cell.isCurrentMonth && "",
+              "flex aspect-square w-full items-center justify-center rounded-full text-sm font-semibold transition-colors duration-200",
+              cell.isToday
+                ? "bg-[#FF3B30] text-white shadow-[0_6px_18px_rgba(255,59,48,0.35)]"
+                : "text-[#1C1C1E] hover:bg-[#F2F2F7]",
+              !cell.isCurrentMonth &&
+                !cell.isToday &&
+                "text-[#C7C7CC] hover:bg-transparent",
             )}
           >
             {cell.date.getDate()}
