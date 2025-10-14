@@ -11,9 +11,14 @@ import type { CalendarCell } from "../utils/calendar";
 type CalendarSectionProps = {
   monthLabel: string;
   cells: CalendarCell[];
+  onAdjustMonth: (delta: number) => void;
 };
 
-export function CalendarSection({ monthLabel, cells }: CalendarSectionProps) {
+export function CalendarSection({
+  monthLabel,
+  cells,
+  onAdjustMonth,
+}: CalendarSectionProps) {
   const weekendDays = useMemo(
     () => new Set<WeekdayIndex>(WEEKEND_DAY_INDICES),
     [],
@@ -44,7 +49,27 @@ export function CalendarSection({ monthLabel, cells }: CalendarSectionProps) {
           />
         </div>
         <div className="flex items-center">
-          <h1>{monthLabel.split(" ")[1]}</h1>
+          <button
+            type="button"
+            className="h-6 w-6 rounded-full hover:bg-black/10 flex items-center justify-center"
+            onClick={() => onAdjustMonth(-1)}
+            aria-label="Previous Month"
+          >
+            <span className="text-xl font-light leading-none text-black">
+              ‹
+            </span>
+          </button>
+          <button
+            type="button"
+            className="ml-2 h-6 w-6 rounded-full hover:bg-black/10 flex items-center justify-center"
+            onClick={() => onAdjustMonth(1)}
+            aria-label="Next Month"
+          >
+            <span className="text-xl font-light leading-none text-black"></span>
+            <span className="text-xl font-light leading-none text-black">
+              ›
+            </span>
+          </button>
         </div>
       </header>
       <div className="mt-4 grid grid-cols-7 gap-2">

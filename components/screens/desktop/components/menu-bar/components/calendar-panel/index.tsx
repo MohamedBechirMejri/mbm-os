@@ -27,6 +27,7 @@ export function CalendarPanel() {
         <CalendarSection
           monthLabel={calendar.monthLabel}
           cells={calendar.cells}
+          onAdjustMonth={handlers.adjustMonth}
         />
         {/* <ActiveSessionSection
           activeWindow={session.activeWindow}
