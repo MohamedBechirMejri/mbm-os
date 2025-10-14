@@ -10,11 +10,10 @@ type CalendarPanelProps = {
 };
 
 export function CalendarPanel({ referenceDate }: CalendarPanelProps) {
-  const { summary, calendar, session, flow, handlers } =
-    useCalendarPanel(referenceDate);
+  const { summary, calendar, handlers } = useCalendarPanel(referenceDate);
 
   return (
-    <GlassTile className="w-[26rem]">
+    <GlassTile className="w-[22rem]">
       <CalendarSummary
         dayLabel={summary.dayLabel}
         dayNumber={summary.dayNumber}

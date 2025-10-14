@@ -156,9 +156,7 @@ function Tick({
     <span
       className={cn(
         "absolute origin-center rounded-full",
-        index % 15 === 0
-          ? "h-3 w-0.75"
-          : "h-2 w-[0.050125rem]",
+        index % 15 === 0 ? "h-3 w-0.75" : "h-2 w-[0.050125rem]",
       )}
       style={{
         left: `${tick.x}px`,
@@ -174,7 +172,6 @@ function Tick({
 
 export default function ClockWidget({
   referenceDate,
-  timeZone,
   seconds,
 }: {
   referenceDate: Date;
@@ -324,24 +321,29 @@ export default function ClockWidget({
         ))}
       </div>
       <div className="flex flex-col items-center">
-        <div className="text-3xl font-semibold tracking-tight flex items-center">
+        <div className="text-3xl font-semibold tracking-tight flex items-center flex-col">
           <Counter
             value={hours}
             places={[10, 1]}
             textColor="black"
-            fontSize={42}
+            fontSize={52}
             gap={0}
+            digitStyle={{
+              fontWeight: 900,
+            }}
           />
-          <span className=" text-black text-4xl">:</span>
+
           <Counter
             value={minutes}
             places={[10, 1]}
             textColor="black"
-            fontSize={42}
+            fontSize={52}
             gap={0}
+            digitStyle={{
+              fontWeight: 900,
+            }}
           />
         </div>
-        <span className="text-xs text-black/60">{timeZone}</span>
       </div>
     </div>
   );
