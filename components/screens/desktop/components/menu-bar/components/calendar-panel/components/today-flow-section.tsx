@@ -1,8 +1,8 @@
 import { Clock3, Monitor } from "lucide-react";
 import { motion } from "motion/react";
-import { type WinInstance } from "@/components/screens/desktop/components/window-manager";
+import type { WinInstance } from "@/components/screens/desktop/components/window-manager";
 
-import { type TodayEntry } from "../hooks/use-calendar-panel";
+import type { TodayEntry } from "../hooks/use-calendar-panel";
 import { AppGlyph } from "./app-glyph";
 
 type TodayFlowSectionProps = {

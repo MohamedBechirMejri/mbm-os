@@ -1,12 +1,12 @@
 import { Monitor } from "lucide-react";
 import { motion } from "motion/react";
-import {
-  type AppMeta,
-  type WinInstance,
+import type {
+  AppMeta,
+  WinInstance,
 } from "@/components/screens/desktop/components/window-manager";
 import { Button } from "@/components/ui/button";
 
-import { type SessionStat } from "../hooks/use-calendar-panel";
+import type { SessionStat } from "../hooks/use-calendar-panel";
 import { AppGlyph } from "./app-glyph";
 
 type ActiveSessionSectionProps = {

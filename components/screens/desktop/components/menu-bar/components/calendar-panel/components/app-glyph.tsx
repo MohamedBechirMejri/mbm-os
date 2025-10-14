@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { type AppMeta } from "@/components/screens/desktop/components/window-manager";
+import type { AppMeta } from "@/components/screens/desktop/components/window-manager";
 
 type AppGlyphProps = {
   app: AppMeta;
@@ -22,9 +22,5 @@ export function AppGlyph({ app }: AppGlyphProps) {
     return <span className="">{app.icon}</span>;
   }
 
-  return (
-    <span className="text-sm font-semibold">
-      {app.title.slice(0, 1)}
-    </span>
-  );
+  return <span className="text-sm font-semibold">{app.title.slice(0, 1)}</span>;
 }

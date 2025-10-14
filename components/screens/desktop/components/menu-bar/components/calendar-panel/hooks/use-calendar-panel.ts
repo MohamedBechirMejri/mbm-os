@@ -1,8 +1,8 @@
 import { useCallback, useMemo, useState } from "react";
 import {
+  type AppMeta,
   DesktopAPI,
   useDesktop,
-  type AppMeta,
   type WinInstance,
 } from "@/components/screens/desktop/components/window-manager";
 

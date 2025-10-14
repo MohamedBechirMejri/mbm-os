@@ -1,7 +1,7 @@
 import useCurrentTime from "../../desktop/components/menu-bar/hooks/use-current-time";
-import { APPLE_FONT_STACK, APPLE_TEXT_FONT_STACK } from "../constants/fonts"; 
+import { APPLE_FONT_STACK, APPLE_TEXT_FONT_STACK } from "../constants/fonts";
 
-export default function TimeDisplay( ) {
+export default function TimeDisplay() {
   const now = useCurrentTime();
 
   // Format date and time in macOS lock screen style

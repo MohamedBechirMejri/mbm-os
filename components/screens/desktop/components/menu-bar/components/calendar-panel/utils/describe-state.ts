@@ -1,4 +1,4 @@
-import { type WinInstance } from "@/components/screens/desktop/components/window-manager";
+import type { WinInstance } from "@/components/screens/desktop/components/window-manager";
 
 export function describeState(win: WinInstance): string {
   switch (win.state) {
