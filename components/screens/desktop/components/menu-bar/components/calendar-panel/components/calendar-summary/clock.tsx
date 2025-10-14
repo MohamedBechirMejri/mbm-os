@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Counter from "@/components/ui/counter";
 import { cn } from "@/lib/utils";
 
@@ -260,10 +260,11 @@ export default function ClockWidget({
     return () => cancelAnimationFrame(rafId);
   }, []);
 
-  const ticks =
-    dimensions.width > 0
+  const ticks = useMemo(() => {
+    return dimensions.width > 0
       ? generateTicks({ width: dimensions.width, height: dimensions.height })
       : [];
+  }, [dimensions]);
 
   const minutes = referenceDate.getMinutes();
   const hours = referenceDate.getHours() % 12;
