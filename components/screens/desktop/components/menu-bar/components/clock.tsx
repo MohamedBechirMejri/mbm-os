@@ -1,9 +1,9 @@
 "use client";
 
-import type { PointerEvent } from "react";
+import { type PointerEvent, useEffect, useState } from "react";
+import useCurrentTime from "../hooks/use-current-time";
 
 type ClockProps = {
-  date: Date;
   isActive: boolean;
   onToggle: () => void;
 };
@@ -36,11 +36,13 @@ function formatDate(date: Date) {
   return `${dayName} ${monthName} ${day}  ${displayHours}:${minutes.toString().padStart(2, "0")} ${ampm}`;
 }
 
-export function Clock({ date, isActive, onToggle }: ClockProps) {
+export function Clock({ isActive, onToggle }: ClockProps) {
   const handlePointerDown = (event: PointerEvent<HTMLButtonElement>) => {
     event.stopPropagation();
     onToggle();
   };
+
+  const date = useCurrentTime();
 
   return (
     <button

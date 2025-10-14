@@ -1,15 +1,13 @@
 "use client";
 
+import useCurrentTime from "../../hooks/use-current-time";
 import { CalendarSection } from "./components/calendar-section";
 import { CalendarSummary } from "./components/calendar-summary";
 import { GlassTile } from "./components/glass-tile";
 import { useCalendarPanel } from "./hooks/use-calendar-panel";
 
-type CalendarPanelProps = {
-  referenceDate: Date;
-};
-
-export function CalendarPanel({ referenceDate }: CalendarPanelProps) {
+export function CalendarPanel() {
+  const referenceDate = useCurrentTime();
   const { summary, calendar, handlers } = useCalendarPanel(referenceDate);
 
   return (

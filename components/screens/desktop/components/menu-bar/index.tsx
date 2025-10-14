@@ -22,7 +22,6 @@ type MenuBarPanel = "calendar" | "control-center";
 export default function MenuBar() {
   const menuBarRef = useRef<HTMLDivElement>(null);
   const [activePanel, setActivePanel] = useState<MenuBarPanel | null>(null);
-  const [currentTime, setCurrentTime] = useState<Date>(() => new Date());
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const apps = useDesktop((state) => Object.values(state.apps));
   const windows = useDesktop((state) => Object.values(state.windows));
@@ -40,16 +39,6 @@ export default function MenuBar() {
   const toggleSearch = useCallback(() => {
     setActivePanel(null);
     setIsSearchOpen((current) => !current);
-  }, []);
-
-  useEffect(() => {
-    const timerId = window.setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-
-    return () => {
-      window.clearInterval(timerId);
-    };
   }, []);
 
   useEffect(() => {
@@ -125,7 +114,6 @@ export default function MenuBar() {
             <BatteryIndicator />
           </div>
           <Clock
-            date={currentTime}
             isActive={activePanel === "calendar"}
             onToggle={() => togglePanel("calendar")}
           />
@@ -157,7 +145,7 @@ export default function MenuBar() {
             className="absolute right-2 top-9"
             onPointerDown={(event) => event.stopPropagation()}
           >
-            <CalendarPanel referenceDate={currentTime} />
+            <CalendarPanel />
           </motion.div>
         )}
       </AnimatePresence>
