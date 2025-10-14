@@ -32,7 +32,7 @@ export function CalendarSection({ monthLabel, cells }: CalendarSectionProps) {
   }, [cells, weekendDays]);
 
   return (
-    <section className="rounded-[28px] bg-white p-5 shadow-[0_12px_30px_rgba(28,28,30,0.12)]">
+    <section className="rounded-4xl bg-white p-5 shadow-xl">
       <header className="text-left text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-[#FF3B30]">
         {monthLabel}
       </header>
