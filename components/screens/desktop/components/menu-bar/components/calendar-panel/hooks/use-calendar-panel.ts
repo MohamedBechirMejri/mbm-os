@@ -126,10 +126,19 @@ export function useCalendarPanel(referenceDate: Date): CalendarPanelData {
     [],
   );
 
-  const monthLabel = visibleMonth.toLocaleDateString(undefined, {
-    month: "long",
-    year: "numeric",
-  });
+  const calendarMonthLabel = useMemo(() => {
+    return visibleMonth.toLocaleDateString(undefined, {
+      month: "long",
+      year: "numeric",
+    });
+  }, [visibleMonth]);
+
+  const summaryMonthLabel = useMemo(() => {
+    return referenceDate.toLocaleDateString(undefined, {
+      month: "long",
+      year: "numeric",
+    });
+  }, [referenceDate]);
 
   const dayLabel = referenceDate.toLocaleDateString(undefined, {
     weekday: "long",
@@ -176,7 +185,7 @@ export function useCalendarPanel(referenceDate: Date): CalendarPanelData {
     summary: {
       dayLabel,
       dayNumber,
-      monthLabel,
+      monthLabel: summaryMonthLabel,
       timeZone,
       referenceDate,
       formattedTime: timeFormatter.format(referenceDate),
@@ -184,7 +193,7 @@ export function useCalendarPanel(referenceDate: Date): CalendarPanelData {
       openWindowCount,
     },
     calendar: {
-      monthLabel,
+      monthLabel: calendarMonthLabel,
       cells,
     },
     session: {
