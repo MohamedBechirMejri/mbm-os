@@ -6,11 +6,14 @@ interface BrightnessStore {
   setBrightness: (brightness: number) => void;
 }
 
+const MIN_BRIGHTNESS = 10; // Prevent complete blackout
+
 export const useBrightnessStore = create<BrightnessStore>()(
   persist(
     (set) => ({
       brightness: 100,
-      setBrightness: (brightness) => set({ brightness }),
+      setBrightness: (brightness) =>
+        set({ brightness: Math.max(MIN_BRIGHTNESS, brightness) }),
     }),
     {
       name: "brightness-storage",

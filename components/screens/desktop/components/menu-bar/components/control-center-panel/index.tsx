@@ -13,6 +13,8 @@ export function ControlCenterPanel(_props: ControlCenterPanelProps) {
   const brightness = useBrightnessStore((state) => state.brightness);
   const setBrightness = useBrightnessStore((state) => state.setBrightness);
 
+  const MIN_BRIGHTNESS = 10; // Match the store's minimum
+
   return (
     <section className="w-[24rem] space-y-4 text-white">
       <div className="grid grid-cols-2 gap-4">
@@ -27,7 +29,7 @@ export function ControlCenterPanel(_props: ControlCenterPanelProps) {
               <Slider
                 value={brightness}
                 onChange={setBrightness}
-                min={0}
+                min={MIN_BRIGHTNESS}
                 max={100}
                 step={1}
                 className="flex-1"
