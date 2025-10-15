@@ -31,6 +31,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useActiveApp } from "../../hooks/use-active-app";
 import { useMenuActions } from "../../hooks/use-menu-actions";
+import GlassSurface from "@/components/ui/glass-surface";
 
 type ControlCenterPanelProps = {
   onClose: () => void;
@@ -80,22 +81,6 @@ const quickApps: QuickApp[] = [
     icon: Store,
   },
 ];
-
-function GlassTile({
-  children,
-  className,
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
-  return (
-    <div className={cn(tileBase, className)}>
-      <div className="pointer-events-none absolute inset-0 rounded-[inherit] border border-white/10" />
-      <div className="pointer-events-none absolute -top-16 left-6 h-32 w-32 rounded-full bg-white/20 blur-3xl" />
-      <div className="relative z-10 h-full">{children}</div>
-    </div>
-  );
-}
 
 function AppGlyph({ app }: { app: AppMeta }) {
   if (typeof app.icon === "string") {
@@ -288,25 +273,7 @@ export function ControlCenterPanel({ onClose }: ControlCenterPanelProps) {
 
       <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-4">
         <div className="space-y-4">
-          <GlassTile>
-            <div className="flex items-center justify-between text-sm font-semibold text-white/80">
-              <span>Quick launch</span>
-              <span className="text-xs text-white/60">
-                {online ? "Online" : "Offline"}
-              </span>
-            </div>
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              {quickApps.map((app) => (
-                <QuickLaunchButton
-                  key={app.id}
-                  app={app}
-                  onLaunch={handleLaunch}
-                />
-              ))}
-            </div>
-          </GlassTile>
-
-          <GlassTile>
+          <GlassSurface>
             <div className="text-sm font-semibold text-white/80">
               Window controls
             </div>
@@ -315,11 +282,11 @@ export function ControlCenterPanel({ onClose }: ControlCenterPanelProps) {
                 <WindowActionButton key={action.id} action={action} />
               ))}
             </div>
-          </GlassTile>
+          </GlassSurface>
         </div>
 
         <div className="space-y-4">
-          <GlassTile>
+          <GlassSurface>
             <div className="flex items-center justify-between">
               <div className="text-sm font-semibold text-white/80">
                 Currently focused
@@ -355,9 +322,9 @@ export function ControlCenterPanel({ onClose }: ControlCenterPanelProps) {
                 No window is focused right now.
               </p>
             )}
-          </GlassTile>
+          </GlassSurface>
 
-          <GlassTile>
+          <GlassSurface>
             <div className="flex items-center justify-between text-sm font-semibold text-white/80">
               <span>Running windows</span>
               <span className="text-xs text-white/60">Tap to focus</span>
@@ -395,7 +362,7 @@ export function ControlCenterPanel({ onClose }: ControlCenterPanelProps) {
                 );
               })}
             </div>
-          </GlassTile>
+          </GlassSurface>
         </div>
       </div>
     </section>
