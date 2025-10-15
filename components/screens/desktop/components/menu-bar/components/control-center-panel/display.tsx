@@ -1,11 +1,8 @@
 import { Sun, SunDim } from "lucide-react";
-import { motion } from "motion/react";
 import { useState } from "react";
 import ElasticSlider from "@/components/ui/elastic-slider";
 import GlassSurface from "@/components/ui/glass-surface";
 import { useBrightnessStore } from "@/lib/brightness-store";
-
-const GlassSurfaceNotion = motion(GlassSurface);
 
 export default function Display() {
   const { brightness, setBrightness } = useBrightnessStore((state) => state);
@@ -14,8 +11,7 @@ export default function Display() {
   const MIN_BRIGHTNESS = 10; // Match the store's minimum
 
   return (
-    <GlassSurfaceNotion
-      key={"display controls"}
+    <GlassSurface
       blur={1}
       borderRadius={24}
       className="!w-full !h-max col-span-2 !backdrop-blur-[8px]"
@@ -45,6 +41,6 @@ export default function Display() {
           isHovered={isHovered}
         />
       </fieldset>
-    </GlassSurfaceNotion>
+    </GlassSurface>
   );
 }
