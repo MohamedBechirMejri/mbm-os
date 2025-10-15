@@ -7,6 +7,7 @@ import {
 } from "motion/react";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
+import { cn } from "@/lib/utils";
 
 const MAX_OVERFLOW = 50;
 
@@ -60,6 +61,9 @@ interface SliderProps {
   leftIcon: React.ReactNode;
   rightIcon: React.ReactNode;
   onChange: (value: number) => void;
+  sliderClassName?: string;
+  sliderBackgroundClassName?: string;
+  sliderKnobClassName?: string;
 }
 
 const Slider: React.FC<SliderProps> = ({
@@ -71,6 +75,9 @@ const Slider: React.FC<SliderProps> = ({
   leftIcon,
   rightIcon,
   onChange,
+  sliderClassName = "",
+  sliderBackgroundClassName = "",
+  sliderKnobClassName = "",
 }) => {
   const [value, setValue] = useState<number>(defaultValue);
   const sliderRef = useRef<HTMLDivElement>(null);
@@ -132,85 +139,88 @@ const Slider: React.FC<SliderProps> = ({
   };
 
   return (
-    <>
+    <motion.div
+      style={{
+        opacity: useTransform(scale, [1, 1.2], [0.7, 1]),
+      }}
+      className="flex w-full touch-none select-none items-center justify-center gap-4"
+    >
       <motion.div
-        style={{
-          opacity: useTransform(scale, [1, 1.2], [0.7, 1]),
+        animate={{
+          scale: region === "left" ? [1, 1.4, 1] : 1,
+          transition: { duration: 0.25 },
         }}
-        className="flex w-full touch-none select-none items-center justify-center gap-4"
+        style={{
+          x: useTransform(() =>
+            region === "left" ? -overflow.get() / scale.get() : 0,
+          ),
+        }}
+      >
+        {leftIcon}
+      </motion.div>
+
+      <div
+        ref={sliderRef}
+        className="relative flex w-full max-w-xs flex-grow cursor-grab touch-none select-none items-center py-4"
+        onPointerMove={handlePointerMove}
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
       >
         <motion.div
-          animate={{
-            scale: region === "left" ? [1, 1.4, 1] : 1,
-            transition: { duration: 0.25 },
-          }}
           style={{
-            x: useTransform(() =>
-              region === "left" ? -overflow.get() / scale.get() : 0,
-            ),
+            scaleX: useTransform(() => {
+              if (sliderRef.current) {
+                const { width } = sliderRef.current.getBoundingClientRect();
+                return 1 + overflow.get() / width;
+              }
+              return 1;
+            }),
+            scaleY: useTransform(overflow, [0, MAX_OVERFLOW], [1, 0.8]),
+            transformOrigin: useTransform(() => {
+              if (sliderRef.current) {
+                const { left, width } =
+                  sliderRef.current.getBoundingClientRect();
+                return clientX.get() < left + width / 2 ? "right" : "left";
+              }
+              return "center";
+            }),
+            height: useTransform(scale, [1, 1.2], [6, 12]),
+            marginTop: useTransform(scale, [1, 1.2], [0, -3]),
+            marginBottom: useTransform(scale, [1, 1.2], [0, -3]),
           }}
+          className="flex flex-grow"
         >
-          {leftIcon}
-        </motion.div>
-
-        <div
-          ref={sliderRef}
-          className="relative flex w-full max-w-xs flex-grow cursor-grab touch-none select-none items-center py-4"
-          onPointerMove={handlePointerMove}
-          onPointerDown={handlePointerDown}
-          onPointerUp={handlePointerUp}
-        >
-          <motion.div
-            style={{
-              scaleX: useTransform(() => {
-                if (sliderRef.current) {
-                  const { width } = sliderRef.current.getBoundingClientRect();
-                  return 1 + overflow.get() / width;
-                }
-                return 1;
-              }),
-              scaleY: useTransform(overflow, [0, MAX_OVERFLOW], [1, 0.8]),
-              transformOrigin: useTransform(() => {
-                if (sliderRef.current) {
-                  const { left, width } =
-                    sliderRef.current.getBoundingClientRect();
-                  return clientX.get() < left + width / 2 ? "right" : "left";
-                }
-                return "center";
-              }),
-              height: useTransform(scale, [1, 1.2], [6, 12]),
-              marginTop: useTransform(scale, [1, 1.2], [0, -3]),
-              marginBottom: useTransform(scale, [1, 1.2], [0, -3]),
-            }}
-            className="flex flex-grow"
+          <div
+            className={cn(
+              "relative h-full flex-grow overflow-hidden rounded-full bg-gray-400",
+              sliderBackgroundClassName,
+            )}
           >
-            <div className="relative h-full flex-grow overflow-hidden rounded-full bg-gray-400">
-              <div
-                className="absolute h-full bg-gray-500 rounded-full"
-                style={{ width: `${getRangePercentage()}%` }}
-              />
-            </div>
-          </motion.div>
-        </div>
-
-        <motion.div
-          animate={{
-            scale: region === "right" ? [1, 1.4, 1] : 1,
-            transition: { duration: 0.25 },
-          }}
-          style={{
-            x: useTransform(() =>
-              region === "right" ? overflow.get() / scale.get() : 0,
-            ),
-          }}
-        >
-          {rightIcon}
+            <div
+              className={cn(
+                "absolute h-full bg-gray-500 rounded-full",
+                sliderClassName,
+              )}
+              style={{ width: `${getRangePercentage()}%` }}
+            />
+          </div>
         </motion.div>
+      </div>
+
+      <motion.div
+        animate={{
+          scale: region === "right" ? [1, 1.4, 1] : 1,
+          transition: { duration: 0.25 },
+        }}
+        style={{
+          x: useTransform(() =>
+            region === "right" ? overflow.get() / scale.get() : 0,
+          ),
+        }}
+      >
+        {rightIcon}
       </motion.div>
-      <p className="absolute text-gray-400 transform -translate-y-4 text-xs font-medium tracking-wide">
-        {Math.round(value)}
-      </p>
-    </>
+    </motion.div>
   );
 };
 
