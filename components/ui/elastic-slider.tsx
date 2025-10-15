@@ -216,12 +216,12 @@ const Slider: React.FC<SliderProps> = ({
             />
             <div
               className={cn(
-                "absolute w-6 h-4 top-[-.365rem] rounded-full z-50 transition-opacity",
-                isHovered ? "opacity-100" : "opacity-100",
+                "absolute w-5 h-4 top-[-.365rem] rounded-full z-50 transition-[opacity,scale,background-color] active:bg-white/5 bg-white active:scale-110 scale-80 duration-200",
+                isHovered ? "opacity-100" : "opacity-0",
                 sliderKnobClassName,
               )}
               style={{
-                left: `max(calc(${getRangePercentage()}% - 1rem), 0%)`,
+                left: `max(calc(${getRangePercentage()}% - .75rem), 0%)`,
               }}
             >
               <GlassSurface
