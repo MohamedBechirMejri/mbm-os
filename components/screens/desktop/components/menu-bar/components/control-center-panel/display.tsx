@@ -28,7 +28,7 @@ export default function Display() {
               defaultValue={brightness}
               maxValue={100}
               onChange={setBrightness}
-              className="w-full"
+              className="w-full h-max items-center flex"
               sliderClassName="bg-white h-1"
               sliderBackgroundClassName="bg-black h-1"
               sliderKnobClassName=""
