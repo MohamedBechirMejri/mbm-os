@@ -9,7 +9,11 @@ export default function Display() {
   const MIN_BRIGHTNESS = 10; // Match the store's minimum
 
   return (
-    <GlassSurface blur={2} borderRadius={24} className="!w-full !h-max !bg-black/40 col-span-2">
+    <GlassSurface
+      blur={2}
+      borderRadius={24}
+      className="!w-full !h-max !bg-black/40 col-span-2"
+    >
       <div className="w-full p-2">
         <div className="flex items-center gap-2 text-sm font-semibold text-white/80">
           Display
