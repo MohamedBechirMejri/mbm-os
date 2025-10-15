@@ -48,16 +48,19 @@ export function Clock({ isActive, onToggle }: ClockProps) {
   return (
     <button
       type="button"
-      className={`grid grid-cols-[auto_auto_auto_minmax(0,1fr)_auto] items-center gap-1 px-2 text-sm font-medium rounded transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 text-white/90 active:bg-white/10 w-40`}
+      className={`grid grid-cols-[auto_auto_auto_minmax(0,1fr)_auto] items-center gap-1 text-sm font-medium rounded transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 text-white/90 active:bg-white/10 w-37`}
       onPointerDown={handlePointerDown}
       aria-pressed={isActive}
       aria-haspopup="dialog"
       aria-expanded={isActive}
     >
       {formatDate(date)
+        .replace("  ", " ")
         .split(" ")
         .map((x) => (
-          <div key={"date " + Math.random()} className="w-max">{x}</div>
+          <div key={`date ${Math.random()}`} className="w-max">
+            {x}
+          </div>
         ))}
     </button>
   );
