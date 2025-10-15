@@ -29,6 +29,8 @@ export default function Display() {
               maxValue={100}
               onChange={setBrightness}
               className="w-full"
+              
+
             />
           </div>
         </div>

@@ -21,6 +21,9 @@ interface ElasticSliderProps {
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
   onChange?: (value: number) => void;
+  sliderClassName?: string;
+  sliderBackgroundClassName?: string;
+  sliderKnobClassName?: string;
 }
 
 const ElasticSlider: React.FC<ElasticSliderProps> = ({
@@ -33,6 +36,9 @@ const ElasticSlider: React.FC<ElasticSliderProps> = ({
   leftIcon = <>-</>,
   rightIcon = <>+</>,
   onChange = () => {},
+  sliderClassName = "",
+  sliderBackgroundClassName = "",
+  sliderKnobClassName = "",
 }) => {
   return (
     <div
@@ -47,6 +53,9 @@ const ElasticSlider: React.FC<ElasticSliderProps> = ({
         leftIcon={leftIcon}
         rightIcon={rightIcon}
         onChange={onChange}
+        sliderClassName={sliderClassName}
+        sliderBackgroundClassName={sliderBackgroundClassName}
+        sliderKnobClassName={sliderKnobClassName}
       />
     </div>
   );
