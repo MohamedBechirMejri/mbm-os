@@ -3,7 +3,7 @@
 import { Search, Square } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   type AppId,
@@ -50,21 +50,21 @@ function AppGlyph({ app }: { app: AppMeta }) {
       <Image
         src={`/assets/icons/apps/${app.icon}.ico`}
         alt={app.title}
-        width={28}
-        height={28}
-        className="rounded-xl"
+        width={32}
+        height={32}
+        className="rounded-lg"
       />
     );
   }
 
   if (app.icon) {
-    return <span className="text-white/75">{app.icon}</span>;
+    return <span className="text-xl">{app.icon}</span>;
   }
 
   return (
-    <span className="flex size-7 items-center justify-center rounded-xl border border-white/15 bg-white/10 text-white/70">
-      <Square className="size-4" />
-    </span>
+    <div className="flex size-8 items-center justify-center rounded-lg bg-black/10">
+      <Square className="size-4 text-black/60" />
+    </div>
   );
 }
 
@@ -106,6 +106,7 @@ export function SearchOverlay({
   onClose,
 }: SearchOverlayProps) {
   const [query, setQuery] = useState("");
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   const appsById = useMemo(() => {
     return new Map<AppId, AppMeta>(apps.map((app) => [app.id, app]));
@@ -115,7 +116,7 @@ export function SearchOverlay({
 
   const filtered = useMemo(() => {
     if (!query.trim()) {
-      return entries.slice(0, 9);
+      return entries.slice(0, 8);
     }
 
     return entries
@@ -129,14 +130,39 @@ export function SearchOverlay({
         ].join(" ");
         return fuzzyIncludes(candidate, query);
       })
-      .slice(0, 9);
+      .slice(0, 8);
   }, [appsById, entries, query]);
+
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [filtered]);
+
+  useEffect(() => {
+    if (!open) {
+      setQuery("");
+      setSelectedIndex(0);
+    }
+  }, [open]);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const first = filtered[0];
-    if (first) {
-      handleSelect(first);
+    const selected = filtered[selectedIndex];
+    if (selected) {
+      handleSelect(selected);
+    }
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setSelectedIndex((prev) => Math.min(prev + 1, filtered.length - 1));
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setSelectedIndex((prev) => Math.max(prev - 1, 0));
+    } else if (event.key === "Escape") {
+      event.preventDefault();
+      event.stopPropagation();
+      onClose();
     }
   };
 
@@ -182,103 +208,117 @@ export function SearchOverlay({
   return (
     <AnimatePresence>
       {open ? (
-        <motion.div
-          key="search-overlay"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.16, ease: [0.4, 0, 0.2, 1] }}
-          className="fixed inset-0 z-[70] flex items-start justify-center bg-slate-950/55 px-6 pt-24 backdrop-blur-[28px]"
-          onPointerDown={onClose}
-        >
+        <>
+          {/* Invisible backdrop for click-outside */}
           <motion.div
-            initial={{ y: -24, opacity: 0, scale: 0.98 }}
-            animate={{ y: 0, opacity: 1, scale: 1 }}
-            exit={{ y: -24, opacity: 0, scale: 0.98 }}
-            transition={{ duration: 0.18, ease: [0.34, 1.56, 0.64, 1] }}
-            className="w-full max-w-2xl"
-            onPointerDown={(event) => event.stopPropagation()}
-          >
-            <section
+            key="search-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="fixed inset-0 z-[70]"
+            onPointerDown={onClose}
+          />
+
+          {/* Spotlight search box */}
+          <div className="fixed left-1/2 top-[15vh] z-[71] w-full max-w-[36rem] -translate-x-1/2 px-6">
+            <motion.div
+              key="search-box"
+              initial={{ y: -20, opacity: 0, scale: 0.95 }}
+              animate={{ y: 0, opacity: 1, scale: 1 }}
+              exit={{ y: -10, opacity: 0, scale: 0.98 }}
+              transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+              onPointerDown={(event) => event.stopPropagation()}
+              onKeyDown={handleKeyDown}
               className={cn(
-                "relative rounded-3xl border border-white/14 bg-[linear-gradient(135deg,rgba(255,255,255,0.28)_0%,rgba(255,255,255,0.1)_40%,rgba(90,120,255,0.12)_100%)] p-6 text-white shadow-[0_1.5rem_4rem_rgba(8,15,40,0.55)]",
-                "backdrop-blur-[32px]",
+                "relative overflow-hidden rounded-[1.125rem] border border-white/[0.12]",
+                "bg-white/[0.8] text-black shadow-[0_1rem_3rem_rgba(0,0,0,0.2)]",
+                "backdrop-blur-[72px] backdrop-saturate-[180%]",
               )}
             >
-              <div className="pointer-events-none absolute inset-0 rounded-[inherit] border border-white/12" />
-              <div className="pointer-events-none absolute -top-24 left-1/2 h-40 w-40 -translate-x-1/2 rounded-full bg-white/20 blur-3xl" />
-              <div className="relative z-10">
-                <form onSubmit={handleSubmit}>
-                  <div className="relative">
-                    <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-white/60" />
-                    <Input
-                      autoFocus
-                      value={query}
-                      onChange={(event) => setQuery(event.target.value)}
-                      placeholder="Search apps or windows"
-                      className="h-12 rounded-2xl border-white/20 bg-white/12 pl-10 text-base text-white placeholder:text-white/50"
-                      aria-label="Search applications"
-                      onKeyDown={(event) => {
-                        if (event.key === "Escape") {
-                          event.stopPropagation();
-                          onClose();
-                        }
-                      }}
-                    />
-                  </div>
-                </form>
-
-                <div className="mt-5 space-y-4">
-                  {filtered.length === 0 ? (
-                    <p className="rounded-2xl border border-white/10 bg-white/8 px-4 py-6 text-center text-sm text-white/70">
-                      Nothing matches that query yet. Maybe try fewer syllables?
-                    </p>
-                  ) : null}
-
-                  {filtered.length > 0 ? (
-                    <ul className="space-y-2">
-                      {filtered.map((entry) => {
-                        const appMeta = entry.appId
-                          ? appsById.get(entry.appId)
-                          : null;
-                        return (
-                          <li key={entry.id}>
-                            <button
-                              type="button"
-                              onClick={() => handleSelect(entry)}
-                              className="flex w-full items-center gap-3 rounded-2xl border border-white/12 bg-white/10 px-4 py-3 text-left text-sm text-white/80 transition-[background-color,transform] hover:-translate-y-0.5 hover:bg-white/18 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
-                            >
-                              <span className="flex size-9 items-center justify-center rounded-2xl border border-white/20 bg-white/12">
-                                {appMeta ? (
-                                  <AppGlyph app={appMeta} />
-                                ) : (
-                                  <Square className="size-4 text-white/60" />
-                                )}
-                              </span>
-                              <span className="flex flex-1 flex-col">
-                                <span className="text-sm font-semibold leading-tight">
-                                  {entry.label}
-                                </span>
-                                {entry.description ? (
-                                  <span className="text-xs text-white/60">
-                                    {entry.description}
-                                  </span>
-                                ) : null}
-                              </span>
-                              <span className="text-xs uppercase tracking-wide text-white/50">
-                                {entry.kind === "app" ? "App" : "Window"}
-                              </span>
-                            </button>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  ) : null}
+              {/* Search input */}
+              <form onSubmit={handleSubmit} className="relative">
+                <div className="relative flex items-center px-4">
+                  <Search className="pointer-events-none size-[1.125rem] text-black/40" />
+                  <Input
+                    autoFocus
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                    placeholder="Spotlight Search"
+                    className="h-14 border-0 bg-transparent pl-3 pr-4 text-[1.0625rem] text-black placeholder:text-black/40 focus-visible:ring-0"
+                    aria-label="Spotlight Search"
+                  />
                 </div>
-              </div>
-            </section>
-          </motion.div>
-        </motion.div>
+              </form>
+
+              {/* Results */}
+              {filtered.length === 0 && query.trim() ? (
+                <div className="border-t border-black/[0.06] px-5 py-6 text-center">
+                  <p className="text-[0.8125rem] text-black/50">No results</p>
+                </div>
+              ) : null}
+
+              {filtered.length > 0 ? (
+                <div className="max-h-[32rem] overflow-y-auto border-t border-black/[0.06] px-1.5 py-1.5">
+                  {filtered.map((entry, index) => {
+                    const appMeta = entry.appId
+                      ? appsById.get(entry.appId)
+                      : null;
+                    const isSelected = index === selectedIndex;
+
+                    return (
+                      <button
+                        key={entry.id}
+                        type="button"
+                        onClick={() => handleSelect(entry)}
+                        onMouseEnter={() => setSelectedIndex(index)}
+                        className={cn(
+                          "flex w-full items-center gap-2.5 rounded-[0.5rem] px-2.5 py-2 text-left transition-colors",
+                          isSelected
+                            ? "bg-blue-500 text-white"
+                            : "text-black hover:bg-black/[0.05]",
+                        )}
+                      >
+                        <div className="flex size-10 shrink-0 items-center justify-center">
+                          {appMeta ? (
+                            <AppGlyph app={appMeta} />
+                          ) : (
+                            <div className="flex size-8 items-center justify-center rounded-lg bg-black/10">
+                              <Square className="size-4 text-black/60" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                          <span className="truncate text-[0.875rem] font-medium leading-tight">
+                            {entry.label}
+                          </span>
+                          {entry.description ? (
+                            <span
+                              className={cn(
+                                "truncate text-[0.6875rem] leading-tight",
+                                isSelected ? "text-white/70" : "text-black/50",
+                              )}
+                            >
+                              {entry.description}
+                            </span>
+                          ) : null}
+                        </div>
+                        <span
+                          className={cn(
+                            "shrink-0 text-[0.625rem] font-medium uppercase tracking-wide",
+                            isSelected ? "text-white/50" : "text-black/35",
+                          )}
+                        >
+                          {entry.kind === "app" ? "App" : "Win"}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : null}
+            </motion.div>
+          </div>
+        </>
       ) : null}
     </AnimatePresence>
   );
