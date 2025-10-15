@@ -155,10 +155,6 @@ const Slider: React.FC<SliderProps> = ({
       className="flex w-full touch-none select-none items-center justify-center gap-1"
     >
       <motion.div
-        animate={{
-          scale: region === "left" ? [1, 1.4, 1] : 1,
-          transition: { duration: 0.25 },
-        }}
         style={{
           x: useTransform(() =>
             region === "left" ? -overflow.get() / scale.get() : 0,
@@ -217,10 +213,6 @@ const Slider: React.FC<SliderProps> = ({
       </div>
 
       <motion.div
-        animate={{
-          scale: region === "right" ? [1, 1.4, 1] : 1,
-          transition: { duration: 0.25 },
-        }}
         style={{
           x: useTransform(() =>
             region === "right" ? overflow.get() / scale.get() : 0,
