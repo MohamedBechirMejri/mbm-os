@@ -215,11 +215,11 @@ const Slider: React.FC<SliderProps> = ({
             />
             <div
               className={cn(
-                "absolute w-4 h-4 top-[-.365rem] rounded-full bg-white shadow-md border border-gray-200 pointer-events-none z-50",
+                "absolute w-6 h-4 top-[-.365rem] rounded-full bg-white shadow-md pointer-events-none z-50 border",
                 sliderKnobClassName,
               )}
               style={{
-                left: `max(calc(${getRangePercentage()}% - 1rem), 0%)`,
+                left: `max(calc(${getRangePercentage()}% - 1.5rem), 0%)`,
               }}
             />
           </div>
