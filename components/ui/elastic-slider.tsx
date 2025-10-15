@@ -152,7 +152,7 @@ const Slider: React.FC<SliderProps> = ({
       style={{
         opacity: useTransform(scale, [1, 1.2], [0.7, 1]),
       }}
-      className="flex w-full touch-none select-none items-center justify-center gap-4"
+      className="flex w-full touch-none select-none items-center justify-center gap-1"
     >
       <motion.div
         animate={{
@@ -170,7 +170,7 @@ const Slider: React.FC<SliderProps> = ({
 
       <div
         ref={sliderRef}
-        className="relative flex w-full max-w-xs flex-grow cursor-grab touch-none select-none items-center py-4"
+        className="relative flex w-full max-w-xs flex-grow cursor-grab touch-none select-none items-center h-1"
         onPointerMove={handlePointerMove}
         onPointerDown={handlePointerDown}
         onPointerUp={handlePointerUp}
@@ -193,7 +193,7 @@ const Slider: React.FC<SliderProps> = ({
               }
               return "center";
             }),
-            height: useTransform(scale, [1, 1.2], [6, 12]),
+            height: useTransform(scale, [1, 1.2], [4, 12]),
             marginTop: useTransform(scale, [1, 1.2], [0, -3]),
             marginBottom: useTransform(scale, [1, 1.2], [0, -3]),
           }}
