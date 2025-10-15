@@ -271,99 +271,17 @@ export function ControlCenterPanel({ onClose }: ControlCenterPanelProps) {
         </button>
       </header>
 
-      <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-4">
-        <div className="space-y-4">
-          <GlassSurface>
-            <div className="text-sm font-semibold text-white/80">
-              Window controls
-            </div>
-            <div className="mt-4 grid gap-3">
-              {windowActions.map((action) => (
-                <WindowActionButton key={action.id} action={action} />
-              ))}
-            </div>
-          </GlassSurface>
-        </div>
-
-        <div className="space-y-4">
-          <GlassSurface>
-            <div className="flex items-center justify-between">
-              <div className="text-sm font-semibold text-white/80">
-                Currently focused
-              </div>
-              <span
-                className={cn(
-                  "flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium",
-                  online
-                    ? "border-emerald-400/40 bg-emerald-400/10 text-emerald-200"
-                    : "border-white/20 bg-white/10 text-white/70",
-                )}
-              >
-                {online ? (
-                  <WifiIcon className="size-3.5" />
-                ) : (
-                  <WifiOff className="size-3.5" />
-                )}
-                {online ? "Connected" : "Offline"}
-              </span>
-            </div>
-            {activeAppId && activeWindow ? (
-              <div className="mt-4 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/10 px-4 py-3">
-                {appMeta ? <AppGlyph app={appMeta} /> : null}
-                <div>
-                  <p className="text-sm font-semibold leading-tight text-white/85">
-                    {appTitle}
-                  </p>
-                  <p className="text-xs text-white/60">{activeWindow.title}</p>
-                </div>
-              </div>
-            ) : (
-              <p className="mt-4 text-sm text-white/70">
-                No window is focused right now.
-              </p>
-            )}
-          </GlassSurface>
-
-          <GlassSurface>
-            <div className="flex items-center justify-between text-sm font-semibold text-white/80">
-              <span>Running windows</span>
-              <span className="text-xs text-white/60">Tap to focus</span>
-            </div>
-            <div className="mt-4 space-y-2">
-              {runningWindows.length === 0 ? (
-                <p className="text-sm text-white/70">
-                  Launch an app to see it listed here.
-                </p>
-              ) : null}
-              {runningWindows.map((win) => {
-                const meta = desktop.apps[win.appId];
-                return (
-                  <button
-                    key={win.id}
-                    type="button"
-                    onClick={() => handleFocusWindow(win)}
-                    className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/10 px-3 py-2 text-left text-sm text-white/75 transition-colors hover:bg-white/16 hover:text-white"
-                  >
-                    <div className="flex items-center gap-3 overflow-hidden">
-                      {meta ? <AppGlyph app={meta} /> : null}
-                      <div className="truncate">
-                        <p className="truncate font-semibold">
-                          {win.title || meta?.title || win.appId}
-                        </p>
-                        <p className="text-xs text-white/60">
-                          {meta?.title ?? win.appId}
-                        </p>
-                      </div>
-                    </div>
-                    {win.state === "minimized" ? (
-                      <span className="text-xs text-white/50">minimized</span>
-                    ) : null}
-                  </button>
-                );
-              })}
-            </div>
-          </GlassSurface>
-        </div>
+      <div className="grid grid-cols-2 gap-4">
+        <GlassSurface className="!w-full !h-max !bg-black/50">
+          <div className="text-sm font-semibold text-white/80">
+            Window controls
+          </div>
+          <div className="mt-4 grid gap-3">
+            {windowActions.map((action) => (
+              <WindowActionButton key={action.id} action={action} />
+            ))}
+          </div>
+        </GlassSurface>
       </div>
     </section>
   );
