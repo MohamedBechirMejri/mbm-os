@@ -28,10 +28,8 @@ export default function Display() {
               defaultValue={brightness}
               maxValue={100}
               onChange={setBrightness}
+              className="w-full"
             />
-            <span className="text-xs text-white/60 w-8 text-right">
-              {Math.round(brightness)}%
-            </span>
           </div>
         </div>
       </div>
