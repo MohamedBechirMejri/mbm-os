@@ -12,7 +12,7 @@ export default function Display() {
     <GlassSurface
       blur={1}
       borderRadius={24}
-      className="!w-full !h-max !bjg-black/30 col-span-2 !backdrop-blur-[8px]"
+      className="!w-full !h-max col-span-2 !backdrop-blur-[8px]"
     >
       <div className="w-full p-2 flex flex-col gap-2">
         <div className="flex items-center gap-2 text-sm font-semibold text-white/80">
