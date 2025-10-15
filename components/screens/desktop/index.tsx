@@ -1,6 +1,7 @@
 "use client";
 
 import { AppRegistry, preinstalledApps } from "./components/apps/app-registry";
+import { BrightnessOverlay } from "./components/brightness-overlay";
 import { Dock } from "./components/dock";
 import { DockAppIcon } from "./components/dock/dock-app-icon";
 import MenuBar from "./components/menu-bar";
@@ -62,6 +63,7 @@ export default function Desktop() {
 
   return (
     <div className="relative size-full grid grid-rows-[auto_minmax(0,_1fr)_auto]">
+      <BrightnessOverlay />
       <MenuBar />
       <div>
         <WindowManagerRoot />
