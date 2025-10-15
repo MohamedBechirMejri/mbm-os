@@ -24,6 +24,7 @@ interface ElasticSliderProps {
   sliderClassName?: string;
   sliderBackgroundClassName?: string;
   sliderKnobClassName?: string;
+  isHovered?: boolean;
 }
 
 const ElasticSlider: React.FC<ElasticSliderProps> = ({
@@ -39,6 +40,7 @@ const ElasticSlider: React.FC<ElasticSliderProps> = ({
   sliderClassName = "",
   sliderBackgroundClassName = "",
   sliderKnobClassName = "",
+  isHovered = false,
 }) => {
   return (
     <div
@@ -56,6 +58,7 @@ const ElasticSlider: React.FC<ElasticSliderProps> = ({
         sliderClassName={sliderClassName}
         sliderBackgroundClassName={sliderBackgroundClassName}
         sliderKnobClassName={sliderKnobClassName}
+        isHovered={isHovered}
       />
     </div>
   );
@@ -73,6 +76,7 @@ interface SliderProps {
   sliderClassName?: string;
   sliderBackgroundClassName?: string;
   sliderKnobClassName?: string;
+  isHovered: boolean;
 }
 
 const Slider: React.FC<SliderProps> = ({
@@ -87,6 +91,7 @@ const Slider: React.FC<SliderProps> = ({
   sliderClassName = "",
   sliderBackgroundClassName = "",
   sliderKnobClassName = "",
+  isHovered,
 }) => {
   const [value, setValue] = useState<number>(defaultValue);
   const sliderRef = useRef<HTMLDivElement>(null);
@@ -197,7 +202,7 @@ const Slider: React.FC<SliderProps> = ({
         >
           <div
             className={cn(
-              "relative h-full flex-grow overflow-hidden rounded-full bg-gray-400",
+              "relative h-full flex-grow rounded-full bg-gray-400",
               sliderBackgroundClassName,
             )}
           >
@@ -207,7 +212,14 @@ const Slider: React.FC<SliderProps> = ({
                 sliderClassName,
               )}
               style={{ width: `${getRangePercentage()}%` }}
-            />
+            >
+              <div
+                className={cn(
+                  "absolute w-4 h-4 rounded-full bg-white shadow-md border border-gray-200 pointer-events-none z-50",
+                  sliderKnobClassName,
+                )}
+              />
+            </div>
           </div>
         </motion.div>
       </div>
