@@ -19,6 +19,7 @@ interface ElasticSliderProps {
   stepSize?: number;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  onChange?: (value: number) => void;
 }
 
 const ElasticSlider: React.FC<ElasticSliderProps> = ({
@@ -30,6 +31,8 @@ const ElasticSlider: React.FC<ElasticSliderProps> = ({
   stepSize = 1,
   leftIcon = <>-</>,
   rightIcon = <>+</>,
+  onChange = () => {},
+
 }) => {
   return (
     <div
@@ -43,6 +46,7 @@ const ElasticSlider: React.FC<ElasticSliderProps> = ({
         stepSize={stepSize}
         leftIcon={leftIcon}
         rightIcon={rightIcon}
+        onChange={onChange}
       />
     </div>
   );
@@ -56,6 +60,7 @@ interface SliderProps {
   stepSize: number;
   leftIcon: React.ReactNode;
   rightIcon: React.ReactNode;
+  onChange: (value: number) => void;
 }
 
 const Slider: React.FC<SliderProps> = ({
@@ -66,6 +71,7 @@ const Slider: React.FC<SliderProps> = ({
   stepSize,
   leftIcon,
   rightIcon,
+  onChange,
 }) => {
   const [value, setValue] = useState<number>(defaultValue);
   const sliderRef = useRef<HTMLDivElement>(null);
@@ -106,7 +112,7 @@ const Slider: React.FC<SliderProps> = ({
         newValue = Math.round(newValue / stepSize) * stepSize;
       }
       newValue = Math.min(Math.max(newValue, startingValue), maxValue);
-      setValue(newValue);
+      onChange(newValue);
       clientX.jump(e.clientX);
     }
   };
