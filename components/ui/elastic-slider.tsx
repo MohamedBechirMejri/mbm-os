@@ -95,6 +95,7 @@ const Slider: React.FC<SliderProps> = ({
   isHovered,
 }) => {
   const [value, setValue] = useState<number>(defaultValue);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
   const sliderRef = useRef<HTMLDivElement>(null);
   const [region, setRegion] = useState<"left" | "middle" | "right">("middle");
   const clientX = useMotionValue(0);
@@ -139,11 +140,13 @@ const Slider: React.FC<SliderProps> = ({
   };
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    setIsDragging(true);
     handlePointerMove(e);
     e.currentTarget.setPointerCapture(e.pointerId);
   };
 
   const handlePointerUp = () => {
+    setIsDragging(false);
     animate(overflow, 0, { type: "spring", bounce: 0.5 });
   };
 
@@ -216,8 +219,9 @@ const Slider: React.FC<SliderProps> = ({
             />
             <div
               className={cn(
-                "absolute w-5 h-4 top-[-.365rem] rounded-full z-50 transition-[opacity,scale,background-color] active:bg-white/5 bg-white active:scale-110 scale-80 duration-200",
+                "absolute w-5 h-4 top-[-.365rem] rounded-full z-50 transition-[opacity,scale,background-color] duration-200",
                 isHovered ? "opacity-100" : "opacity-0",
+                isDragging ? "bg-white/5 scale-110" : "bg-white scale-80",
                 sliderKnobClassName,
               )}
               style={{
