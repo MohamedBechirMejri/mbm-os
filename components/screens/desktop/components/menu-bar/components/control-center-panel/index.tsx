@@ -8,7 +8,7 @@ type ControlCenterPanelProps = {
 
 export function ControlCenterPanel(_props: ControlCenterPanelProps) {
   return (
-    <section className="w-[24rem] space-y-4 text-white">
+    <section className="w-[20rem] space-y-4 text-white">
       <div className="grid grid-cols-2 gap-4">
         <Display />
       </div>
