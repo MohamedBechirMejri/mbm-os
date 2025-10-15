@@ -219,7 +219,7 @@ const Slider: React.FC<SliderProps> = ({
                 sliderKnobClassName,
               )}
               style={{
-                left: `calc(${getRangePercentage()}% - 1rem)`,
+                left: `max(calc(${getRangePercentage()}% - 1rem), 0%)`,
               }}
             />
           </div>
