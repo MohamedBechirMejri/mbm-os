@@ -215,7 +215,8 @@ const Slider: React.FC<SliderProps> = ({
             />
             <div
               className={cn(
-                "absolute w-6 h-4 top-[-.365rem] rounded-full bg-white shadow-md pointer-events-none z-50 border",
+                "absolute w-6 h-4 top-[-.365rem] rounded-full bg-white shadow-md pointer-events-none z-50 border transition-opacity",
+                isHovered ? "opacity-100" : "opacity-0",
                 sliderKnobClassName,
               )}
               style={{
