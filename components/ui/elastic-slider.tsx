@@ -212,14 +212,16 @@ const Slider: React.FC<SliderProps> = ({
                 sliderClassName,
               )}
               style={{ width: `${getRangePercentage()}%` }}
-            >
-              <div
-                className={cn(
-                  "absolute w-4 h-4 rounded-full bg-white shadow-md border border-gray-200 pointer-events-none z-50",
-                  sliderKnobClassName,
-                )}
-              />
-            </div>
+            />
+            <div
+              className={cn(
+                "absolute w-4 h-4 top-[-.365rem] rounded-full bg-white shadow-md border border-gray-200 pointer-events-none z-50",
+                sliderKnobClassName,
+              )}
+              style={{
+                left: `min(${getRangePercentage()}%, 95%)`,
+              }}
+            />
           </div>
         </motion.div>
       </div>
