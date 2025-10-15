@@ -29,8 +29,8 @@ import {
   type WinInstance,
 } from "@/components/screens/desktop/components/window-manager";
 import { cn } from "@/lib/utils";
-import { useActiveApp } from "../hooks/use-active-app";
-import { useMenuActions } from "../hooks/use-menu-actions";
+import { useActiveApp } from "../../hooks/use-active-app";
+import { useMenuActions } from "../../hooks/use-menu-actions";
 
 type ControlCenterPanelProps = {
   onClose: () => void;
