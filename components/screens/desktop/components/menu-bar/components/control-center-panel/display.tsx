@@ -1,4 +1,5 @@
 import { Sun } from "lucide-react";
+import ElasticSlider from "@/components/ui/elastic-slider";
 import GlassSurface from "@/components/ui/glass-surface";
 import { Slider } from "@/components/ui/slider";
 import { useBrightnessStore } from "@/lib/brightness-store";
@@ -20,14 +21,13 @@ export default function Display() {
         </div>
         <div className="mt-4 grid gap-3">
           <div className="flex items-center gap-3">
-            <Sun className="w-4 h-4 text-white/60" />
-            <Slider
-              value={brightness}
+            <ElasticSlider
+              leftIcon={<Sun className="w-4 h-4 text-white/60" />}
+              rightIcon={<Sun className="w-4 h-4 text-white/60" />}
+              startingValue={MIN_BRIGHTNESS}
+              defaultValue={brightness}
+              maxValue={100}
               onChange={setBrightness}
-              min={MIN_BRIGHTNESS}
-              max={100}
-              step={1}
-              className="flex-1"
             />
             <span className="text-xs text-white/60 w-8 text-right">
               {Math.round(brightness)}%
