@@ -8,6 +8,7 @@ import {
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import GlassSurface from "./glass-surface";
 
 const MAX_OVERFLOW = 10;
 
@@ -157,7 +158,7 @@ const Slider: React.FC<SliderProps> = ({
       style={{
         opacity: useTransform(scale, [1, 1.2], [0.7, 1]),
       }}
-      className="flex w-full touch-none select-none items-center justify-center gap-1"
+      className="flex w-full touch-none select-none items-center justify-center gap-2"
     >
       <motion.div
         style={{
@@ -215,14 +216,21 @@ const Slider: React.FC<SliderProps> = ({
             />
             <div
               className={cn(
-                "absolute w-6 h-4 top-[-.365rem] rounded-full bg-white shadow-md z-50 transition-opacity",
-                isHovered ? "opacity-100" : "opacity-0",
+                "absolute w-6 h-4 top-[-.365rem] rounded-full z-50 transition-opacity",
+                isHovered ? "opacity-100" : "opacity-100",
                 sliderKnobClassName,
               )}
               style={{
-                left: `max(calc(${getRangePercentage()}% - 1.25rem), 0%)`,
+                left: `max(calc(${getRangePercentage()}% - 1rem), 0%)`,
               }}
-            />
+            >
+              <GlassSurface
+                blur={10}
+                borderWidth={0.1}
+                borderRadius={24}
+                className="!w-full !h-max !backdrop-blur-[.1px]"
+              />
+            </div>
           </div>
         </motion.div>
       </div>
