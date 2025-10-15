@@ -50,15 +50,13 @@ export function BatteryIndicator() {
 
   return (
     <div className="flex items-center gap-1 px-2 hover:bg-white/10 rounded transition-colors cursor-pointer">
-      <span className="text-xs font-bold text-white/90">
-        {battery.level}%
-      </span>{" "}
+      <span className="text-xs font-bold text-white/90">{battery.level}%</span>
       <Image
         src={getBatteryIcon()}
-        alt="Battery"
+        alt={battery.charging ? "Battery charging" : "Battery"}
         width={16}
         height={16}
-        className="invert brightness-0"
+        className="size-5"
       />
     </div>
   );
