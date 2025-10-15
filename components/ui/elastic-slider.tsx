@@ -9,7 +9,7 @@ import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
-const MAX_OVERFLOW = 50;
+const MAX_OVERFLOW = 10;
 
 interface ElasticSliderProps {
   defaultValue?: number;
