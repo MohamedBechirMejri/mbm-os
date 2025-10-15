@@ -13,7 +13,7 @@ export const appMachine = createMachine({
     events: {} as AppEvent,
   },
   id: "app",
-  initial: "boot",
+  initial: "desktop",
   states: {
     boot: {
       on: { BOOT_FINISHED: "login" },
