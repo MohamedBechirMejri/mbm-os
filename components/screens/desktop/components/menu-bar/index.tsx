@@ -93,10 +93,6 @@ export default function MenuBar() {
           >
             <SearchIcon isActive={isSearchOpen} onToggle={toggleSearch} />
           </div>
-          <ControlCenterButton
-            isActive={activePanel === "control-center"}
-            onToggle={() => togglePanel("control-center")}
-          />
           <div
             onPointerDown={(event) => {
               event.stopPropagation();
@@ -113,6 +109,10 @@ export default function MenuBar() {
           >
             <BatteryIndicator />
           </div>
+          <ControlCenterButton
+            isActive={activePanel === "control-center"}
+            onToggle={() => togglePanel("control-center")}
+          />
           <Clock
             isActive={activePanel === "calendar"}
             onToggle={() => togglePanel("calendar")}
@@ -138,11 +138,11 @@ export default function MenuBar() {
         {activePanel === "calendar" && (
           <motion.div
             key="calendar"
-            initial={{ x: '100%' }}
-            animate={{ x: '0%' }}
-            exit={{ x: '100%' }}
+            initial={{ x: "100%" }}
+            animate={{ x: "0%" }}
+            exit={{ x: "100%" }}
             transition={{
-              ease: 'easeOut',
+              ease: "easeOut",
               duration: 0.3,
             }}
             className="absolute right-2 top-9"
