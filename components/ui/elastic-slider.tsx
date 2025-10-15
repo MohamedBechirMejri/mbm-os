@@ -32,7 +32,6 @@ const ElasticSlider: React.FC<ElasticSliderProps> = ({
   leftIcon = <>-</>,
   rightIcon = <>+</>,
   onChange = () => {},
-
 }) => {
   return (
     <div
@@ -135,12 +134,7 @@ const Slider: React.FC<SliderProps> = ({
   return (
     <>
       <motion.div
-        onHoverStart={() => animate(scale, 1.2)}
-        onHoverEnd={() => animate(scale, 1)}
-        onTouchStart={() => animate(scale, 1.2)}
-        onTouchEnd={() => animate(scale, 1)}
         style={{
-          scale,
           opacity: useTransform(scale, [1, 1.2], [0.7, 1]),
         }}
         className="flex w-full touch-none select-none items-center justify-center gap-4"
