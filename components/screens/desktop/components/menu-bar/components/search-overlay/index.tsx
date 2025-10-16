@@ -30,13 +30,6 @@ type SearchEntry = {
   windowId?: string;
 };
 
-const QUICK_ACTION_IDS: AppId[] = [
-  "softwarecenter",
-  "file-manager",
-  "safari",
-  "terminal",
-];
-
 const RESULTS_LIMIT = 8;
 
 function normalize(value: string) {
@@ -149,12 +142,6 @@ export function SearchOverlay({
   const appsById = useMemo(() => {
     return new Map<AppId, AppMeta>(apps.map((app) => [app.id, app]));
   }, [apps]);
-
-  const quickActions = useMemo(() => {
-    return QUICK_ACTION_IDS.map((id) => appsById.get(id)).filter(
-      (candidate): candidate is AppMeta => Boolean(candidate),
-    );
-  }, [appsById]);
 
   const entries = useMemo(() => buildEntries(apps, windows), [apps, windows]);
 
@@ -285,13 +272,6 @@ export function SearchOverlay({
     DesktopAPI.focus(win.id);
   };
 
-  const handleQuickAction = (appId: AppId) => {
-    launchOrFocusApp(appId);
-    setQuery("");
-    setSelectedId(null);
-    onClose();
-  };
-
   return (
     <AnimatePresence>
       {open ? (
@@ -325,7 +305,7 @@ export function SearchOverlay({
               <form onSubmit={handleSubmit} className="relative">
                 <motion.div
                   layout
-                  className="relative flex items-center gap-3 px-4 py-2.5"
+                  className="relative flex items-center gap-3 px-4 py-2.5 bg-white/20 backdrop-blur-[64px] rounded-full"
                 >
                   <div className="flex size-10 shrink-0 items-center justify-center">
                     <Search className="size-[1.25rem] text-slate-400" />
@@ -341,28 +321,6 @@ export function SearchOverlay({
                     className="min-w-0 flex-1 border-0 bg-transparent px-0 text-[1.125rem] font-normal text-slate-900 placeholder:text-slate-400 focus-visible:border-0 focus-visible:ring-0"
                     aria-label="Spotlight Search"
                   />
-
-                  {quickActions.length > 0 ? (
-                    <div className="flex shrink-0 items-center gap-3">
-                      {quickActions.map((appMeta) => (
-                        <motion.button
-                          key={appMeta.id}
-                          type="button"
-                          onClick={() => handleQuickAction(appMeta.id)}
-                          whileHover={{ scale: 1.08 }}
-                          whileTap={{ scale: 0.92 }}
-                          className="group relative flex size-12 items-center justify-center rounded-full border border-white/40 bg-white/85 shadow-[0_0.5rem_1.5rem_rgba(15,23,42,0.08),inset_0_0.5px_0_rgba(255,255,255,0.9)] transition-shadow duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 focus-visible:ring-offset-0"
-                        >
-                          <AppGlyph
-                            app={appMeta}
-                            size={32}
-                            variant="plain"
-                            className="rounded-[1.75rem]"
-                          />
-                        </motion.button>
-                      ))}
-                    </div>
-                  ) : null}
                 </motion.div>
               </form>
 
