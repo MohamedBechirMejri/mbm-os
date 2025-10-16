@@ -320,12 +320,7 @@ export function SearchOverlay({
               transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
               onPointerDown={(event) => event.stopPropagation()}
               onKeyDown={handleKeyDown}
-              className={cn(
-                "relative overflow-visible rounded-[2rem] border border-white/30",
-                "bg-white/75 text-slate-900 shadow-[0_1.25rem_3.5rem_rgba(15,23,42,0.12)]",
-                "backdrop-blur-[48px] backdrop-saturate-[180%]",
-                "focus-within:shadow-[0_1.5rem_4rem_rgba(59,130,246,0.18)]",
-              )}
+              className={cn("relative overflow-visible")}
             >
               <div className="pointer-events-none absolute inset-0">
                 <div className="absolute inset-[0.15rem] rounded-[1.95rem] border border-white/50" />
