@@ -321,59 +321,50 @@ export function SearchOverlay({
               onPointerDown={(event) => event.stopPropagation()}
               onKeyDown={handleKeyDown}
               className={cn(
-                "relative overflow-visible rounded-[3rem] border border-white/35",
-                "bg-[linear-gradient(135deg,rgba(255,255,255,0.85)_0%,rgba(255,255,255,0.52)_45%,rgba(255,255,255,0.24)_100%)]",
-                "text-slate-900 shadow-[0_1.85rem_4.5rem_rgba(15,23,42,0.18)]",
-                "backdrop-blur-[72px] backdrop-saturate-[190%]",
-                "focus-within:shadow-[0_2rem_5.25rem_rgba(59,130,246,0.28)]",
+                "relative overflow-visible rounded-[2rem] border border-white/30",
+                "bg-white/75 text-slate-900 shadow-[0_1.25rem_3.5rem_rgba(15,23,42,0.12)]",
+                "backdrop-blur-[48px] backdrop-saturate-[180%]",
+                "focus-within:shadow-[0_1.5rem_4rem_rgba(59,130,246,0.18)]",
               )}
             >
               <div className="pointer-events-none absolute inset-0">
-                <div className="absolute inset-[0.18rem] rounded-[2.92rem] border border-white/55 opacity-90" />
-                <div className="absolute inset-0 rounded-[3rem] bg-[linear-gradient(118deg,rgba(255,255,255,0.96)_0%,rgba(255,255,255,0.38)_46%,rgba(255,255,255,0.12)_100%)]" />
-                <div className="absolute -left-[24%] -top-[38%] h-[11rem] w-[11rem] rounded-full bg-white/45 blur-[130px]" />
-                <div className="absolute -right-[30%] -top-[58%] h-[15rem] w-[15rem] rounded-full bg-sky-200/55 blur-[150px]" />
-                <div className="absolute -right-[22%] bottom-[-48%] h-[12rem] w-[12rem] rounded-full bg-sky-400/30 blur-[135px]" />
+                <div className="absolute inset-[0.15rem] rounded-[1.95rem] border border-white/50" />
               </div>
 
               <form onSubmit={handleSubmit} className="relative">
                 <motion.div
                   layout
-                  className="relative flex items-center gap-3 px-5 py-4 md:px-6 md:py-5"
+                  className="relative flex items-center gap-3 px-4 py-2.5"
                 >
-                  <div className="flex min-w-0 flex-1 items-center gap-3 rounded-[2.25rem] border border-white/55 bg-white/80 px-4 py-2 shadow-[0_0.75rem_2.75rem_rgba(15,23,42,0.16),inset_0_1px_0_rgba(255,255,255,0.92)]">
-                    <div className="flex size-[3rem] shrink-0 items-center justify-center rounded-full border border-white/70 bg-white/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
-                      <Search className="size-[1.15rem] text-slate-500" />
-                    </div>
-                    <Input
-                      autoFocus
-                      value={query}
-                      onChange={(event) => {
-                        setQuery(event.target.value);
-                        setSelectedId(null);
-                      }}
-                      placeholder="Spotlight Search"
-                      className="min-w-0 flex-1 border-0 bg-transparent px-0 text-[1.125rem] font-medium text-slate-900 placeholder:text-slate-500/90 focus-visible:border-0 focus-visible:ring-0"
-                      aria-label="Spotlight Search"
-                    />
+                  <div className="flex size-10 shrink-0 items-center justify-center">
+                    <Search className="size-[1.25rem] text-slate-400" />
                   </div>
+                  <Input
+                    autoFocus
+                    value={query}
+                    onChange={(event) => {
+                      setQuery(event.target.value);
+                      setSelectedId(null);
+                    }}
+                    placeholder="Spotlight Search"
+                    className="min-w-0 flex-1 border-0 bg-transparent px-0 text-[1.125rem] font-normal text-slate-900 placeholder:text-slate-400 focus-visible:border-0 focus-visible:ring-0"
+                    aria-label="Spotlight Search"
+                  />
 
                   {quickActions.length > 0 ? (
-                    <div className="flex shrink-0 items-center gap-2.5">
+                    <div className="flex shrink-0 items-center gap-3">
                       {quickActions.map((appMeta) => (
                         <motion.button
                           key={appMeta.id}
                           type="button"
                           onClick={() => handleQuickAction(appMeta.id)}
-                          whileHover={{ y: -1.5, scale: 1.04 }}
-                          whileTap={{ scale: 0.95 }}
-                          className="group relative flex size-[3rem] items-center justify-center rounded-full border border-white/45 bg-[linear-gradient(135deg,rgba(255,255,255,0.88)_0%,rgba(255,255,255,0.48)_62%,rgba(255,255,255,0.2)_100%)] shadow-[0_0.8rem_2.6rem_rgba(15,23,42,0.18),inset_0_1px_0_rgba(255,255,255,0.9)] transition-[transform,box-shadow] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/80"
+                          whileHover={{ scale: 1.08 }}
+                          whileTap={{ scale: 0.92 }}
+                          className="group relative flex size-12 items-center justify-center rounded-full border border-white/40 bg-white/85 shadow-[0_0.5rem_1.5rem_rgba(15,23,42,0.08),inset_0_0.5px_0_rgba(255,255,255,0.9)] transition-shadow duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 focus-visible:ring-offset-0"
                         >
-                          <span className="pointer-events-none absolute inset-[0.22rem] rounded-full bg-white/45 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100" />
-                          <span className="pointer-events-none absolute -bottom-[0.4rem] inset-x-[0.7rem] h-[0.6rem] rounded-full bg-sky-400/30 blur-lg opacity-0 transition-opacity duration-200 group-hover:opacity-80" />
                           <AppGlyph
                             app={appMeta}
-                            size={28}
+                            size={32}
                             variant="plain"
                             className="rounded-[1.75rem]"
                           />
