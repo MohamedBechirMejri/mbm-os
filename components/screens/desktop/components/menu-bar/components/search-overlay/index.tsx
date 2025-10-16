@@ -302,7 +302,7 @@ export function SearchOverlay({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[70] bg-gradient-to-br from-slate-900/10 via-slate-900/5 to-slate-900/20 backdrop-blur-[6px]"
+            className="fixed inset-0 z-[70]"
             onPointerDown={() => {
               setQuery("");
               setSelectedId(null);
@@ -310,7 +310,7 @@ export function SearchOverlay({
             }}
           />
 
-          <div className="fixed left-1/2 top-[15vh] z-[71] w-full max-w-[40rem] -translate-x-1/2 px-6">
+          <div className="fixed left-1/2 top-[5vh] z-[71] w-full max-w-[40rem] -translate-x-1/2 px-6">
             <motion.div
               key="search-box"
               layout
