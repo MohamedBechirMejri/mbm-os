@@ -322,10 +322,6 @@ export function SearchOverlay({
               onKeyDown={handleKeyDown}
               className={cn("relative overflow-visible")}
             >
-              <div className="pointer-events-none absolute inset-0">
-                <div className="absolute inset-[0.15rem] rounded-[1.95rem] border border-white/50" />
-              </div>
-
               <form onSubmit={handleSubmit} className="relative">
                 <motion.div
                   layout
