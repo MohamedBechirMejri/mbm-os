@@ -11,6 +11,7 @@ import {
   DesktopAPI,
   type WinInstance,
 } from "@/components/screens/desktop/components/window-manager";
+import GlassSurface from "@/components/ui/glass-surface";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
@@ -291,132 +292,137 @@ export function SearchOverlay({
           />
 
           <div className="fixed left-1/2 top-[5vh] z-[71] w-full max-w-[40rem] -translate-x-1/2 px-6">
-            <motion.div
-              key="search-box"
-              layout
-              initial={{ y: -18, opacity: 0, scale: 0.96 }}
-              animate={{ y: 0, opacity: 1, scale: 1 }}
-              exit={{ y: -14, opacity: 0, scale: 0.98 }}
-              transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
-              onPointerDown={(event) => event.stopPropagation()}
-              onKeyDown={handleKeyDown}
-              className={cn("relative overflow-visible")}
+            <GlassSurface
+              width={"24rem"}
+              height={"max-content"}
             >
-              <form onSubmit={handleSubmit} className="relative">
-                <motion.div
-                  layout
-                  className="relative flex items-center gap-3 px-4 py-2.5 bg-white/20 backdrop-blur-[64px] rounded-full"
-                >
-                  <div className="flex size-10 shrink-0 items-center justify-center">
-                    <Search className="size-[1.25rem] text-slate-400" />
-                  </div>
-                  <Input
-                    autoFocus
-                    value={query}
-                    onChange={(event) => {
-                      setQuery(event.target.value);
-                      setSelectedId(null);
-                    }}
-                    placeholder="Spotlight Search"
-                    className="min-w-0 flex-1 border-0 bg-transparent px-0 text-[1.125rem] font-normal text-slate-900 placeholder:text-slate-400 focus-visible:border-0 focus-visible:ring-0"
-                    aria-label="Spotlight Search"
-                  />
-                </motion.div>
-              </form>
-
-              <AnimatePresence initial={false}>
-                {showResultsPanel ? (
+              <motion.div
+                key="search-box"
+                layout
+                initial={{ y: -18, opacity: 0, scale: 0.96 }}
+                animate={{ y: 0, opacity: 1, scale: 1 }}
+                exit={{ y: -14, opacity: 0, scale: 0.98 }}
+                transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
+                onPointerDown={(event) => event.stopPropagation()}
+                onKeyDown={handleKeyDown}
+                className={cn("relative overflow-visible")}
+              >
+                <form onSubmit={handleSubmit} className="relative">
                   <motion.div
-                    key="results"
-                    initial={{ opacity: 0, height: 0, y: -10 }}
-                    animate={{ opacity: 1, height: "auto", y: 0 }}
-                    exit={{ opacity: 0, height: 0, y: -12 }}
-                    transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
-                    className="relative border-t border-white/25 bg-white/30 px-3 pb-3 pt-2 backdrop-blur-[64px]"
+                    layout
+                    className="relative flex items-center gap-3 px-4 py-2.5 bg-white/20 backdrop-blur-[64px] rounded-full"
                   >
-                    {filtered.length > 0 ? (
-                      <div className="max-h-[26rem] space-y-1.5 overflow-y-auto pr-1.5">
-                        {filtered.map((entry) => {
-                          const appMeta = entry.appId
-                            ? appsById.get(entry.appId)
-                            : null;
-                          const isSelected = entry.id === activeId;
+                    <div className="flex size-10 shrink-0 items-center justify-center">
+                      <Search className="size-[1.25rem] text-slate-400" />
+                    </div>
+                    <Input
+                      autoFocus
+                      value={query}
+                      onChange={(event) => {
+                        setQuery(event.target.value);
+                        setSelectedId(null);
+                      }}
+                      placeholder="Spotlight Search"
+                      className="min-w-0 flex-1 border-0 bg-transparent px-0 text-[1.125rem] font-normal text-slate-900 placeholder:text-slate-400 focus-visible:border-0 focus-visible:ring-0"
+                      aria-label="Spotlight Search"
+                    />
+                  </motion.div>
+                </form>
 
-                          return (
-                            <motion.button
-                              key={entry.id}
-                              layout="position"
-                              type="button"
-                              onClick={() => handleSelect(entry)}
-                              onMouseEnter={() => setSelectedId(entry.id)}
-                              className={cn(
-                                "group relative flex w-full items-center gap-3 rounded-[1.125rem] px-3.5 py-3 text-left transition-colors duration-200",
-                                isSelected
-                                  ? "bg-gradient-to-r from-sky-500/85 via-sky-500/75 to-sky-500/85 text-white shadow-[0_1rem_2.5rem_rgba(56,130,255,0.4)]"
-                                  : "bg-white/15 text-slate-900 hover:bg-white/25",
-                              )}
-                            >
-                              <div
+                <AnimatePresence initial={false}>
+                  {showResultsPanel ? (
+                    <motion.div
+                      key="results"
+                      initial={{ opacity: 0, height: 0, y: -10 }}
+                      animate={{ opacity: 1, height: "auto", y: 0 }}
+                      exit={{ opacity: 0, height: 0, y: -12 }}
+                      transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
+                      className="relative border-t border-white/25 bg-white/30 px-3 pb-3 pt-2 backdrop-blur-[64px]"
+                    >
+                      {filtered.length > 0 ? (
+                        <div className="max-h-[26rem] space-y-1.5 overflow-y-auto pr-1.5">
+                          {filtered.map((entry) => {
+                            const appMeta = entry.appId
+                              ? appsById.get(entry.appId)
+                              : null;
+                            const isSelected = entry.id === activeId;
+
+                            return (
+                              <motion.button
+                                key={entry.id}
+                                layout="position"
+                                type="button"
+                                onClick={() => handleSelect(entry)}
+                                onMouseEnter={() => setSelectedId(entry.id)}
                                 className={cn(
-                                  "flex size-12 shrink-0 items-center justify-center rounded-[1rem] border border-white/40 bg-white/60",
-                                  isSelected && "border-white/70 bg-white/25",
+                                  "group relative flex w-full items-center gap-3 rounded-[1.125rem] px-3.5 py-3 text-left transition-colors duration-200",
+                                  isSelected
+                                    ? "bg-gradient-to-r from-sky-500/85 via-sky-500/75 to-sky-500/85 text-white shadow-[0_1rem_2.5rem_rgba(56,130,255,0.4)]"
+                                    : "bg-white/15 text-slate-900 hover:bg-white/25",
                                 )}
                               >
-                                {appMeta ? (
-                                  <AppGlyph app={appMeta} size={32} />
-                                ) : (
-                                  <div className="flex h-[2rem] w-[2rem] items-center justify-center rounded-[0.75rem] bg-white/30">
-                                    <Square
+                                <div
+                                  className={cn(
+                                    "flex size-12 shrink-0 items-center justify-center rounded-[1rem] border border-white/40 bg-white/60",
+                                    isSelected && "border-white/70 bg-white/25",
+                                  )}
+                                >
+                                  {appMeta ? (
+                                    <AppGlyph app={appMeta} size={32} />
+                                  ) : (
+                                    <div className="flex h-[2rem] w-[2rem] items-center justify-center rounded-[0.75rem] bg-white/30">
+                                      <Square
+                                        className={cn(
+                                          "h-[1rem] w-[1rem]",
+                                          isSelected
+                                            ? "text-white/80"
+                                            : "text-slate-500",
+                                        )}
+                                      />
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex min-w-0 flex-1 flex-col gap-1">
+                                  <span className="truncate text-[0.9375rem] font-semibold leading-tight tracking-tight">
+                                    {entry.label}
+                                  </span>
+                                  {entry.description ? (
+                                    <span
                                       className={cn(
-                                        "h-[1rem] w-[1rem]",
+                                        "truncate text-[0.75rem] leading-tight",
                                         isSelected
                                           ? "text-white/80"
-                                          : "text-slate-500",
+                                          : "text-slate-500/90",
                                       )}
-                                    />
-                                  </div>
-                                )}
-                              </div>
-                              <div className="flex min-w-0 flex-1 flex-col gap-1">
-                                <span className="truncate text-[0.9375rem] font-semibold leading-tight tracking-tight">
-                                  {entry.label}
+                                    >
+                                      {entry.description}
+                                    </span>
+                                  ) : null}
+                                </div>
+                                <span
+                                  className={cn(
+                                    "shrink-0 rounded-full px-2 py-1 text-[0.6875rem] font-semibold uppercase tracking-[0.08em]",
+                                    isSelected
+                                      ? "bg-white/15 text-white/90"
+                                      : "bg-white/40 text-slate-600",
+                                  )}
+                                >
+                                  {entry.kind === "app" ? "App" : "Win"}
                                 </span>
-                                {entry.description ? (
-                                  <span
-                                    className={cn(
-                                      "truncate text-[0.75rem] leading-tight",
-                                      isSelected
-                                        ? "text-white/80"
-                                        : "text-slate-500/90",
-                                    )}
-                                  >
-                                    {entry.description}
-                                  </span>
-                                ) : null}
-                              </div>
-                              <span
-                                className={cn(
-                                  "shrink-0 rounded-full px-2 py-1 text-[0.6875rem] font-semibold uppercase tracking-[0.08em]",
-                                  isSelected
-                                    ? "bg-white/15 text-white/90"
-                                    : "bg-white/40 text-slate-600",
-                                )}
-                              >
-                                {entry.kind === "app" ? "App" : "Win"}
-                              </span>
-                            </motion.button>
-                          );
-                        })}
-                      </div>
-                    ) : (
-                      <div className="px-4 py-6 text-center text-[0.875rem] font-medium text-slate-500">
-                        No results
-                      </div>
-                    )}
-                  </motion.div>
-                ) : null}
-              </AnimatePresence>
-            </motion.div>
+                              </motion.button>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className="px-4 py-6 text-center text-[0.875rem] font-medium text-slate-500">
+                          No results
+                        </div>
+                      )}
+                    </motion.div>
+                  ) : null}
+                </AnimatePresence>
+              </motion.div>
+            </GlassSurface>
           </div>
         </>
       ) : null}
