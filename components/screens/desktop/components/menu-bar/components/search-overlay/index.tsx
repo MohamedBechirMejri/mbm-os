@@ -1,8 +1,7 @@
 "use client";
 
-import { Search, Square } from "lucide-react";
+import { Search } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 
 import {
@@ -14,6 +13,9 @@ import {
 import GlassSurface from "@/components/ui/glass-surface";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { SearchResultItem } from "./search-result-item";
+import type { SearchEntry } from "./types";
+import { buildEntries, fuzzyIncludes, RESULTS_LIMIT } from "./utils";
 
 type SearchOverlayProps = {
   open: boolean;
@@ -21,115 +23,6 @@ type SearchOverlayProps = {
   windows: WinInstance[];
   onClose: () => void;
 };
-
-type SearchEntry = {
-  id: string;
-  label: string;
-  description?: string;
-  kind: "app" | "window";
-  appId?: AppId;
-  windowId?: string;
-};
-
-const RESULTS_LIMIT = 8;
-
-function normalize(value: string) {
-  return value
-    .normalize("NFKD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLowerCase();
-}
-
-function fuzzyIncludes(source: string, query: string) {
-  if (!query) return true;
-  const haystack = normalize(source);
-  const needle = normalize(query);
-  return haystack.includes(needle);
-}
-
-function AppGlyph({
-  app,
-  className,
-  size = 32,
-  variant = "default",
-}: {
-  app: AppMeta;
-  className?: string;
-  size?: number;
-  variant?: "default" | "plain";
-}) {
-  if (typeof app.icon === "string" && app.icon.length > 0) {
-    return (
-      <Image
-        src={`/assets/icons/apps/${app.icon}.ico`}
-        alt={app.title}
-        width={size}
-        height={size}
-        className={cn(
-          "object-cover",
-          variant === "plain" ? "rounded-[1.75rem]" : "rounded-[0.75rem]",
-          className,
-        )}
-      />
-    );
-  }
-
-  if (app.icon) {
-    return (
-      <span
-        className={cn("text-[1.125rem] leading-none text-current", className)}
-      >
-        {app.icon}
-      </span>
-    );
-  }
-
-  const dimensionRem = `${size / 16}rem`;
-
-  return (
-    <div
-      style={{ width: dimensionRem, height: dimensionRem }}
-      className={cn(
-        "flex items-center justify-center rounded-[0.75rem] bg-black/10",
-        variant === "plain" && "bg-transparent",
-        className,
-      )}
-    >
-      <Square className="h-[1rem] w-[1rem] text-black/60" />
-    </div>
-  );
-}
-
-function buildEntries(apps: AppMeta[], windows: WinInstance[]): SearchEntry[] {
-  const appMap = new Map<AppId, AppMeta>(apps.map((app) => [app.id, app]));
-
-  const appEntries = apps.map((app) => ({
-    id: `app:${app.id}`,
-    label: app.title,
-    description: "Launch installed experience",
-    kind: "app" as const,
-    appId: app.id,
-  }));
-
-  const windowEntries = [...windows]
-    .sort((a, b) => b.z - a.z)
-    .map((win) => {
-      const relatedApp = appMap.get(win.appId);
-      const label = win.title || relatedApp?.title || win.appId;
-      return {
-        id: `window:${win.id}`,
-        label,
-        description: relatedApp
-          ? `Switch to ${relatedApp.title}`
-          : "Switch to running window",
-        kind: "window" as const,
-        windowId: win.id,
-        appId: win.appId,
-      };
-    });
-
-  return [...windowEntries, ...appEntries];
-}
 
 export function SearchOverlay({
   open,
@@ -292,10 +185,7 @@ export function SearchOverlay({
           />
 
           <div className="fixed left-1/2 top-[5vh] z-[71] w-full max-w-[40rem] -translate-x-1/2 px-6">
-            <GlassSurface
-              width={"24rem"}
-              height={"max-content"}
-            >
+            <GlassSurface width={"24rem"} height={"max-content"}>
               <motion.div
                 key="search-box"
                 layout
@@ -348,68 +238,14 @@ export function SearchOverlay({
                             const isSelected = entry.id === activeId;
 
                             return (
-                              <motion.button
+                              <SearchResultItem
                                 key={entry.id}
-                                layout="position"
-                                type="button"
-                                onClick={() => handleSelect(entry)}
-                                onMouseEnter={() => setSelectedId(entry.id)}
-                                className={cn(
-                                  "group relative flex w-full items-center gap-3 rounded-[1.125rem] px-3.5 py-3 text-left transition-colors duration-200",
-                                  isSelected
-                                    ? "bg-gradient-to-r from-sky-500/85 via-sky-500/75 to-sky-500/85 text-white shadow-[0_1rem_2.5rem_rgba(56,130,255,0.4)]"
-                                    : "bg-white/15 text-slate-900 hover:bg-white/25",
-                                )}
-                              >
-                                <div
-                                  className={cn(
-                                    "flex size-12 shrink-0 items-center justify-center rounded-[1rem] border border-white/40 bg-white/60",
-                                    isSelected && "border-white/70 bg-white/25",
-                                  )}
-                                >
-                                  {appMeta ? (
-                                    <AppGlyph app={appMeta} size={32} />
-                                  ) : (
-                                    <div className="flex h-[2rem] w-[2rem] items-center justify-center rounded-[0.75rem] bg-white/30">
-                                      <Square
-                                        className={cn(
-                                          "h-[1rem] w-[1rem]",
-                                          isSelected
-                                            ? "text-white/80"
-                                            : "text-slate-500",
-                                        )}
-                                      />
-                                    </div>
-                                  )}
-                                </div>
-                                <div className="flex min-w-0 flex-1 flex-col gap-1">
-                                  <span className="truncate text-[0.9375rem] font-semibold leading-tight tracking-tight">
-                                    {entry.label}
-                                  </span>
-                                  {entry.description ? (
-                                    <span
-                                      className={cn(
-                                        "truncate text-[0.75rem] leading-tight",
-                                        isSelected
-                                          ? "text-white/80"
-                                          : "text-slate-500/90",
-                                      )}
-                                    >
-                                      {entry.description}
-                                    </span>
-                                  ) : null}
-                                </div>
-                                <span
-                                  className={cn(
-                                    "shrink-0 rounded-full px-2 py-1 text-[0.6875rem] font-semibold uppercase tracking-[0.08em]",
-                                    isSelected
-                                      ? "bg-white/15 text-white/90"
-                                      : "bg-white/40 text-slate-600",
-                                  )}
-                                >
-                                  {entry.kind === "app" ? "App" : "Win"}
-                                </span>
-                              </motion.button>
+                                entry={entry}
+                                isSelected={isSelected}
+                                appMeta={appMeta ?? null}
+                                onSelect={handleSelect}
+                                onHover={setSelectedId}
+                              />
                             );
                           })}
                         </div>
