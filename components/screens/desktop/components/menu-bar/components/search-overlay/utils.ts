@@ -1,7 +1,8 @@
-import type {
-  AppId,
-  AppMeta,
-  WinInstance,
+import {
+  type AppId,
+  type AppMeta,
+  DesktopAPI,
+  type WinInstance,
 } from "@/components/screens/desktop/components/window-manager";
 import type { SearchEntry } from "./types";
 
@@ -53,4 +54,31 @@ export function buildEntries(
     });
 
   return [...windowEntries, ...appEntries];
+}
+
+export function launchOrFocusApp(appId: AppId) {
+  const state = DesktopAPI.getState();
+  const existing = Object.values(state.windows).find(
+    (win) => win.appId === appId,
+  );
+
+  if (existing) {
+    if (existing.state === "minimized") {
+      DesktopAPI.setState(existing.id, "normal");
+    }
+    DesktopAPI.focus(existing.id);
+    return;
+  }
+
+  DesktopAPI.launch(appId);
+}
+
+export function focusWindow(windowId: string) {
+  const state = DesktopAPI.getState();
+  const win = state.windows[windowId];
+  if (!win) return;
+  if (win.state === "minimized") {
+    DesktopAPI.setState(win.id, "normal");
+  }
+  DesktopAPI.focus(win.id);
 }
