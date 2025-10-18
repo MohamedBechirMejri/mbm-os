@@ -144,7 +144,7 @@ export function DockAppIcon({
               className="shadow-2xl"
               containerClassName="!p-1.5"
             >
-              <div className="flex flex-col gap-0.5">
+              <div className="flex flex-col gap-0.5 w-full">
                 {windows.length > 1 && (
                   <div className="px-3 py-1.5 text-xs text-white/70 font-medium tracking-wide">
                     {app.title} • {windows.length} windows
@@ -178,10 +178,10 @@ export function DockAppIcon({
                 <button
                   type="button"
                   onClick={handleNewWindow}
-                  className="w-full px-3 py-2 text-left text-sm text-white/95 hover:bg-white/15 active:bg-white/20 rounded-lg transition-all flex items-center justify-between gap-4"
+                  className="w-full px-3 py-2 text-left text-sm text-white/95 hover:bg-white/15 active:bg-white/20 rounded-lg transition-all flex items-center justify-between gap-2"
                 >
-                  <span className="font-medium">New Window</span>
-                  <span className="text-xs text-white/50 font-normal">
+                  <span className="truncate flex-1 font-medium">New Window</span>
+                  <span className="text-xs text-white/50 flex-shrink-0 font-normal">
                     ⌥ Click
                   </span>
                 </button>
@@ -189,10 +189,10 @@ export function DockAppIcon({
                   <button
                     type="button"
                     onClick={handleQuit}
-                    className="w-full px-3 py-2 text-left text-sm text-white/95 hover:bg-white/15 active:bg-white/20 rounded-lg transition-all flex items-center justify-between gap-4"
+                    className="w-full px-3 py-2 text-left text-sm text-white/95 hover:bg-white/15 active:bg-white/20 rounded-lg transition-all flex items-center justify-between gap-2"
                   >
-                    <span className="font-medium">Quit</span>
-                    <span className="text-xs text-white/50 font-normal">
+                    <span className="truncate flex-1 font-medium">Quit</span>
+                    <span className="text-xs text-white/50 flex-shrink-0 font-normal">
                       ⌘Q
                     </span>
                   </button>
