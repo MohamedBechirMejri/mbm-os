@@ -19,11 +19,12 @@ export function SearchInput({
 }: SearchInputProps) {
   return (
     <form onSubmit={onSubmit} className="relative">
-      <div className="relative flex items-center gap-2.5 px-3.5 py-1.5 bg-white/0 backdrop-blur-[64px]">
-        <div className="flex size-9 shrink-0 items-center justify-center">
+      <div className="relative flex items-center gap-2 px-6 py-1.5 bg-white/0 backdrop-blur-[64px]">
+        <div className="flex size-4 shrink-0 items-center justify-center">
           <Search
-            className="size-[1.125rem] text-slate-600/80"
-            strokeWidth={2.25}
+            className="size-xs text-white"
+            size={20}
+            strokeWidth={1.2}
           />
         </div>
         <Input
@@ -31,7 +32,7 @@ export function SearchInput({
           value={query}
           onChange={(event) => onQueryChange(event.target.value)}
           placeholder="Spotlight Search"
-          className="min-w-0 flex-1 border-0 bg-transparent px-0 text-[1.0625rem] font-semibold text-white placeholder:text-white/70 focus-visible:border-0 focus-visible:ring-0"
+          className="min-w-0 flex-1 border-0 bg-transparent px-0 !text-sm font-semibold text-white placeholder:text-white/70 focus-visible:border-0 focus-visible:ring-0"
           aria-label="Spotlight Search"
           onKeyDown={onKeyDown}
         />
