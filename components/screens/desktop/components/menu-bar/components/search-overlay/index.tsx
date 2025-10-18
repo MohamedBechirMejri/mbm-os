@@ -165,6 +165,7 @@ export function SearchOverlay({
               refractionIntensity={1.51}
               blur={3.5}
               borderWidth={.01}
+              
             >
               <div
                 onPointerDown={(event) => event.stopPropagation()}
