@@ -1,4 +1,5 @@
 /** biome-ignore-all lint/correctness/useExhaustiveDependencies: lll */
+import { cn } from "@/lib/utils";
 import type React from "react";
 import { useEffect, useId, useRef, useState } from "react";
 
@@ -41,6 +42,7 @@ export interface GlassSurfaceProps {
     | "plus-lighter";
   className?: string;
   style?: React.CSSProperties;
+  containerClassName?: string;
 }
 
 const useDarkMode = () => {
@@ -81,6 +83,7 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
   mixBlendMode = "difference",
   className = "",
   style = {},
+  containerClassName = "",
 }) => {
   const uniqueId = useId().replace(/:/g, "-");
   const filterId = `glass-filter-${uniqueId}`;
@@ -401,7 +404,12 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
         </defs>
       </svg>
 
-      <div className="w-full h-full flex items-center justify-center p-2 rounded-[inherit] relative z-10">
+      <div
+        className={cn(
+          "w-full h-full flex items-center justify-center p-2 rounded-[inherit] relative z-10",
+          containerClassName,
+        )}
+      >
         {children}
       </div>
     </div>
