@@ -154,7 +154,14 @@ export function SearchOverlay({
         <>
           <SearchBackdrop onClose={handleClose} />
 
-          <div className="fixed left-[calc(50%-16rem)] top-[18vh] z-[71] w-full px-6">
+          <motion.div
+            key={"search-overlay"}
+            initial={{ y: -18, opacity: 0, scaleY: 0.5 }}
+            animate={{ y: 0, opacity: 1, scaleY: 1 }}
+            exit={{ y: -14, opacity: 0, scaleY: 0.98 }}
+            transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed left-[calc(50%-16rem)] top-[18vh] z-[71] w-full px-6"
+          >
             <GlassSurface
               width={"32rem"}
               borderRadius={99}
@@ -192,7 +199,7 @@ export function SearchOverlay({
                 />
               </motion.div>
             </GlassSurface>
-          </div>
+          </motion.div>
         </>
       ) : null}
     </AnimatePresence>
