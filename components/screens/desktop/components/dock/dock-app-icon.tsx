@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import GlassSurface from "@/components/ui/glass-surface";
 import { DesktopAPI } from "../window-manager";
 import type { AppMeta, WinInstance } from "../window-manager/types";
 import { DockIcon } from ".";
@@ -91,8 +92,8 @@ export function DockAppIcon({
     <div className="relative">
       <DockIcon
         size={64}
-        magnification={2}
-        distance={120}
+        magnification={showMenu ? 64 * 2 : 2}
+        distance={showMenu ? 0 : 120}
         onClick={handleClick}
         onContextMenu={handleContextMenu}
         className="relative"
@@ -123,59 +124,66 @@ export function DockAppIcon({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 min-w-[12rem] rounded-xl border border-white/20 bg-white/10 backdrop-blur-2xl shadow-2xl overflow-hidden z-50"
+            className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 min-w-[12rem]"
+            style={{ zIndex: 999999999 }}
           >
-            <div className="p-1">
-              {windows.length > 1 && (
-                <div className="px-3 py-2 text-xs text-white/60 font-medium border-b border-white/10">
-                  {app.title} • {windows.length} window
-                  {windows.length !== 1 ? "s" : ""}
-                </div>
-              )}
-              {windows.length > 0 && (
-                <>
-                  {windows.map((win, idx) => (
-                    <button
-                      key={win.id}
-                      type="button"
-                      onClick={() => handleWindowClick(win.id, win.state)}
-                      className="w-full px-3 py-2 text-left text-sm text-white/90 hover:bg-white/10 rounded-lg transition-colors flex items-center justify-between gap-2"
-                    >
-                      <span className="truncate flex-1">
-                        {win.title || `${app.title} ${idx + 1}`}
-                      </span>
-                      {win.id === activeId && win.state !== "minimized" && (
-                        <div className="w-1.5 h-1.5 rounded-full bg-blue-400 flex-shrink-0" />
-                      )}
-                      {win.state === "minimized" && (
-                        <span className="text-xs text-white/40 flex-shrink-0">
-                          minimized
+            <GlassSurface
+              blur={1}
+              borderRadius={24}
+              className="!w-full !h-max !backdrop-blur-[8px]"
+            >
+              <div className="p-2 flex flex-col gap-1">
+                {windows.length > 1 && (
+                  <div className="px-2 py-1.5 text-xs text-white/60 font-semibold">
+                    {app.title} • {windows.length} window
+                    {windows.length !== 1 ? "s" : ""}
+                  </div>
+                )}
+                {windows.length > 0 && (
+                  <>
+                    {windows.map((win, idx) => (
+                      <button
+                        key={win.id}
+                        type="button"
+                        onClick={() => handleWindowClick(win.id, win.state)}
+                        className="w-full px-2 py-1.5 text-left text-sm text-white/90 hover:bg-white/10 rounded-xl transition-colors flex items-center justify-between gap-2"
+                      >
+                        <span className="truncate flex-1">
+                          {win.title || `${app.title} ${idx + 1}`}
                         </span>
-                      )}
-                    </button>
-                  ))}
-                  <div className="h-px bg-white/10 my-1" />
-                </>
-              )}
-              <button
-                type="button"
-                onClick={handleNewWindow}
-                className="w-full px-3 py-2 text-left text-sm text-white/90 hover:bg-white/10 rounded-lg transition-colors flex items-center justify-between gap-4"
-              >
-                <span>New Window</span>
-                <span className="text-xs text-white/40">⌥ Click</span>
-              </button>
-              {windows.length > 0 && (
+                        {win.id === activeId && win.state !== "minimized" && (
+                          <div className="w-1.5 h-1.5 rounded-full bg-blue-400 flex-shrink-0" />
+                        )}
+                        {win.state === "minimized" && (
+                          <span className="text-xs text-white/40 flex-shrink-0">
+                            minimized
+                          </span>
+                        )}
+                      </button>
+                    ))}
+                    <div className="h-px bg-white/10 my-1" />
+                  </>
+                )}
                 <button
                   type="button"
-                  onClick={handleQuit}
-                  className="w-full px-3 py-2 text-left text-sm text-white/90 hover:bg-white/10 rounded-lg transition-colors flex items-center justify-between gap-4"
+                  onClick={handleNewWindow}
+                  className="w-full px-2 py-1.5 text-left text-sm text-white/90 hover:bg-white/10 rounded-xl transition-colors flex items-center justify-between gap-4"
                 >
-                  <span>Quit</span>
-                  <span className="text-xs text-white/40">⌘Q</span>
+                  <span>New Window</span>
+                  <span className="text-xs text-white/40">⌥ Click</span>
                 </button>
-              )}
-            </div>
+                {windows.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleQuit}
+                    className="w-full px-2 py-1.5 text-left text-sm text-white/90 hover:bg-white/10 rounded-xl transition-colors flex items-center justify-between gap-4"
+                  >
+                    <span>Quit</span>
+                    <span className="text-xs text-white/40">⌘Q</span>
+                  </button>
+                )}
+              </div>
+            </GlassSurface>
           </motion.div>
         )}
       </AnimatePresence>
