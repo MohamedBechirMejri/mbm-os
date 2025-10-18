@@ -26,7 +26,7 @@ export function SearchResultItem({
       onClick={() => onSelect(entry)}
       onMouseEnter={() => onHover(entry.id)}
       className={cn(
-        "group relative flex w-full items-center gap-3 rounded-[1.125rem] px-3.5 py-3 text-left transition-all duration-150",
+        "group relative flex w-full items-center gap-2.5 rounded-[1rem] px-3 py-2.5 text-left transition-all duration-150",
         isSelected
           ? "bg-gradient-to-b from-sky-500 to-sky-600 text-white shadow-[0_0.5rem_1.5rem_rgba(56,130,255,0.35),inset_0_1px_1px_rgba(255,255,255,0.25)]"
           : "bg-white/20 text-slate-900 hover:bg-white/35 shadow-[inset_0_0.5px_1px_rgba(255,255,255,0.3)]",
@@ -34,13 +34,13 @@ export function SearchResultItem({
     >
       <div
         className={cn(
-          "flex size-12 shrink-0 items-center justify-center rounded-[1rem] border border-white/50 bg-white/70 shadow-[0_1px_3px_rgba(0,0,0,0.08)]",
+          "flex size-11 shrink-0 items-center justify-center rounded-[0.9375rem] border border-white/50 bg-white/70 shadow-[0_1px_3px_rgba(0,0,0,0.08)]",
           isSelected &&
             "border-white/80 bg-white/35 shadow-[0_2px_6px_rgba(0,0,0,0.12)]",
         )}
       >
         {appMeta ? (
-          <AppGlyph app={appMeta} size={32} />
+          <AppGlyph app={appMeta} size={30} />
         ) : (
           <div className="flex h-[2rem] w-[2rem] items-center justify-center rounded-[0.75rem] bg-white/30">
             <Square

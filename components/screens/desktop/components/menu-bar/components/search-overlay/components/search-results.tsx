@@ -52,7 +52,7 @@ export function SearchResults({
       className="relative border-t border-transparent bg-white/35 backdrop-blur-[64px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]"
       aria-hidden={!visible}
     >
-      <div className="px-5 pb-4 pt-3">
+      <div className="px-4 pb-3.5 pt-2.5">
         {filtered.length > 0 ? (
           <div className="max-h-[26rem] space-y-1.5 overflow-y-auto pr-1.5">
             {filtered.map((entry) => {

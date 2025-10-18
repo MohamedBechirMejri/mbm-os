@@ -173,7 +173,7 @@ export function SearchOverlay({
                 className="relative w-full overflow-hidden rounded-[2.25rem]"
               >
                 <div className="relative z-10 flex flex-col gap-1">
-                  <div className="px-5 pt-5 pb-2">
+                  <div className="">
                     <SearchInput
                       query={query}
                       onQueryChange={(newQuery) => {
