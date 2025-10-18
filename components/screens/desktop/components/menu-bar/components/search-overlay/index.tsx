@@ -154,8 +154,12 @@ export function SearchOverlay({
         <>
           <SearchBackdrop onClose={handleClose} />
 
-          <div className="fixed left-1/2 top-[5vh] z-[71] w-full max-w-[40rem] -translate-x-1/2 px-6">
-            <GlassSurface width={"24rem"} borderRadius={55} height={"max-content"}>
+          <div className="fixed left-[calc(50%-12rem)] top-[18vh] z-[71] w-full px-6">
+            <GlassSurface
+              width={"24rem"}
+              borderRadius={55}
+              height={"max-content"}
+            >
               <motion.div
                 key="search-box"
                 layout
