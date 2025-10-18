@@ -154,11 +154,13 @@ export function SearchOverlay({
         <>
           <SearchBackdrop onClose={handleClose} />
 
-          <div className="fixed left-[calc(50%-12rem)] top-[18vh] z-[71] w-full px-6">
+          <div className="fixed left-[calc(50%-16rem)] top-[18vh] z-[71] w-full px-6">
             <GlassSurface
-              width={"24rem"}
+              width={"32rem"}
               borderRadius={55}
               height={"max-content"}
+              style={{ padding: "0 !important" }}
+              className={cn("!backdrop-blur-sm")}
             >
               <motion.div
                 key="search-box"
@@ -168,7 +170,7 @@ export function SearchOverlay({
                 exit={{ y: -14, opacity: 0, scale: 0.98 }}
                 transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
                 onPointerDown={(event) => event.stopPropagation()}
-                className={cn("relative overflow-visible border w-full")}
+                className={cn("relative overflow-visible w-full rounded-full")}
               >
                 <SearchInput
                   query={query}
