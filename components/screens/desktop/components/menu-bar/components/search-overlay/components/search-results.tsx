@@ -68,7 +68,7 @@ export function SearchResults({
             })}
           </div>
         ) : (
-          <div className="px-4 py-6 text-center text-[0.875rem] font-semibold text-slate-600/90">
+          <div className="px-4 py-6 text-center text-[0.875rem] font-semibold text-white/70">
             No results
           </div>
         )}

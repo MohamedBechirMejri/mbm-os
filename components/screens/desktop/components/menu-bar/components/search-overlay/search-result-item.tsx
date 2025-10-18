@@ -29,7 +29,7 @@ export function SearchResultItem({
         "group relative flex w-full items-center gap-2.5 rounded-[1rem] px-3 py-2.5 text-left transition-all duration-150",
         isSelected
           ? "bg-gradient-to-b from-sky-500 to-sky-600 text-white shadow-[0_0.5rem_1.5rem_rgba(56,130,255,0.35),inset_0_1px_1px_rgba(255,255,255,0.25)]"
-          : "bg-white/20 text-slate-900 hover:bg-white/35 shadow-[inset_0_0.5px_1px_rgba(255,255,255,0.3)]",
+          : "bg-white/20 text-white hover:bg-white/35 shadow-[inset_0_0.5px_1px_rgba(255,255,255,0.3)]",
       )}
     >
       <div
@@ -60,7 +60,7 @@ export function SearchResultItem({
           <span
             className={cn(
               "truncate text-[0.75rem] leading-tight font-medium",
-              isSelected ? "text-white/85" : "text-slate-600/90",
+              isSelected ? "text-white/85" : "text-white/70",
             )}
           >
             {entry.description}
@@ -72,7 +72,7 @@ export function SearchResultItem({
           "shrink-0 rounded-full px-2.5 py-1 text-[0.6875rem] font-bold uppercase tracking-[0.08em]",
           isSelected
             ? "bg-white/20 text-white shadow-[inset_0_0.5px_1px_rgba(255,255,255,0.3)]"
-            : "bg-white/50 text-slate-700/90 shadow-[0_1px_2px_rgba(0,0,0,0.06)]",
+            : "bg-white/50 text-white shadow-[0_1px_2px_rgba(0,0,0,0.06)]",
         )}
       >
         {entry.kind === "app" ? "App" : "Win"}
