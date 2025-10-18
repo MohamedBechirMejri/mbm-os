@@ -43,6 +43,7 @@ export interface GlassSurfaceProps {
   className?: string;
   style?: React.CSSProperties;
   containerClassName?: string;
+  refractionIntensity?: number;
 }
 
 const useDarkMode = () => {
@@ -84,6 +85,7 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
   className = "",
   style = {},
   containerClassName = "",
+  refractionIntensity = 1,
 }) => {
   const uniqueId = useId().replace(/:/g, "-");
   const filterId = `glass-filter-${uniqueId}`;
@@ -127,6 +129,8 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
     return `data:image/svg+xml,${encodeURIComponent(svgContent)}`;
   };
 
+  const clampedRefraction = Math.max(refractionIntensity, 0);
+
   const updateDisplacementMap = () => {
     feImageRef.current?.setAttribute("href", generateDisplacementMap());
   };
@@ -141,14 +145,17 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
       if (ref.current) {
         ref.current.setAttribute(
           "scale",
-          (distortionScale + offset).toString(),
+          ((distortionScale + offset) * clampedRefraction).toString(),
         );
         ref.current.setAttribute("xChannelSelector", xChannel);
         ref.current.setAttribute("yChannelSelector", yChannel);
       }
     });
 
-    gaussianBlurRef.current?.setAttribute("stdDeviation", displace.toString());
+    gaussianBlurRef.current?.setAttribute(
+      "stdDeviation",
+      (displace * clampedRefraction).toString(),
+    );
   }, [
     width,
     height,
@@ -165,6 +172,7 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
     xChannel,
     yChannel,
     mixBlendMode,
+    clampedRefraction,
   ]);
 
   useEffect(() => {
@@ -219,12 +227,17 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
   };
 
   const getContainerStyles = (): React.CSSProperties => {
+    const effectiveFrost = Math.min(
+      Math.max(backgroundOpacity * clampedRefraction, 0),
+      1,
+    );
+
     const baseStyles: React.CSSProperties = {
       ...style,
       width: typeof width === "number" ? `${width}px` : width,
       height: typeof height === "number" ? `${height}px` : height,
       borderRadius: `${borderRadius}px`,
-      "--glass-frost": backgroundOpacity,
+      "--glass-frost": effectiveFrost,
       "--glass-saturation": saturation,
     } as React.CSSProperties;
 
@@ -235,8 +248,8 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
       return {
         ...baseStyles,
         background: isDarkMode
-          ? `hsl(0 0% 0% / ${backgroundOpacity})`
-          : `hsl(0 0% 100% / ${backgroundOpacity})`,
+          ? `hsl(0 0% 0% / ${effectiveFrost})`
+          : `hsl(0 0% 100% / ${effectiveFrost})`,
         backdropFilter: `url(#${filterId}) saturate(${saturation})`,
         boxShadow: isDarkMode
           ? `0 0 2px 1px color-mix(in oklch, white, transparent 65%) inset,
@@ -261,7 +274,7 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
         if (!backdropFilterSupported) {
           return {
             ...baseStyles,
-            background: "rgba(0, 0, 0, 0.4)",
+            background: `rgba(0, 0, 0, ${0.4 * clampedRefraction})`,
             border: "1px solid rgba(255, 255, 255, 0.2)",
             boxShadow: `inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
                         inset 0 -1px 0 0 rgba(255, 255, 255, 0.1)`,
@@ -269,7 +282,7 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
         } else {
           return {
             ...baseStyles,
-            background: "rgba(255, 255, 255, 0.1)",
+            background: `rgba(255, 255, 255, ${0.1 * clampedRefraction})`,
             backdropFilter: "blur(12px) saturate(1.8) brightness(1.2)",
             WebkitBackdropFilter: "blur(12px) saturate(1.8) brightness(1.2)",
             border: "1px solid rgba(255, 255, 255, 0.2)",
@@ -281,7 +294,7 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
         if (!backdropFilterSupported) {
           return {
             ...baseStyles,
-            background: "rgba(255, 255, 255, 0.4)",
+            background: `rgba(255, 255, 255, ${0.4 * clampedRefraction})`,
             border: "1px solid rgba(255, 255, 255, 0.3)",
             boxShadow: `inset 0 1px 0 0 rgba(255, 255, 255, 0.5),
                         inset 0 -1px 0 0 rgba(255, 255, 255, 0.3)`,
@@ -289,7 +302,7 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
         } else {
           return {
             ...baseStyles,
-            background: "rgba(255, 255, 255, 0.25)",
+            background: `rgba(255, 255, 255, ${0.25 * clampedRefraction})`,
             backdropFilter: "blur(12px) saturate(1.8) brightness(1.1)",
             WebkitBackdropFilter: "blur(12px) saturate(1.8) brightness(1.1)",
             border: "1px solid rgba(255, 255, 255, 0.3)",

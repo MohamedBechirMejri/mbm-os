@@ -1,6 +1,12 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
+import {
+  AnimatePresence,
+  motion,
+  useMotionValueEvent,
+  useSpring,
+  useTransform,
+} from "motion/react";
 import { useEffect, useMemo, useState } from "react";
 
 import type {
@@ -35,6 +41,22 @@ export function SearchOverlay({
 }: SearchOverlayProps) {
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const refractionSpring = useSpring(0, {
+    stiffness: 220,
+    damping: 30,
+    mass: 0.8,
+  });
+  const [refractionScalar, setRefractionScalar] = useState(0);
+
+  useMotionValueEvent(refractionSpring, "change", (value) => {
+    setRefractionScalar(value);
+  });
+
+  const glassOpacity = useTransform(refractionSpring, (value) => value);
+  const veilOpacity = useTransform(refractionSpring, (value) =>
+    Math.max(0, 0.55 - value * 0.55),
+  );
 
   const appsById = useMemo(() => {
     return new Map<AppId, AppMeta>(apps.map((app) => [app.id, app]));
@@ -83,11 +105,12 @@ export function SearchOverlay({
   const activeEntry = selectedIndex >= 0 ? filtered[selectedIndex] : null;
 
   useEffect(() => {
+    refractionSpring.set(open ? 1 : 0);
     if (!open) {
       setQuery("");
       setSelectedId(null);
     }
-  }, [open]);
+  }, [open, refractionSpring]);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -162,51 +185,53 @@ export function SearchOverlay({
             transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
             className="fixed left-[calc(50%-16rem)] top-[18vh] z-[71] w-full px-6"
           >
-            <GlassSurface
-              width="32rem"
-              borderRadius={36}
-              height="max-content"
-              className={cn(
-                "transition-[background-color,backdrop-filter,box-shadow] duration-300 ease-[0.16,1,0.3,1]",
-              )}
-              containerClassName="p-0"
-            >
-              <div
-                onPointerDown={(event) => event.stopPropagation()}
-                className="relative w-full overflow-hidden rounded-[2.25rem]"
+            <motion.div style={{ opacity: glassOpacity }}>
+              <GlassSurface
+                width="32rem"
+                borderRadius={36}
+                height="max-content"
+                className={cn(
+                  "transition-[background-color,backdrop-filter,box-shadow] duration-300 ease-[0.16,1,0.3,1]",
+                )}
+                containerClassName="p-0"
+                backgroundOpacity={0.34 * Math.min(refractionScalar, 1)}
+                refractionIntensity={refractionScalar}
               >
-                <motion.div
-                  aria-hidden
-                  className="pointer-events-none absolute inset-0 z-[1] rounded-[inherit] bg-white/20"
-                  initial={{ opacity: 0, scale: 0.985 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                />
+                <div
+                  onPointerDown={(event) => event.stopPropagation()}
+                  className="relative w-full overflow-hidden rounded-[2.25rem]"
+                >
+                  <motion.div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 z-[1] rounded-[inherit] bg-white/25"
+                    style={{ opacity: veilOpacity }}
+                  />
 
-                <div className="relative z-10 flex flex-col gap-1">
-                  <div className="px-5 pt-5 pb-2">
-                    <SearchInput
-                      query={query}
-                      onQueryChange={(newQuery) => {
-                        setQuery(newQuery);
-                        setSelectedId(null);
-                      }}
-                      onSubmit={handleSubmit}
-                      onKeyDown={handleKeyDown}
+                  <div className="relative z-10 flex flex-col gap-1">
+                    <div className="px-5 pt-5 pb-2">
+                      <SearchInput
+                        query={query}
+                        onQueryChange={(newQuery) => {
+                          setQuery(newQuery);
+                          setSelectedId(null);
+                        }}
+                        onSubmit={handleSubmit}
+                        onKeyDown={handleKeyDown}
+                      />
+                    </div>
+
+                    <SearchResults
+                      visible={showResultsPanel}
+                      filtered={filtered}
+                      activeId={activeId}
+                      appsById={appsById}
+                      onSelect={handleSelect}
+                      onHover={setSelectedId}
                     />
                   </div>
-
-                  <SearchResults
-                    visible={showResultsPanel}
-                    filtered={filtered}
-                    activeId={activeId}
-                    appsById={appsById}
-                    onSelect={handleSelect}
-                    onHover={setSelectedId}
-                  />
                 </div>
-              </div>
-            </GlassSurface>
+              </GlassSurface>
+            </motion.div>
           </motion.div>
         </>
       ) : null}
