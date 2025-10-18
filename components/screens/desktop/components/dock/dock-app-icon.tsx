@@ -13,6 +13,8 @@ interface DockAppIconProps {
   windows: WinInstance[];
   activeId: string | null;
   onClick: () => void;
+  anyMenuOpen: boolean;
+  setAnyMenuOpen: (open: boolean) => void;
 }
 
 export function DockAppIcon({
@@ -20,6 +22,8 @@ export function DockAppIcon({
   windows,
   activeId,
   onClick,
+  anyMenuOpen,
+  setAnyMenuOpen,
 }: DockAppIconProps) {
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -44,6 +48,10 @@ export function DockAppIcon({
         document.removeEventListener("mousedown", handleClickOutside);
     }
   }, [showMenu]);
+
+  useEffect(() => {
+    setAnyMenuOpen(showMenu);
+  }, [showMenu, setAnyMenuOpen]);
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -92,8 +100,8 @@ export function DockAppIcon({
     <div className="relative">
       <DockIcon
         size={64}
-        magnification={showMenu ? 64 * 2 : 2}
-        distance={showMenu ? 0 : 120}
+        magnification={anyMenuOpen ? 64 : 2}
+        distance={anyMenuOpen ? 0 : 120}
         onClick={handleClick}
         onContextMenu={handleContextMenu}
         className="relative"

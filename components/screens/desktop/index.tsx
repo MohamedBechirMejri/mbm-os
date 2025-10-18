@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { AppRegistry, preinstalledApps } from "./components/apps/app-registry";
 import { BrightnessOverlay } from "./components/brightness-overlay";
 import { Dock } from "./components/dock";
@@ -15,6 +16,7 @@ export default function Desktop() {
   const installed = useDesktop((s) => Object.values(s.apps));
   const windows = useDesktop((s) => s.windows);
   const activeId = useDesktop((s) => s.activeId);
+  const [anyMenuOpen, setAnyMenuOpen] = useState(false);
 
   const dockApps = installed.length > 0 ? installed : preinstalledApps;
 
@@ -77,6 +79,8 @@ export default function Desktop() {
             windows={getAppWindows(app.id)}
             activeId={activeId}
             onClick={() => handleDockClick(app.id)}
+            anyMenuOpen={anyMenuOpen}
+            setAnyMenuOpen={setAnyMenuOpen}
           />
         ))}
       </Dock>
