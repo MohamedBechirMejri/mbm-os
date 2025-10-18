@@ -180,7 +180,9 @@ export function DockAppIcon({
                   onClick={handleNewWindow}
                   className="w-full px-3 py-2 text-left text-sm text-white/95 hover:bg-white/15 active:bg-white/20 rounded-lg transition-all flex items-center justify-between gap-2"
                 >
-                  <span className="truncate flex-1 font-medium">New Window</span>
+                  <span className="truncate flex-1 font-medium">
+                    New Window
+                  </span>
                   <span className="text-xs text-white/50 flex-shrink-0 font-normal">
                     ⌥ Click
                   </span>
