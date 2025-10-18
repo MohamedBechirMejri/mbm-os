@@ -124,19 +124,22 @@ export function DockAppIcon({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 min-w-[12rem]"
+            className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 min-w-[14rem]"
             style={{ zIndex: 999999999 }}
           >
             <GlassSurface
+              width="auto"
+              height="auto"
               blur={1}
-              borderRadius={24}
-              className="!w-full !h-max !backdrop-blur-[8px]"
+              borderRadius={16}
+              backgroundOpacity={0.15}
+              className="shadow-2xl"
+              containerClassName="!p-1.5"
             >
-              <div className="p-2 flex flex-col gap-1">
+              <div className="flex flex-col gap-0.5">
                 {windows.length > 1 && (
-                  <div className="px-2 py-1.5 text-xs text-white/60 font-semibold">
-                    {app.title} • {windows.length} window
-                    {windows.length !== 1 ? "s" : ""}
+                  <div className="px-3 py-1.5 text-xs text-white/70 font-medium tracking-wide">
+                    {app.title} • {windows.length} windows
                   </div>
                 )}
                 {windows.length > 0 && (
@@ -146,40 +149,44 @@ export function DockAppIcon({
                         key={win.id}
                         type="button"
                         onClick={() => handleWindowClick(win.id, win.state)}
-                        className="w-full px-2 py-1.5 text-left text-sm text-white/90 hover:bg-white/10 rounded-xl transition-colors flex items-center justify-between gap-2"
+                        className="w-full px-3 py-2 text-left text-sm text-white/95 hover:bg-white/15 active:bg-white/20 rounded-lg transition-all flex items-center justify-between gap-2"
                       >
-                        <span className="truncate flex-1">
+                        <span className="truncate flex-1 font-medium">
                           {win.title || `${app.title} ${idx + 1}`}
                         </span>
                         {win.id === activeId && win.state !== "minimized" && (
-                          <div className="w-1.5 h-1.5 rounded-full bg-blue-400 flex-shrink-0" />
+                          <div className="w-1.5 h-1.5 rounded-full bg-blue-400/90 flex-shrink-0 shadow-sm" />
                         )}
                         {win.state === "minimized" && (
-                          <span className="text-xs text-white/40 flex-shrink-0">
+                          <span className="text-xs text-white/50 flex-shrink-0 font-normal">
                             minimized
                           </span>
                         )}
                       </button>
                     ))}
-                    <div className="h-px bg-white/10 my-1" />
+                    <div className="h-[0.5px] bg-white/15 my-0.5 mx-2" />
                   </>
                 )}
                 <button
                   type="button"
                   onClick={handleNewWindow}
-                  className="w-full px-2 py-1.5 text-left text-sm text-white/90 hover:bg-white/10 rounded-xl transition-colors flex items-center justify-between gap-4"
+                  className="w-full px-3 py-2 text-left text-sm text-white/95 hover:bg-white/15 active:bg-white/20 rounded-lg transition-all flex items-center justify-between gap-4"
                 >
-                  <span>New Window</span>
-                  <span className="text-xs text-white/40">⌥ Click</span>
+                  <span className="font-medium">New Window</span>
+                  <span className="text-xs text-white/50 font-normal">
+                    ⌥ Click
+                  </span>
                 </button>
                 {windows.length > 0 && (
                   <button
                     type="button"
                     onClick={handleQuit}
-                    className="w-full px-2 py-1.5 text-left text-sm text-white/90 hover:bg-white/10 rounded-xl transition-colors flex items-center justify-between gap-4"
+                    className="w-full px-3 py-2 text-left text-sm text-white/95 hover:bg-white/15 active:bg-white/20 rounded-lg transition-all flex items-center justify-between gap-4"
                   >
-                    <span>Quit</span>
-                    <span className="text-xs text-white/40">⌘Q</span>
+                    <span className="font-medium">Quit</span>
+                    <span className="text-xs text-white/50 font-normal">
+                      ⌘Q
+                    </span>
                   </button>
                 )}
               </div>
