@@ -159,13 +159,12 @@ export function SearchOverlay({
               width="32rem"
               borderRadius={36}
               height="max-content"
-              className={cn("")}
+              className={cn("!backdrop-blur-[8px]")}
               containerClassName="p-0"
-              backgroundOpacity={0.32}
-              refractionIntensity={1.51}
-              blur={3.5}
-              borderWidth={.01}
-              
+              backgroundOpacity={0.15}
+              refractionIntensity={1.2}
+              blur={1}
+              borderWidth={0.01}
             >
               <div
                 onPointerDown={(event) => event.stopPropagation()}
