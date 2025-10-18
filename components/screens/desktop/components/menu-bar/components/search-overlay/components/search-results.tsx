@@ -49,7 +49,7 @@ export function SearchResults({
         pointerEvents: visible ? "auto" : "none",
         overflow: "hidden",
       }}
-      className="relative border-t border-transparent bg-white/35 backdrop-blur-[64px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]"
+      className="relative backdrop-blur-[64px]"
       aria-hidden={!visible}
     >
       <div className="px-4 pb-3.5 pt-2.5">

@@ -172,7 +172,7 @@ export function SearchOverlay({
                 onPointerDown={(event) => event.stopPropagation()}
                 className="relative w-full overflow-hidden rounded-[2.25rem]"
               >
-                <div className="relative z-10 flex flex-col gap-1">
+                <div className="relative z-10 flex flex-col">
                   <div className="">
                     <SearchInput
                       query={query}
