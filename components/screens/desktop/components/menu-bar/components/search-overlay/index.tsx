@@ -157,7 +157,7 @@ export function SearchOverlay({
           <div className="fixed left-[calc(50%-16rem)] top-[18vh] z-[71] w-full px-6">
             <GlassSurface
               width={"32rem"}
-              borderRadius={55}
+              borderRadius={99}
               height={"max-content"}
               className={cn("!backdrop-blur-sm")}
               containerClassName="p-0"
