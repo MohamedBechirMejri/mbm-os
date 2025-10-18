@@ -28,14 +28,15 @@ export function SearchResultItem({
       className={cn(
         "group relative flex w-full items-center gap-3 rounded-[1.125rem] px-3.5 py-3 text-left transition-all duration-150",
         isSelected
-          ? "bg-gradient-to-r from-sky-500/85 via-sky-500/75 to-sky-500/85 text-white shadow-[0_1rem_2.5rem_rgba(56,130,255,0.4)]"
-          : "bg-white/15 text-slate-900 hover:bg-white/25",
+          ? "bg-gradient-to-b from-sky-500 to-sky-600 text-white shadow-[0_0.5rem_1.5rem_rgba(56,130,255,0.35),inset_0_1px_1px_rgba(255,255,255,0.25)]"
+          : "bg-white/20 text-slate-900 hover:bg-white/35 shadow-[inset_0_0.5px_1px_rgba(255,255,255,0.3)]",
       )}
     >
       <div
         className={cn(
-          "flex size-12 shrink-0 items-center justify-center rounded-[1rem] border border-white/40 bg-white/60",
-          isSelected && "border-white/70 bg-white/25",
+          "flex size-12 shrink-0 items-center justify-center rounded-[1rem] border border-white/50 bg-white/70 shadow-[0_1px_3px_rgba(0,0,0,0.08)]",
+          isSelected &&
+            "border-white/80 bg-white/35 shadow-[0_2px_6px_rgba(0,0,0,0.12)]",
         )}
       >
         {appMeta ? (
@@ -52,14 +53,14 @@ export function SearchResultItem({
         )}
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <span className="truncate text-[0.9375rem] font-semibold leading-tight tracking-tight">
+        <span className="truncate text-[0.9375rem] font-semibold leading-tight tracking-[-0.01em]">
           {entry.label}
         </span>
         {entry.description ? (
           <span
             className={cn(
-              "truncate text-[0.75rem] leading-tight",
-              isSelected ? "text-white/80" : "text-slate-500/90",
+              "truncate text-[0.75rem] leading-tight font-medium",
+              isSelected ? "text-white/85" : "text-slate-600/90",
             )}
           >
             {entry.description}
@@ -68,10 +69,10 @@ export function SearchResultItem({
       </div>
       <span
         className={cn(
-          "shrink-0 rounded-full px-2 py-1 text-[0.6875rem] font-semibold uppercase tracking-[0.08em]",
+          "shrink-0 rounded-full px-2.5 py-1 text-[0.6875rem] font-bold uppercase tracking-[0.08em]",
           isSelected
-            ? "bg-white/15 text-white/90"
-            : "bg-white/40 text-slate-600",
+            ? "bg-white/20 text-white shadow-[inset_0_0.5px_1px_rgba(255,255,255,0.3)]"
+            : "bg-white/50 text-slate-700/90 shadow-[0_1px_2px_rgba(0,0,0,0.06)]",
         )}
       >
         {entry.kind === "app" ? "App" : "Win"}

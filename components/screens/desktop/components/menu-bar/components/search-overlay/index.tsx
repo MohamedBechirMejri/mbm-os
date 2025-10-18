@@ -159,12 +159,14 @@ export function SearchOverlay({
               width="32rem"
               borderRadius={36}
               height="max-content"
-              className={cn("")}
+              className={cn(
+                "shadow-[0_1.5rem_4rem_rgba(0,0,0,0.18),0_0.5rem_1.5rem_rgba(0,0,0,0.12)]",
+              )}
               containerClassName="p-0"
-              backgroundOpacity={0.34}
+              backgroundOpacity={0.42}
               refractionIntensity={1}
-              blur={3}
-              mixBlendMode="screen"
+              blur={3.5}
+              mixBlendMode="normal"
             >
               <div
                 onPointerDown={(event) => event.stopPropagation()}

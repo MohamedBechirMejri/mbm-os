@@ -49,7 +49,7 @@ export function SearchResults({
         pointerEvents: visible ? "auto" : "none",
         overflow: "hidden",
       }}
-      className="relative border-t border-transparent bg-white/28 backdrop-blur-[64px]"
+      className="relative border-t border-transparent bg-white/35 backdrop-blur-[64px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]"
       aria-hidden={!visible}
     >
       <div className="px-5 pb-4 pt-3">
@@ -72,7 +72,7 @@ export function SearchResults({
             })}
           </div>
         ) : (
-          <div className="px-4 py-6 text-center text-[0.875rem] font-medium text-slate-500">
+          <div className="px-4 py-6 text-center text-[0.875rem] font-semibold text-slate-600/90">
             No results
           </div>
         )}
