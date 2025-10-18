@@ -71,7 +71,7 @@ export default function Desktop() {
         <WindowManagerRoot />
         <AppRegistry />
       </div>
-      <Dock className="mb-2 select-none w-max">
+      <Dock className="mb-2 select-none w-max relative z-[9999]">
         {dockApps.map((app) => (
           <DockAppIcon
             key={app.id}
