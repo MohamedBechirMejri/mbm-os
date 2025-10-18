@@ -33,16 +33,12 @@ export function SearchResults({
         height: visible ? "auto" : 0,
         y: visible ? 0 : -12,
         scaleY: visible ? 1 : 0.95,
-        borderColor: visible
-          ? "rgba(255, 255, 255, 0.32)"
-          : "rgba(255, 255, 255, 0)",
       }}
       transition={{
         opacity: { duration: 0.24, ease: easeOutExpo },
         height: { duration: 0.28, ease: easeOutExpo },
         y: { duration: 0.26, ease: easeOutExpo },
         scaleY: { duration: 0.26, ease: easeOutExpo },
-        borderColor: { duration: 0.26, ease: easeOutExpo },
       }}
       style={{
         transformOrigin: "50% 0%",
