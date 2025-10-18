@@ -159,8 +159,8 @@ export function SearchOverlay({
               width={"32rem"}
               borderRadius={55}
               height={"max-content"}
-              style={{ padding: "0 !important" }}
               className={cn("!backdrop-blur-sm")}
+              containerClassName="p-0"
             >
               <motion.div
                 key="search-box"
