@@ -163,34 +163,48 @@ export function SearchOverlay({
             className="fixed left-[calc(50%-16rem)] top-[18vh] z-[71] w-full px-6"
           >
             <GlassSurface
-              width={"32rem"}
-              borderRadius={32}
-              height={"max-content"}
-              className={cn("!backdrop-blur-sm")}
+              width="32rem"
+              borderRadius={36}
+              height="max-content"
+              className={cn(
+                "transition-[background-color,backdrop-filter,box-shadow] duration-300 ease-[0.16,1,0.3,1]",
+              )}
               containerClassName="p-0"
             >
               <div
                 onPointerDown={(event) => event.stopPropagation()}
-                className={cn("relative overflow-visible w-full rounded-full")}
+                className="relative w-full overflow-hidden rounded-[2.25rem]"
               >
-                <SearchInput
-                  query={query}
-                  onQueryChange={(newQuery) => {
-                    setQuery(newQuery);
-                    setSelectedId(null);
-                  }}
-                  onSubmit={handleSubmit}
-                  onKeyDown={handleKeyDown}
+                <motion.div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 z-[1] rounded-[inherit] bg-white/20"
+                  initial={{ opacity: 0, scale: 0.985 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                 />
 
-                <SearchResults
-                  visible={showResultsPanel}
-                  filtered={filtered}
-                  activeId={activeId}
-                  appsById={appsById}
-                  onSelect={handleSelect}
-                  onHover={setSelectedId}
-                />
+                <div className="relative z-10 flex flex-col gap-1">
+                  <div className="px-5 pt-5 pb-2">
+                    <SearchInput
+                      query={query}
+                      onQueryChange={(newQuery) => {
+                        setQuery(newQuery);
+                        setSelectedId(null);
+                      }}
+                      onSubmit={handleSubmit}
+                      onKeyDown={handleKeyDown}
+                    />
+                  </div>
+
+                  <SearchResults
+                    visible={showResultsPanel}
+                    filtered={filtered}
+                    activeId={activeId}
+                    appsById={appsById}
+                    onSelect={handleSelect}
+                    onHover={setSelectedId}
+                  />
+                </div>
               </div>
             </GlassSurface>
           </motion.div>

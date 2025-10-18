@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 
 import type { AppMeta } from "@/components/screens/desktop/components/window-manager";
 import { SearchResultItem } from "../search-result-item";
@@ -15,6 +15,8 @@ type SearchResultsProps = {
   onHover: (id: string) => void;
 };
 
+const easeOutExpo = [0.16, 1, 0.3, 1] as const;
+
 export function SearchResults({
   visible,
   filtered,
@@ -24,41 +26,57 @@ export function SearchResults({
   onHover,
 }: SearchResultsProps) {
   return (
-    <AnimatePresence initial={false}>
-      {visible ? (
-        <motion.div
-          key="results"
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: "auto" }}
-          exit={{ opacity: 0, height: 0 }}
-          transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-          className="relative border-t border-white/25 bg-white/30 px-3 pb-3 pt-2 backdrop-blur-[64px] overflow-hidden"
-        >
-          {filtered.length > 0 ? (
-            <div className="max-h-[26rem] space-y-1.5 overflow-y-auto pr-1.5">
-              {filtered.map((entry) => {
-                const appMeta = entry.appId ? appsById.get(entry.appId) : null;
-                const isSelected = entry.id === activeId;
+    <motion.div
+      initial={false}
+      animate={{
+        opacity: visible ? 1 : 0,
+        height: visible ? "auto" : 0,
+        y: visible ? 0 : -12,
+        scaleY: visible ? 1 : 0.95,
+        borderColor: visible
+          ? "rgba(255, 255, 255, 0.32)"
+          : "rgba(255, 255, 255, 0)",
+      }}
+      transition={{
+        opacity: { duration: 0.24, ease: easeOutExpo },
+        height: { duration: 0.28, ease: easeOutExpo },
+        y: { duration: 0.26, ease: easeOutExpo },
+        scaleY: { duration: 0.26, ease: easeOutExpo },
+        borderColor: { duration: 0.26, ease: easeOutExpo },
+      }}
+      style={{
+        transformOrigin: "50% 0%",
+        pointerEvents: visible ? "auto" : "none",
+        overflow: "hidden",
+      }}
+      className="relative border-t border-transparent bg-white/28 backdrop-blur-[64px]"
+      aria-hidden={!visible}
+    >
+      <div className="px-5 pb-4 pt-3">
+        {filtered.length > 0 ? (
+          <div className="max-h-[26rem] space-y-1.5 overflow-y-auto pr-1.5">
+            {filtered.map((entry) => {
+              const appMeta = entry.appId ? appsById.get(entry.appId) : null;
+              const isSelected = entry.id === activeId;
 
-                return (
-                  <SearchResultItem
-                    key={entry.id}
-                    entry={entry}
-                    isSelected={isSelected}
-                    appMeta={appMeta ?? null}
-                    onSelect={onSelect}
-                    onHover={onHover}
-                  />
-                );
-              })}
-            </div>
-          ) : (
-            <div className="px-4 py-6 text-center text-[0.875rem] font-medium text-slate-500">
-              No results
-            </div>
-          )}
-        </motion.div>
-      ) : null}
-    </AnimatePresence>
+              return (
+                <SearchResultItem
+                  key={entry.id}
+                  entry={entry}
+                  isSelected={isSelected}
+                  appMeta={appMeta ?? null}
+                  onSelect={onSelect}
+                  onHover={onHover}
+                />
+              );
+            })}
+          </div>
+        ) : (
+          <div className="px-4 py-6 text-center text-[0.875rem] font-medium text-slate-500">
+            No results
+          </div>
+        )}
+      </div>
+    </motion.div>
   );
 }
