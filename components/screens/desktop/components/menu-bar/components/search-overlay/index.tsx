@@ -155,11 +155,11 @@ export function SearchOverlay({
           <SearchBackdrop onClose={handleClose} />
 
           <motion.div
-            key={"search-overlay"}
-            initial={{ y: -18, opacity: 0, scaleY: 0.5 }}
-            animate={{ y: 0, opacity: 1, scaleY: 1 }}
-            exit={{ y: -14, opacity: 0, scaleY: 0.98 }}
-            transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
+            key="search-overlay"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
             className="fixed left-[calc(50%-16rem)] top-[18vh] z-[71] w-full px-6"
           >
             <GlassSurface
@@ -169,13 +169,7 @@ export function SearchOverlay({
               className={cn("!backdrop-blur-sm")}
               containerClassName="p-0"
             >
-              <motion.div
-                key="search-box"
-                layout
-                initial={{ y: -18, opacity: 0, scale: 0.96 }}
-                animate={{ y: 0, opacity: 1, scale: 1 }}
-                exit={{ y: -14, opacity: 0, scale: 0.98 }}
-                transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
+              <div
                 onPointerDown={(event) => event.stopPropagation()}
                 className={cn("relative overflow-visible w-full rounded-full")}
               >
@@ -197,7 +191,7 @@ export function SearchOverlay({
                   onSelect={handleSelect}
                   onHover={setSelectedId}
                 />
-              </motion.div>
+              </div>
             </GlassSurface>
           </motion.div>
         </>

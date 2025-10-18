@@ -1,5 +1,4 @@
 import { Square } from "lucide-react";
-import { motion } from "motion/react";
 
 import type { AppMeta } from "@/components/screens/desktop/components/window-manager";
 import { cn } from "@/lib/utils";
@@ -22,13 +21,12 @@ export function SearchResultItem({
   onHover,
 }: SearchResultItemProps) {
   return (
-    <motion.button
-      layout="position"
+    <button
       type="button"
       onClick={() => onSelect(entry)}
       onMouseEnter={() => onHover(entry.id)}
       className={cn(
-        "group relative flex w-full items-center gap-3 rounded-[1.125rem] px-3.5 py-3 text-left transition-colors duration-200",
+        "group relative flex w-full items-center gap-3 rounded-[1.125rem] px-3.5 py-3 text-left transition-all duration-150",
         isSelected
           ? "bg-gradient-to-r from-sky-500/85 via-sky-500/75 to-sky-500/85 text-white shadow-[0_1rem_2.5rem_rgba(56,130,255,0.4)]"
           : "bg-white/15 text-slate-900 hover:bg-white/25",
@@ -78,6 +76,6 @@ export function SearchResultItem({
       >
         {entry.kind === "app" ? "App" : "Win"}
       </span>
-    </motion.button>
+    </button>
   );
 }

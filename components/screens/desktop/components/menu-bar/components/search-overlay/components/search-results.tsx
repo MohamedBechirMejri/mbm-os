@@ -28,11 +28,11 @@ export function SearchResults({
       {visible ? (
         <motion.div
           key="results"
-          initial={{ opacity: 0, height: 0, y: -10 }}
-          animate={{ opacity: 1, height: "auto", y: 0 }}
-          exit={{ opacity: 0, height: 0, y: -12 }}
-          transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
-          className="relative border-t border-white/25 bg-white/30 px-3 pb-3 pt-2 backdrop-blur-[64px]"
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          exit={{ opacity: 0, height: 0 }}
+          transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+          className="relative border-t border-white/25 bg-white/30 px-3 pb-3 pt-2 backdrop-blur-[64px] overflow-hidden"
         >
           {filtered.length > 0 ? (
             <div className="max-h-[26rem] space-y-1.5 overflow-y-auto pr-1.5">
