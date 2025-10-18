@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
 
 import type {
@@ -19,6 +19,11 @@ import {
   launchOrFocusApp,
   RESULTS_LIMIT,
 } from "./utils";
+
+const overlayVariants = {
+  hidden: { y: -8, opacity: 0 },
+  visible: { y: 0, opacity: 1 },
+};
 
 type SearchOverlayProps = {
   open: boolean;
@@ -154,7 +159,14 @@ export function SearchOverlay({
         <>
           <SearchBackdrop onClose={handleClose} />
 
-          <div className="fixed left-[calc(50%-16rem)] top-[18vh] z-[71] w-full px-6">
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+            variants={overlayVariants}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="fixed left-[calc(50%-16rem)] top-[18vh] z-[71] w-full px-6"
+          >
             <GlassSurface
               width="32rem"
               borderRadius={36}
@@ -194,7 +206,7 @@ export function SearchOverlay({
                 </div>
               </div>
             </GlassSurface>
-          </div>
+          </motion.div>
         </>
       ) : null}
     </AnimatePresence>
