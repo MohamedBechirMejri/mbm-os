@@ -23,6 +23,12 @@ export function DockAppIcon({
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const isRunning = windows.length > 0;
+  const hasFocusedWindow = windows.some(
+    (win) =>
+      win.id === activeId &&
+      win.state !== "minimized" &&
+      win.state !== "hidden",
+  );
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -54,6 +60,7 @@ export function DockAppIcon({
     } else {
       onClick();
     }
+    setShowMenu(false);
   };
 
   const handleWindowClick = (windowId: string, state: string) => {
@@ -102,7 +109,9 @@ export function DockAppIcon({
           app.icon
         )}
         {isRunning && (
-          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-white/80 shadow-lg" />
+          <div
+            className={`absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-full shadow-lg ${hasFocusedWindow ? "h-1.5 w-3 bg-sky-400/90" : "h-1.5 w-1.5 bg-white/80"}`}
+          />
         )}
       </DockIcon>
 
