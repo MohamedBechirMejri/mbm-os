@@ -72,10 +72,13 @@ export function WindowView({
     }
   }, [win.animationState, win.id]);
 
-  const getAnimationVariant = (): "idle" | "open" | "closed" => {
-    const animState = win.animationState || "idle";
+  type AnimationVariant = "idle" | "open" | "closing" | "minimized";
+
+  const getAnimationVariant = (): AnimationVariant => {
+    const animState = win.animationState ?? "idle";
     if (animState === "opening" || animState === "restoring") return "open";
-    if (animState === "closing" || animState === "minimizing") return "closed";
+    if (animState === "closing" || animState === "minimizing") return "closing";
+    if (win.state === "minimized") return "minimized";
     return "idle";
   };
 
@@ -86,19 +89,10 @@ export function WindowView({
     setWinState(win.id, win.state === "maximized" ? "normal" : "maximized");
   };
 
-  // Don't render minimized windows unless they're animating
-  const isMinimized = win.state === "minimized";
-  const isAnimating =
-    win.animationState === "minimizing" || win.animationState === "restoring";
-
-  if (isMinimized && !isAnimating) {
-    return null;
-  }
-
-  // Log for debugging
-  console.log(
-    `Window ${win.id}: state=${win.state}, animState=${win.animationState}, variant=${currentVariant}`,
-  );
+  const isDormant =
+    win.state === "minimized" &&
+    win.animationState !== "restoring" &&
+    win.animationState !== "minimizing";
 
   return (
     <TitlebarPortalProvider value={titlebarMountRef}>
@@ -117,9 +111,12 @@ export function WindowView({
           height: win.bounds.h,
           zIndex: win.z,
           transformOrigin: `${originX}px ${originY}px`,
+          visibility: isDormant ? "hidden" : "visible",
+          pointerEvents: isDormant ? "none" : "auto",
         }}
         initial={false}
         animate={currentVariant}
+        aria-hidden={isDormant}
         variants={{
           idle: {
             scale: 1,
@@ -129,7 +126,11 @@ export function WindowView({
             scale: [0.3, 1.02, 1],
             opacity: [0, 1, 1],
           },
-          closed: {
+          closing: {
+            scale: 0.3,
+            opacity: 0,
+          },
+          minimized: {
             scale: 0.3,
             opacity: 0,
           },
@@ -138,13 +139,13 @@ export function WindowView({
           scale:
             currentVariant === "open"
               ? { duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }
-              : currentVariant === "closed"
+              : currentVariant === "closing"
                 ? { duration: 0.3, ease: [0.36, 0, 0.66, -0.56] }
                 : { type: "spring", stiffness: 300, damping: 30 },
           opacity:
             currentVariant === "open"
               ? { duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }
-              : currentVariant === "closed"
+              : currentVariant === "closing"
                 ? { duration: 0.3, ease: [0.36, 0, 0.66, -0.56] }
                 : { type: "spring", stiffness: 300, damping: 30 },
         }}

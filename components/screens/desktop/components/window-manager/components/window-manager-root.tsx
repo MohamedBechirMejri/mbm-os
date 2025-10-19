@@ -23,7 +23,7 @@ export function WindowManagerRoot({ className }: { className?: string }) {
     >
       {ids.map((id) => {
         const w = windows[id];
-        if (!w || w.state === "minimized" || w.state === "hidden") return null;
+        if (!w || w.state === "hidden") return null;
         return <WindowView key={id} win={w} rootRef={ref} />;
       })}
     </div>
