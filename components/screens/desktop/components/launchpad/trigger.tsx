@@ -15,7 +15,7 @@ export function LaunchpadTrigger({ onClick, isOpen }: LaunchpadTriggerProps) {
     <motion.div
       onMouseMove={(e) => mouseX.set(e.pageX)}
       onMouseLeave={() => mouseX.set(Infinity)}
-      className="mx-auto mt-8 flex min-h-[58px] w-max items-center justify-center gap-2 rounded-2xl relative select-none"
+      className="ml-auto mt-8 flex min-h-[58px] w-max items-center justify-center gap-2 rounded-2xl relative select-none"
     >
       <GlassSurface
         width={"max-content"}

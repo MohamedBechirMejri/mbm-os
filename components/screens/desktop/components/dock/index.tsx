@@ -33,7 +33,7 @@ const DEFAULT_MAGNIFICATION = 60;
 const DEFAULT_DISTANCE = 140;
 
 const dockVariants = cva(
-  "mx-auto mt-8 flex min-h-[58px] w-max items-center justify-center gap-2 rounded-2xl",
+  "mr-auto mt-8 flex min-h-[58px] w-max items-center justify-center gap-2 rounded-2xl",
 );
 
 interface DockContextValue {
