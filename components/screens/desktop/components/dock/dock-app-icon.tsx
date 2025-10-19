@@ -139,6 +139,7 @@ export function DockAppIcon({
               width="auto"
               height="auto"
               blur={2.5}
+              displace={20}
               borderRadius={14}
               backgroundOpacity={0.45}
               className="shadow-2xl ring-1 ring-white/20"
