@@ -16,6 +16,7 @@ import {
   MENU_BAR_HEIGHT,
   viewportRect,
 } from "./utils";
+import { runWindowViewTransition } from "./view-transitions";
 
 export function registerApps(apps: AppMeta[]) {
   store.set((s) => ({
@@ -112,7 +113,7 @@ export function setWinState(id: string, st: WinState) {
   const root = document.getElementById("wm-root");
   const r = viewportRect(root);
 
-  let next: WinInstance = { ...w } as WinInstance;
+  let next: WinInstance | null = { ...w } as WinInstance;
 
   if (st === "maximized" || st === "fullscreen") {
     // Save current bounds to restore later (only overwrite when coming from normal)
@@ -155,19 +156,45 @@ export function setWinState(id: string, st: WinState) {
       restoreBounds: null,
     };
   } else if (st === "minimized") {
-    // Trigger minimizing animation
-    next = {
+    const nextWin = {
       ...next,
       state: st,
       snap: null,
       animationState: "minimizing",
     } as WinInstance;
+
+    const commit = () => {
+      store.set((prev) => ({
+        ...prev,
+        windows: { ...prev.windows, [id]: nextWin },
+      }));
+    };
+
+    const transitioned = runWindowViewTransition({
+      win: w,
+      kind: "minimize",
+      commit,
+      onFinished: () => {
+        setAnimationState(id, "idle");
+      },
+    });
+
+    if (transitioned) {
+      return;
+    }
+
+    next = nextWin;
   } else {
     // Other states (hidden) — pass through without changing bounds
     next = { ...next, state: st, snap: null } as WinInstance;
   }
 
-  store.set((prev) => ({ ...prev, windows: { ...prev.windows, [id]: next } }));
+  if (next) {
+    store.set((prev) => ({
+      ...prev,
+      windows: { ...prev.windows, [id]: next as WinInstance },
+    }));
+  }
 }
 
 export function closeWin(id: string) {
@@ -214,13 +241,31 @@ export function restoreFromMinimized(id: string) {
   const w = s.windows[id];
   if (!w || w.state !== "minimized") return;
 
-  store.set((prev) => ({
-    ...prev,
-    windows: {
-      ...prev.windows,
-      [id]: { ...w, state: "normal", animationState: "restoring" },
+  const next: WinInstance = {
+    ...w,
+    state: "normal",
+    animationState: "restoring",
+  };
+
+  const commit = () => {
+    store.set((prev) => ({
+      ...prev,
+      windows: { ...prev.windows, [id]: next },
+    }));
+  };
+
+  const transitioned = runWindowViewTransition({
+    win: w,
+    kind: "restore",
+    commit,
+    onFinished: () => {
+      setAnimationState(id, "idle");
     },
-  }));
+  });
+
+  if (!transitioned) {
+    commit();
+  }
 
   focusWin(id);
 }

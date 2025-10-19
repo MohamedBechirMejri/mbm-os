@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import GlassSurface from "@/components/ui/glass-surface";
 import { DesktopAPI } from "../window-manager";
 import type { AppMeta, WinInstance } from "../window-manager/types";
@@ -25,6 +25,7 @@ export function DockAppIcon({
   anyMenuOpen,
   setAnyMenuOpen,
 }: DockAppIconProps) {
+  const rootRef = useRef<HTMLDivElement>(null);
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const isRunning = windows.length > 0;
@@ -106,8 +107,43 @@ export function DockAppIcon({
     setShowMenu(false);
   };
 
+  useLayoutEffect(() => {
+    const node = rootRef.current;
+    if (!node) return;
+
+    let frame: number | null = null;
+
+    const updateRect = () => {
+      if (frame != null) {
+        cancelAnimationFrame(frame);
+      }
+      frame = requestAnimationFrame(() => {
+        frame = null;
+        DesktopAPI.registerDockAppRect(app.id, node.getBoundingClientRect());
+      });
+    };
+
+    updateRect();
+
+    const resizeObserver =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(updateRect)
+        : null;
+    resizeObserver?.observe(node);
+    window.addEventListener("resize", updateRect);
+
+    return () => {
+      if (frame != null) {
+        cancelAnimationFrame(frame);
+      }
+      resizeObserver?.disconnect();
+      window.removeEventListener("resize", updateRect);
+      DesktopAPI.registerDockAppRect(app.id, undefined);
+    };
+  }, [app.id]);
+
   return (
-    <div className="relative">
+    <div className="relative" ref={rootRef} data-dock-app={app.id}>
       <DockIcon
         size={64}
         magnification={anyMenuOpen ? 64 : 2}

@@ -112,6 +112,32 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+.wm-view-transition-active ::view-transition-group(*) {
+  animation-duration: 0.46s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.28, 1);
+}
+
+.wm-view-transition-active ::view-transition-old(*),
+.wm-view-transition-active ::view-transition-new(*) {
+  animation-timing-function: cubic-bezier(0.12, 0.9, 0.23, 1);
+  mix-blend-mode: normal;
+}
+
+[data-dock-app]::after {
+  content: "";
+  position: absolute;
+  inset: -0.35rem;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0) 65%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.24s ease;
+}
+
+[data-dock-app].wm-dock-transition-target::after {
+  opacity: 0.66;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

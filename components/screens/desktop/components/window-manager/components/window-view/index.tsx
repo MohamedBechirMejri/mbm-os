@@ -2,11 +2,12 @@
 
 import { motion, type Transition, type Variants } from "motion/react";
 import type React from "react";
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import { focusWin, setAnimationState, setWinState } from "../../api";
 import { useWindowDrag, useWindowResize } from "../../hooks";
 import { useDesktop } from "../../store";
 import type { WinInstance } from "../../types";
+import { isWindowTransitionActive } from "../../view-transitions";
 import { TitlebarPortalProvider } from "./titlebar-portal";
 import { WindowContent } from "./window-content";
 import { WindowResizeHandles } from "./window-resize-handles";
@@ -39,82 +40,124 @@ const createWindowSpring = (overrides?: Partial<Transition>): Transition => ({
   ...overrides,
 });
 
-const WINDOW_VARIANTS: Variants = {
-  spawn: {
-    scaleX: 0.84,
-    scaleY: 0.8,
-    y: 28,
-    opacity: 0,
-    rotateX: 12,
-    filter: "blur(16px)",
-  },
-  idle: {
-    scaleX: 1,
-    scaleY: 1,
-    y: 0,
-    opacity: 1,
-    rotateX: 0,
-    filter: "blur(0px)",
-  },
-  entering: {
-    scaleX: 1,
-    scaleY: 1,
-    y: 0,
-    opacity: 1,
-    rotateX: 0,
-    filter: "blur(0px)",
-    transition: {
-      default: createWindowSpring({ bounce: 0.24 }),
-      opacity: createWindowSpring({ damping: 40, stiffness: 480 }),
-      filter: createWindowSpring({ damping: 46, stiffness: 420 }),
+const ZERO_TWEEN: Transition = { type: "tween", duration: 0.0001 };
+
+function createWindowVariants(
+  minimizeVector: { x: number; y: number },
+  vtActive: boolean,
+): Variants {
+  const minimizeTransition = vtActive
+    ? { default: ZERO_TWEEN, filter: ZERO_TWEEN }
+    : {
+        default: createWindowSpring({
+          stiffness: 620,
+          damping: 34,
+          mass: 0.74,
+        }),
+        filter: createWindowSpring({ stiffness: 520, damping: 38, mass: 0.8 }),
+      };
+
+  const restoreTransition = vtActive
+    ? { default: ZERO_TWEEN, opacity: ZERO_TWEEN, filter: ZERO_TWEEN }
+    : {
+        default: createWindowSpring({
+          bounce: 0.2,
+          stiffness: 560,
+          damping: 30,
+        }),
+        opacity: createWindowSpring({ damping: 38, stiffness: 460 }),
+        filter: createWindowSpring({ damping: 44, stiffness: 420 }),
+      };
+
+  const minimizedTransition = vtActive
+    ? { default: ZERO_TWEEN }
+    : {
+        default: createWindowSpring({
+          stiffness: 720,
+          damping: 40,
+          mass: 0.58,
+        }),
+      };
+
+  return {
+    spawn: {
+      x: 0,
+      scaleX: 0.84,
+      scaleY: 0.8,
+      y: 28,
+      opacity: 0,
+      rotateX: 12,
+      filter: "blur(16px)",
     },
-  },
-  closing: {
-    scaleX: 0.78,
-    scaleY: 0.72,
-    y: -24,
-    opacity: 0,
-    rotateX: -12,
-    filter: "blur(18px)",
-    transition: {
-      default: createWindowSpring({ damping: 26, stiffness: 640, mass: 0.68 }),
-      opacity: createWindowSpring({ damping: 24, stiffness: 560, mass: 0.6 }),
-      filter: createWindowSpring({ damping: 30, stiffness: 520, mass: 0.62 }),
+    idle: {
+      x: 0,
+      scaleX: 1,
+      scaleY: 1,
+      y: 0,
+      opacity: 1,
+      rotateX: 0,
+      filter: "blur(0px)",
     },
-  },
-  minimizing: {
-    scaleX: MINIMIZED_SIGNATURE.scaleX,
-    scaleY: MINIMIZED_SIGNATURE.scaleY,
-    y: 34,
-    opacity: MINIMIZED_SIGNATURE.opacity,
-    rotateX: MINIMIZED_SIGNATURE.rotateX,
-    filter: MINIMIZED_SIGNATURE.filter,
-    transition: {
-      default: createWindowSpring({ stiffness: 620, damping: 34, mass: 0.74 }),
-      filter: createWindowSpring({ stiffness: 520, damping: 38, mass: 0.8 }),
+    entering: {
+      x: 0,
+      scaleX: 1,
+      scaleY: 1,
+      y: 0,
+      opacity: 1,
+      rotateX: 0,
+      filter: "blur(0px)",
+      transition: {
+        default: createWindowSpring({ bounce: 0.24 }),
+        opacity: createWindowSpring({ damping: 40, stiffness: 480 }),
+        filter: createWindowSpring({ damping: 46, stiffness: 420 }),
+      },
     },
-  },
-  restoring: {
-    scaleX: 1,
-    scaleY: 1,
-    y: 0,
-    opacity: 1,
-    rotateX: 0,
-    filter: "blur(0px)",
-    transition: {
-      default: createWindowSpring({ bounce: 0.2, stiffness: 560, damping: 30 }),
-      opacity: createWindowSpring({ damping: 38, stiffness: 460 }),
-      filter: createWindowSpring({ damping: 44, stiffness: 420 }),
+    closing: {
+      x: 0,
+      scaleX: 0.78,
+      scaleY: 0.72,
+      y: -24,
+      opacity: 0,
+      rotateX: -12,
+      filter: "blur(18px)",
+      transition: {
+        default: createWindowSpring({
+          damping: 26,
+          stiffness: 640,
+          mass: 0.68,
+        }),
+        opacity: createWindowSpring({ damping: 24, stiffness: 560, mass: 0.6 }),
+        filter: createWindowSpring({ damping: 30, stiffness: 520, mass: 0.62 }),
+      },
     },
-  },
-  minimized: {
-    ...MINIMIZED_SIGNATURE,
-    y: 34,
-    transition: {
-      default: createWindowSpring({ stiffness: 720, damping: 40, mass: 0.58 }),
+    minimizing: {
+      x: minimizeVector.x,
+      y: minimizeVector.y,
+      scaleX: MINIMIZED_SIGNATURE.scaleX,
+      scaleY: MINIMIZED_SIGNATURE.scaleY,
+      opacity: MINIMIZED_SIGNATURE.opacity,
+      rotateX: MINIMIZED_SIGNATURE.rotateX,
+      filter: MINIMIZED_SIGNATURE.filter,
+      transition: minimizeTransition,
     },
-  },
-};
+    restoring: {
+      x: 0,
+      y: 0,
+      scaleX: 1,
+      scaleY: 1,
+      opacity: 1,
+      rotateX: 0,
+      filter: "blur(0px)",
+      transition: restoreTransition,
+    },
+    minimized: {
+      x: minimizeVector.x,
+      y: minimizeVector.y,
+      ...MINIMIZED_SIGNATURE,
+      transition: minimizedTransition,
+    },
+  } satisfies Variants;
+}
 
 export function WindowView({
   win,
@@ -146,6 +189,30 @@ export function WindowView({
   };
 
   const dockOrigin = getDockOrigin();
+  const dockHeight = dockRect?.height ?? 56;
+  const minimizeVector = useMemo(() => {
+    const windowCenterX = win.bounds.x + win.bounds.w / 2;
+    const windowCenterY = win.bounds.y + win.bounds.h / 2;
+    const targetY = dockOrigin.y - dockHeight * 0.28;
+    return {
+      x: dockOrigin.x - windowCenterX,
+      y: targetY - windowCenterY,
+    };
+  }, [
+    dockHeight,
+    dockOrigin.x,
+    dockOrigin.y,
+    win.bounds.x,
+    win.bounds.y,
+    win.bounds.w,
+    win.bounds.h,
+  ]);
+
+  const viewTransitionActive = isWindowTransitionActive(win.id);
+  const variants = useMemo(
+    () => createWindowVariants(minimizeVector, viewTransitionActive),
+    [minimizeVector, viewTransitionActive],
+  );
 
   const getAnimationVariant = (): AnimationVariant => {
     const animState = win.animationState ?? "idle";
@@ -170,11 +237,19 @@ export function WindowView({
       setAnimationState(win.id, "idle");
     }
 
-    if (variant === "minimizing" && win.animationState === "minimizing") {
+    if (
+      variant === "minimizing" &&
+      win.animationState === "minimizing" &&
+      !viewTransitionActive
+    ) {
       setAnimationState(win.id, "idle");
     }
 
-    if (variant === "restoring" && win.animationState === "restoring") {
+    if (
+      variant === "restoring" &&
+      win.animationState === "restoring" &&
+      !viewTransitionActive
+    ) {
       setAnimationState(win.id, "idle");
     }
   };
@@ -224,7 +299,9 @@ export function WindowView({
         initial={win.animationState === "opening" ? "spawn" : false}
         animate={currentVariant}
         aria-hidden={isDormant}
-        variants={WINDOW_VARIANTS}
+        variants={variants}
+        data-win-id={win.id}
+        data-app-id={win.appId}
         onAnimationComplete={handleAnimationComplete}
         onPointerDown={() => focusWin(win.id)}
       >
