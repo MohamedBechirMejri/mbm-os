@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, type Variants } from "motion/react";
+import { motion, type Transition, type Variants } from "motion/react";
 import type React from "react";
 import { useRef } from "react";
 import { focusWin, setAnimationState, setWinState } from "../../api";
@@ -13,6 +13,7 @@ import { WindowResizeHandles } from "./window-resize-handles";
 import { WindowTitlebar } from "./window-titlebar";
 
 type AnimationVariant =
+  | "spawn"
   | "idle"
   | "entering"
   | "closing"
@@ -28,7 +29,25 @@ const MINIMIZED_SIGNATURE = {
   filter: "blur(18px)",
 } as const;
 
+const createWindowSpring = (overrides?: Partial<Transition>): Transition => ({
+  type: "spring",
+  mass: 0.82,
+  stiffness: 540,
+  damping: 32,
+  restDelta: 0.001,
+  restSpeed: 0.001,
+  ...overrides,
+});
+
 const WINDOW_VARIANTS: Variants = {
+  spawn: {
+    scaleX: 0.84,
+    scaleY: 0.8,
+    y: 28,
+    opacity: 0,
+    rotateX: 12,
+    filter: "blur(16px)",
+  },
   idle: {
     scaleX: 1,
     scaleY: 1,
@@ -38,73 +57,61 @@ const WINDOW_VARIANTS: Variants = {
     filter: "blur(0px)",
   },
   entering: {
-    scaleX: [0.82, 1.06, 0.98, 1],
-    scaleY: [0.78, 1.02, 0.99, 1],
-    y: [26, -10, 3, 0],
-    opacity: [0, 0.86, 1, 1],
-    rotateX: [10, 0, -2, 0],
-    filter: ["blur(20px)", "blur(6px)", "blur(1px)", "blur(0px)"],
+    scaleX: 1,
+    scaleY: 1,
+    y: 0,
+    opacity: 1,
+    rotateX: 0,
+    filter: "blur(0px)",
     transition: {
-      duration: 0.52,
-      ease: [0.16, 1, 0.3, 1],
-      times: [0, 0.45, 0.75, 1],
+      default: createWindowSpring({ bounce: 0.24 }),
+      opacity: createWindowSpring({ damping: 40, stiffness: 480 }),
+      filter: createWindowSpring({ damping: 46, stiffness: 420 }),
     },
   },
   closing: {
-    scaleX: [1, 0.96, 0.9, 0.78, 0.68],
-    scaleY: [1, 0.94, 0.88, 0.78, 0.68],
-    y: [0, -4, -10, -18, -26],
-    opacity: [1, 0.88, 0.6, 0.32, 0],
-    rotateX: [0, -4, -8, -12, -16],
-    filter: ["blur(0px)", "blur(4px)", "blur(9px)", "blur(14px)", "blur(22px)"],
+    scaleX: 0.78,
+    scaleY: 0.72,
+    y: -24,
+    opacity: 0,
+    rotateX: -12,
+    filter: "blur(18px)",
     transition: {
-      duration: 0.42,
-      ease: [0.4, 0.1, 0.7, 0],
-      times: [0, 0.35, 0.6, 0.82, 1],
+      default: createWindowSpring({ damping: 26, stiffness: 640, mass: 0.68 }),
+      opacity: createWindowSpring({ damping: 24, stiffness: 560, mass: 0.6 }),
+      filter: createWindowSpring({ damping: 30, stiffness: 520, mass: 0.62 }),
     },
   },
   minimizing: {
-    scaleX: [1, 0.92, 0.7, MINIMIZED_SIGNATURE.scaleX],
-    scaleY: [1, 0.86, 0.42, MINIMIZED_SIGNATURE.scaleY],
-    y: [0, 10, 26, 36],
-    opacity: [1, 1, 0.74, MINIMIZED_SIGNATURE.opacity],
-    rotateX: [0, 8, 12, MINIMIZED_SIGNATURE.rotateX],
-    filter: [
-      "blur(0px)",
-      "blur(4px)",
-      "blur(12px)",
-      MINIMIZED_SIGNATURE.filter,
-    ],
+    scaleX: MINIMIZED_SIGNATURE.scaleX,
+    scaleY: MINIMIZED_SIGNATURE.scaleY,
+    y: 34,
+    opacity: MINIMIZED_SIGNATURE.opacity,
+    rotateX: MINIMIZED_SIGNATURE.rotateX,
+    filter: MINIMIZED_SIGNATURE.filter,
     transition: {
-      duration: 0.48,
-      ease: [0.3, 0.7, 0.4, 1],
-      times: [0, 0.32, 0.64, 1],
+      default: createWindowSpring({ stiffness: 620, damping: 34, mass: 0.74 }),
+      filter: createWindowSpring({ stiffness: 520, damping: 38, mass: 0.8 }),
     },
   },
   restoring: {
-    scaleX: [MINIMIZED_SIGNATURE.scaleX, 0.74, 1.04, 1],
-    scaleY: [MINIMIZED_SIGNATURE.scaleY, 0.46, 1.02, 1],
-    y: [34, 8, -2, 0],
-    opacity: [0, 0.72, 1, 1],
-    rotateX: [MINIMIZED_SIGNATURE.rotateX, 10, 0, 0],
-    filter: [
-      MINIMIZED_SIGNATURE.filter,
-      "blur(10px)",
-      "blur(2px)",
-      "blur(0px)",
-    ],
+    scaleX: 1,
+    scaleY: 1,
+    y: 0,
+    opacity: 1,
+    rotateX: 0,
+    filter: "blur(0px)",
     transition: {
-      duration: 0.5,
-      ease: [0.18, 0.9, 0.2, 1],
-      times: [0, 0.38, 0.72, 1],
+      default: createWindowSpring({ bounce: 0.2, stiffness: 560, damping: 30 }),
+      opacity: createWindowSpring({ damping: 38, stiffness: 460 }),
+      filter: createWindowSpring({ damping: 44, stiffness: 420 }),
     },
   },
   minimized: {
     ...MINIMIZED_SIGNATURE,
-    y: 36,
+    y: 34,
     transition: {
-      duration: 0.18,
-      ease: [0.33, 1, 0.68, 1],
+      default: createWindowSpring({ stiffness: 720, damping: 40, mass: 0.58 }),
     },
   },
 };
@@ -214,7 +221,7 @@ export function WindowView({
           pointerEvents: isDormant ? "none" : "auto",
           transformStyle: "preserve-3d",
         }}
-        initial={false}
+        initial={win.animationState === "opening" ? "spawn" : false}
         animate={currentVariant}
         aria-hidden={isDormant}
         variants={WINDOW_VARIANTS}
