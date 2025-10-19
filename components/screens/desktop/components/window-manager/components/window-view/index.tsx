@@ -25,7 +25,7 @@ export function WindowView({
   const meta = useDesktop((s) => s.apps[win.appId]);
   const dockRect = useDesktop((s) => s.dockByAppRect[win.appId]);
   const isResizable = meta?.resizable ?? true;
-  
+
   const [isVisible, setIsVisible] = useState(win.state !== "minimized");
 
   // Get dock icon position for animations
@@ -52,7 +52,7 @@ export function WindowView({
   // Handle animation state changes
   useEffect(() => {
     const animState = win.animationState || "idle";
-    
+
     if (animState === "opening") {
       setIsVisible(true);
       // Reset to idle after animation
@@ -137,16 +137,18 @@ export function WindowView({
           top: { type: "spring", stiffness: 400, damping: 35 },
           width: { type: "spring", stiffness: 400, damping: 35 },
           height: { type: "spring", stiffness: 400, damping: 35 },
-          scale: getAnimationVariant() === "open" 
-            ? { duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }
-            : getAnimationVariant() === "closed"
-            ? { duration: 0.3, ease: [0.36, 0, 0.66, -0.56] }
-            : { type: "spring", stiffness: 300, damping: 30 },
-          opacity: getAnimationVariant() === "open" 
-            ? { duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }
-            : getAnimationVariant() === "closed"
-            ? { duration: 0.3, ease: [0.36, 0, 0.66, -0.56] }
-            : { type: "spring", stiffness: 300, damping: 30 },
+          scale:
+            getAnimationVariant() === "open"
+              ? { duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }
+              : getAnimationVariant() === "closed"
+                ? { duration: 0.3, ease: [0.36, 0, 0.66, -0.56] }
+                : { type: "spring", stiffness: 300, damping: 30 },
+          opacity:
+            getAnimationVariant() === "open"
+              ? { duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }
+              : getAnimationVariant() === "closed"
+                ? { duration: 0.3, ease: [0.36, 0, 0.66, -0.56] }
+                : { type: "spring", stiffness: 300, damping: 30 },
         }}
         onPointerDown={() => focusWin(win.id)}
       >

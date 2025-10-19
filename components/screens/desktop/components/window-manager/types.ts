@@ -22,11 +22,11 @@ export type WinState =
   | "fullscreen"
   | "hidden";
 
-export type AnimationState = 
-  | "idle" 
-  | "opening" 
-  | "closing" 
-  | "minimizing" 
+export type AnimationState =
+  | "idle"
+  | "opening"
+  | "closing"
+  | "minimizing"
   | "restoring";
 
 export type Snap =

@@ -155,7 +155,12 @@ export function setWinState(id: string, st: WinState) {
     };
   } else if (st === "minimized") {
     // Trigger minimizing animation
-    next = { ...next, state: st, snap: null, animationState: "minimizing" } as WinInstance;
+    next = {
+      ...next,
+      state: st,
+      snap: null,
+      animationState: "minimizing",
+    } as WinInstance;
   } else {
     // Other states (hidden) — pass through without changing bounds
     next = { ...next, state: st, snap: null } as WinInstance;
@@ -168,7 +173,7 @@ export function closeWin(id: string) {
   const s = store.get();
   const w = s.windows[id];
   if (!w) return;
-  
+
   // Set closing animation state first
   store.set((prev) => ({
     ...prev,
@@ -177,7 +182,7 @@ export function closeWin(id: string) {
       [id]: { ...w, animationState: "closing" },
     },
   }));
-  
+
   // Actually remove the window after animation completes
   setTimeout(() => {
     store.set((prev) => {
@@ -207,7 +212,7 @@ export function restoreFromMinimized(id: string) {
   const s = store.get();
   const w = s.windows[id];
   if (!w || w.state !== "minimized") return;
-  
+
   store.set((prev) => ({
     ...prev,
     windows: {
@@ -215,7 +220,7 @@ export function restoreFromMinimized(id: string) {
       [id]: { ...w, state: "normal", animationState: "restoring" },
     },
   }));
-  
+
   focusWin(id);
 }
 
