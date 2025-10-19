@@ -84,8 +84,12 @@ export function WindowView({
     setWinState(win.id, win.state === "maximized" ? "normal" : "maximized");
   };
 
-  // Don't render minimized windows when idle
-  if (win.state === "minimized" && win.animationState === "idle") {
+  // Don't render minimized windows unless they're animating
+  const isMinimized = win.state === "minimized";
+  const isAnimating =
+    win.animationState === "minimizing" || win.animationState === "restoring";
+
+  if (isMinimized && !isAnimating) {
     return null;
   }
 
