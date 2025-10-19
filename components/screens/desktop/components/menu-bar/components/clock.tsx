@@ -1,6 +1,6 @@
 "use client";
 
-import { type PointerEvent, useEffect, useState } from "react";
+import type { PointerEvent } from "react";
 import useCurrentTime from "../hooks/use-current-time";
 
 type ClockProps = {
@@ -57,8 +57,8 @@ export function Clock({ isActive, onToggle }: ClockProps) {
       {formatDate(date)
         .replace("  ", " ")
         .split(" ")
-        .map((x) => (
-          <div key={`date ${Math.random()}`} className="w-max">
+        .map((x, i) => (
+          <div key={`date-${i}-${x}`} className="w-max">
             {x}
           </div>
         ))}
