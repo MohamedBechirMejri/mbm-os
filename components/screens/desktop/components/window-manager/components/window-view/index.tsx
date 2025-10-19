@@ -79,6 +79,8 @@ export function WindowView({
     return "idle";
   };
 
+  const currentVariant = getAnimationVariant();
+
   const onTitleDoubleClick = () => {
     if (!isResizable) return;
     setWinState(win.id, win.state === "maximized" ? "normal" : "maximized");
@@ -92,6 +94,11 @@ export function WindowView({
   if (isMinimized && !isAnimating) {
     return null;
   }
+
+  // Log for debugging
+  console.log(
+    `Window ${win.id}: state=${win.state}, animState=${win.animationState}, variant=${currentVariant}`,
+  );
 
   return (
     <TitlebarPortalProvider value={titlebarMountRef}>
@@ -112,7 +119,7 @@ export function WindowView({
           transformOrigin: `${originX}px ${originY}px`,
         }}
         initial={false}
-        animate={getAnimationVariant()}
+        animate={currentVariant}
         variants={{
           idle: {
             scale: 1,
@@ -129,15 +136,15 @@ export function WindowView({
         }}
         transition={{
           scale:
-            getAnimationVariant() === "open"
+            currentVariant === "open"
               ? { duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }
-              : getAnimationVariant() === "closed"
+              : currentVariant === "closed"
                 ? { duration: 0.3, ease: [0.36, 0, 0.66, -0.56] }
                 : { type: "spring", stiffness: 300, damping: 30 },
           opacity:
-            getAnimationVariant() === "open"
+            currentVariant === "open"
               ? { duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }
-              : getAnimationVariant() === "closed"
+              : currentVariant === "closed"
                 ? { duration: 0.3, ease: [0.36, 0, 0.66, -0.56] }
                 : { type: "spring", stiffness: 300, damping: 30 },
         }}
