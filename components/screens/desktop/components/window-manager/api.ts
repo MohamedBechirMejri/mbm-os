@@ -195,7 +195,7 @@ export function closeWin(id: string) {
         activeId: prev.activeId === id ? null : prev.activeId,
       };
     });
-  }, 300); // Match animation duration
+  }, 420); // Mirror the closing animation length
 }
 
 export function setAnimationState(id: string, animState: AnimationState) {
