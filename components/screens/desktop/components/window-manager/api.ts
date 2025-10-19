@@ -2,6 +2,7 @@
 
 import { getDesktop, store } from "./store";
 import type {
+  AnimationState,
   AppId,
   AppMeta,
   Bounds,
@@ -63,6 +64,7 @@ export function launch(appId: AppId, init?: Partial<WinInstance>): string {
     z,
     focused: true,
     createdAt: now,
+    animationState: "opening",
   };
   store.set((prev) => ({
     ...prev,
@@ -151,8 +153,11 @@ export function setWinState(id: string, st: WinState) {
       },
       restoreBounds: null,
     };
+  } else if (st === "minimized") {
+    // Trigger minimizing animation
+    next = { ...next, state: st, snap: null, animationState: "minimizing" } as WinInstance;
   } else {
-    // Other states (minimized/hidden) — pass through without changing bounds
+    // Other states (hidden) — pass through without changing bounds
     next = { ...next, state: st, snap: null } as WinInstance;
   }
 
@@ -160,15 +165,58 @@ export function setWinState(id: string, st: WinState) {
 }
 
 export function closeWin(id: string) {
+  const s = store.get();
+  const w = s.windows[id];
+  if (!w) return;
+  
+  // Set closing animation state first
+  store.set((prev) => ({
+    ...prev,
+    windows: {
+      ...prev.windows,
+      [id]: { ...w, animationState: "closing" },
+    },
+  }));
+  
+  // Actually remove the window after animation completes
+  setTimeout(() => {
+    store.set((prev) => {
+      const { [id]: _dead, ...rest } = prev.windows;
+      return {
+        ...prev,
+        windows: rest,
+        order: prev.order.filter((x) => x !== id),
+        activeId: prev.activeId === id ? null : prev.activeId,
+      };
+    });
+  }, 300); // Match animation duration
+}
+
+export function setAnimationState(id: string, animState: AnimationState) {
   store.set((prev) => {
-    const { [id]: _dead, ...rest } = prev.windows;
+    const w = prev.windows[id];
+    if (!w) return prev;
     return {
       ...prev,
-      windows: rest,
-      order: prev.order.filter((x) => x !== id),
-      activeId: prev.activeId === id ? null : prev.activeId,
+      windows: { ...prev.windows, [id]: { ...w, animationState: animState } },
     };
   });
+}
+
+export function restoreFromMinimized(id: string) {
+  const s = store.get();
+  const w = s.windows[id];
+  if (!w || w.state !== "minimized") return;
+  
+  store.set((prev) => ({
+    ...prev,
+    windows: {
+      ...prev.windows,
+      [id]: { ...w, state: "normal", animationState: "restoring" },
+    },
+  }));
+  
+  focusWin(id);
 }
 
 export function moveWin(id: string, to: Partial<Bounds>) {
@@ -240,4 +288,6 @@ export const DesktopAPI = {
   move: moveWin,
   snapTo,
   unsnap,
+  setAnimationState,
+  restoreFromMinimized,
 };

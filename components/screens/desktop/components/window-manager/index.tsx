@@ -8,6 +8,8 @@ export {
   moveWin,
   registerApps,
   registerDockAppRect,
+  restoreFromMinimized,
+  setAnimationState,
   setWinState,
   snapTo,
   unsnap,

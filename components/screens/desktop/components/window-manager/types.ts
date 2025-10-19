@@ -22,6 +22,13 @@ export type WinState =
   | "fullscreen"
   | "hidden";
 
+export type AnimationState = 
+  | "idle" 
+  | "opening" 
+  | "closing" 
+  | "minimizing" 
+  | "restoring";
+
 export type Snap =
   | null
   | "left-half"
@@ -52,6 +59,7 @@ export interface WinInstance {
   z: number;
   focused: boolean;
   createdAt: number;
+  animationState?: AnimationState;
 }
 
 export interface DesktopState {

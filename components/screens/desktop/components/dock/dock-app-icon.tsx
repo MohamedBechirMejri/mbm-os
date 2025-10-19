@@ -67,16 +67,26 @@ export function DockAppIcon({
       }
       DesktopAPI.launch(app.id);
     } else {
-      onClick();
+      // If there's a minimized window, restore it instead of launching a new one
+      const minimizedWindow = windows.find((w) => w.state === "minimized");
+      if (minimizedWindow) {
+        DesktopAPI.restoreFromMinimized(minimizedWindow.id);
+      } else {
+        onClick();
+      }
     }
     setShowMenu(false);
   };
 
   const handleWindowClick = (windowId: string, state: string) => {
-    if (state === "minimized" || state === "hidden") {
+    if (state === "minimized") {
+      DesktopAPI.restoreFromMinimized(windowId);
+    } else if (state === "hidden") {
       DesktopAPI.setState(windowId, "normal");
+      DesktopAPI.focus(windowId);
+    } else {
+      DesktopAPI.focus(windowId);
     }
-    DesktopAPI.focus(windowId);
     setShowMenu(false);
   };
 
