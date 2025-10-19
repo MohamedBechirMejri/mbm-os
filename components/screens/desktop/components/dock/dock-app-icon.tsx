@@ -138,15 +138,15 @@ export function DockAppIcon({
             <GlassSurface
               width="auto"
               height="auto"
-              blur={1}
-              borderRadius={16}
-              backgroundOpacity={0.15}
-              className="shadow-2xl"
-              containerClassName="!p-1.5"
+              blur={2.5}
+              borderRadius={14}
+              backgroundOpacity={0.45}
+              className="shadow-2xl ring-1 ring-white/20"
+              containerClassName="!p-1"
             >
               <div className="flex flex-col gap-0.5 w-full">
                 {windows.length > 1 && (
-                  <div className="px-3 py-1.5 text-xs text-white/70 font-medium tracking-wide">
+                  <div className="px-3 py-2 text-xs text-white/80 font-semibold tracking-wide uppercase">
                     {app.title} • {windows.length} windows
                   </div>
                 )}
@@ -157,33 +157,33 @@ export function DockAppIcon({
                         key={win.id}
                         type="button"
                         onClick={() => handleWindowClick(win.id, win.state)}
-                        className="w-full px-3 py-2 text-left text-sm text-white/95 hover:bg-white/15 active:bg-white/20 rounded-lg transition-all flex items-center justify-between gap-2"
+                        className="w-full px-3 py-2 text-left text-sm text-white hover:bg-white/20 active:bg-white/25 rounded-[10px] transition-all flex items-center justify-between gap-3"
                       >
-                        <span className="truncate flex-1 font-medium">
+                        <span className="truncate flex-1 font-medium drop-shadow-sm">
                           {win.title || `${app.title} ${idx + 1}`}
                         </span>
                         {win.id === activeId && win.state !== "minimized" && (
-                          <div className="w-1.5 h-1.5 rounded-full bg-blue-400/90 flex-shrink-0 shadow-sm" />
+                          <div className="w-1.5 h-1.5 rounded-full bg-blue-400 flex-shrink-0 shadow-[0_0_8px_rgba(96,165,250,0.6)]" />
                         )}
                         {win.state === "minimized" && (
-                          <span className="text-xs text-white/50 flex-shrink-0 font-normal">
+                          <span className="text-xs text-white/60 flex-shrink-0 font-medium drop-shadow-sm">
                             minimized
                           </span>
                         )}
                       </button>
                     ))}
-                    <div className="h-[0.5px] bg-white/15 my-0.5 mx-2" />
+                    <div className="h-px bg-white/25 my-1 mx-2" />
                   </>
                 )}
                 <button
                   type="button"
                   onClick={handleNewWindow}
-                  className="w-full px-3 py-2 text-left text-sm text-white/95 hover:bg-white/15 active:bg-white/20 rounded-lg transition-all flex items-center justify-between gap-2"
+                  className="w-full px-3 py-2 text-left text-sm text-white hover:bg-white/20 active:bg-white/25 rounded-[10px] transition-all flex items-center justify-between gap-3"
                 >
-                  <span className="truncate flex-1 font-medium">
+                  <span className="truncate flex-1 font-medium drop-shadow-sm">
                     New Window
                   </span>
-                  <span className="text-xs text-white/50 flex-shrink-0 font-normal">
+                  <span className="text-xs text-white/60 flex-shrink-0 font-medium drop-shadow-sm">
                     ⌥ Click
                   </span>
                 </button>
@@ -191,10 +191,12 @@ export function DockAppIcon({
                   <button
                     type="button"
                     onClick={handleQuit}
-                    className="w-full px-3 py-2 text-left text-sm text-white/95 hover:bg-white/15 active:bg-white/20 rounded-lg transition-all flex items-center justify-between gap-2"
+                    className="w-full px-3 py-2 text-left text-sm text-white hover:bg-white/20 active:bg-white/25 rounded-[10px] transition-all flex items-center justify-between gap-3"
                   >
-                    <span className="truncate flex-1 font-medium">Quit</span>
-                    <span className="text-xs text-white/50 flex-shrink-0 font-normal">
+                    <span className="truncate flex-1 font-medium drop-shadow-sm">
+                      Quit
+                    </span>
+                    <span className="text-xs text-white/60 flex-shrink-0 font-medium drop-shadow-sm">
                       ⌘Q
                     </span>
                   </button>
