@@ -83,23 +83,25 @@ export default function Desktop() {
         onClose={() => setIsLaunchpadOpen(false)}
         apps={catalogApps}
       />
-      <LaunchpadTrigger
-        onClick={() => setIsLaunchpadOpen(!isLaunchpadOpen)}
-        isOpen={isLaunchpadOpen}
-      />
-      <Dock className="mb-2 select-none w-max relative z-[9999]">
-        {dockApps.map((app) => (
-          <DockAppIcon
-            key={app.id}
-            app={app}
-            windows={getAppWindows(app.id)}
-            activeId={activeId}
-            onClick={() => handleDockClick(app.id)}
-            anyMenuOpen={anyMenuOpen}
-            setAnyMenuOpen={setAnyMenuOpen}
-          />
-        ))}
-      </Dock>
+      <div className="flex items-center justify-center gap-2 mb-2">
+        <LaunchpadTrigger
+          onClick={() => setIsLaunchpadOpen(!isLaunchpadOpen)}
+          isOpen={isLaunchpadOpen}
+        />
+        <Dock className="select-none w-max relative z-[9999]">
+          {dockApps.map((app) => (
+            <DockAppIcon
+              key={app.id}
+              app={app}
+              windows={getAppWindows(app.id)}
+              activeId={activeId}
+              onClick={() => handleDockClick(app.id)}
+              anyMenuOpen={anyMenuOpen}
+              setAnyMenuOpen={setAnyMenuOpen}
+            />
+          ))}
+        </Dock>
+      </div>
     </div>
   );
 }

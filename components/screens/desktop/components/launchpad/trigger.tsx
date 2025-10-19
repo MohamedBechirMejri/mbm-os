@@ -1,6 +1,7 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useMotionValue } from "motion/react";
+import GlassSurface from "@/components/ui/glass-surface";
 
 interface LaunchpadTriggerProps {
   onClick: () => void;
@@ -8,142 +9,101 @@ interface LaunchpadTriggerProps {
 }
 
 export function LaunchpadTrigger({ onClick, isOpen }: LaunchpadTriggerProps) {
+  const mouseX = useMotionValue(Infinity);
+
   return (
-    <motion.button
-      type="button"
-      onClick={onClick}
-      className="fixed bottom-3 right-3 z-[9998] rounded-[18px] overflow-hidden shadow-2xl cursor-pointer select-none"
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-      animate={{
-        rotate: isOpen ? 45 : 0,
-      }}
-      transition={{
-        type: "spring",
-        stiffness: 300,
-        damping: 20,
-      }}
+    <motion.div
+      onMouseMove={(e) => mouseX.set(e.pageX)}
+      onMouseLeave={() => mouseX.set(Infinity)}
+      className="mx-auto mt-8 flex min-h-[58px] w-max items-center justify-center gap-2 rounded-2xl relative select-none"
     >
-      <motion.div
-        className="relative w-16 h-16 bg-gradient-to-br from-slate-400/40 to-slate-600/40 backdrop-blur-xl border border-white/20"
-        style={{
-          boxShadow:
-            "0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)",
-        }}
+      <GlassSurface
+        width={"max-content"}
+        height={64}
+        borderRadius={24}
+        className="!overflow-visible cursor-pointer"
+        containerClassName="gap-2 px-3 py-2 !items-center"
       >
-        <div className="absolute inset-0 flex items-center justify-center">
-          <svg
-            width="36"
-            height="36"
-            viewBox="0 0 36 36"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="drop-shadow-lg"
-            aria-label="Launchpad"
+        <motion.button
+          type="button"
+          onClick={onClick}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="relative flex items-center justify-center rounded-full aspect-square"
+          style={{ width: 40, height: 40, padding: 6 }}
+        >
+          <motion.div
+            className="w-full h-full flex items-center justify-center"
+            animate={{
+              rotate: isOpen ? 45 : 0,
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 300,
+              damping: 20,
+            }}
           >
-            <title>Launchpad</title>
-            <motion.g
-              animate={{
-                opacity: isOpen ? 0.8 : 0.95,
-              }}
-              transition={{ duration: 0.2 }}
+            <svg
+              width="28"
+              height="28"
+              viewBox="0 0 28 28"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="drop-shadow-sm"
+              aria-label="Launchpad"
             >
-              {/* Grid of 9 squares (3x3) with better spacing */}
-              <motion.rect
-                x="5"
-                y="5"
-                width="7"
-                height="7"
-                rx="1.5"
-                fill="white"
-                whileHover={{ scale: 1.1 }}
-              />
-              <motion.rect
-                x="14.5"
-                y="5"
-                width="7"
-                height="7"
-                rx="1.5"
-                fill="white"
-                whileHover={{ scale: 1.1 }}
-              />
-              <motion.rect
-                x="24"
-                y="5"
-                width="7"
-                height="7"
-                rx="1.5"
-                fill="white"
-                whileHover={{ scale: 1.1 }}
-              />
+              <title>Launchpad</title>
+              <motion.g
+                animate={{
+                  opacity: isOpen ? 0.7 : 0.9,
+                }}
+                transition={{ duration: 0.2 }}
+              >
+                {/* Grid of 9 squares (3x3) matching dock icon style */}
+                <rect x="3" y="3" width="6" height="6" rx="1.5" fill="white" />
+                <rect x="11" y="3" width="6" height="6" rx="1.5" fill="white" />
+                <rect x="19" y="3" width="6" height="6" rx="1.5" fill="white" />
 
-              <motion.rect
-                x="5"
-                y="14.5"
-                width="7"
-                height="7"
-                rx="1.5"
-                fill="white"
-                whileHover={{ scale: 1.1 }}
-              />
-              <motion.rect
-                x="14.5"
-                y="14.5"
-                width="7"
-                height="7"
-                rx="1.5"
-                fill="white"
-                whileHover={{ scale: 1.1 }}
-              />
-              <motion.rect
-                x="24"
-                y="14.5"
-                width="7"
-                height="7"
-                rx="1.5"
-                fill="white"
-                whileHover={{ scale: 1.1 }}
-              />
+                <rect x="3" y="11" width="6" height="6" rx="1.5" fill="white" />
+                <rect
+                  x="11"
+                  y="11"
+                  width="6"
+                  height="6"
+                  rx="1.5"
+                  fill="white"
+                />
+                <rect
+                  x="19"
+                  y="11"
+                  width="6"
+                  height="6"
+                  rx="1.5"
+                  fill="white"
+                />
 
-              <motion.rect
-                x="5"
-                y="24"
-                width="7"
-                height="7"
-                rx="1.5"
-                fill="white"
-                whileHover={{ scale: 1.1 }}
-              />
-              <motion.rect
-                x="14.5"
-                y="24"
-                width="7"
-                height="7"
-                rx="1.5"
-                fill="white"
-                whileHover={{ scale: 1.1 }}
-              />
-              <motion.rect
-                x="24"
-                y="24"
-                width="7"
-                height="7"
-                rx="1.5"
-                fill="white"
-                whileHover={{ scale: 1.1 }}
-              />
-            </motion.g>
-          </svg>
-        </div>
-
-        {/* Subtle glow effect */}
-        <motion.div
-          className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none"
-          animate={{
-            opacity: isOpen ? 0.3 : 0.5,
-          }}
-        />
-      </motion.div>
-    </motion.button>
+                <rect x="3" y="19" width="6" height="6" rx="1.5" fill="white" />
+                <rect
+                  x="11"
+                  y="19"
+                  width="6"
+                  height="6"
+                  rx="1.5"
+                  fill="white"
+                />
+                <rect
+                  x="19"
+                  y="19"
+                  width="6"
+                  height="6"
+                  rx="1.5"
+                  fill="white"
+                />
+              </motion.g>
+            </svg>
+          </motion.div>
+        </motion.button>
+      </GlassSurface>
+    </motion.div>
   );
 }
