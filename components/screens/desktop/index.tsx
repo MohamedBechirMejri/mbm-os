@@ -1,10 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { AppRegistry, preinstalledApps } from "./components/apps/app-registry";
+import {
+  AppRegistry,
+  catalogApps,
+  preinstalledApps,
+} from "./components/apps/app-registry";
 import { BrightnessOverlay } from "./components/brightness-overlay";
 import { Dock } from "./components/dock";
 import { DockAppIcon } from "./components/dock/dock-app-icon";
+import { LaunchpadDockIcon } from "./components/dock/launchpad-dock-icon";
+import { Launchpad } from "./components/launchpad";
 import MenuBar from "./components/menu-bar";
 import {
   DesktopAPI,
@@ -17,6 +23,7 @@ export default function Desktop() {
   const windows = useDesktop((s) => s.windows);
   const activeId = useDesktop((s) => s.activeId);
   const [anyMenuOpen, setAnyMenuOpen] = useState(false);
+  const [isLaunchpadOpen, setIsLaunchpadOpen] = useState(false);
 
   const dockApps = installed.length > 0 ? installed : preinstalledApps;
 
@@ -71,6 +78,11 @@ export default function Desktop() {
         <WindowManagerRoot />
         <AppRegistry />
       </div>
+      <Launchpad
+        isOpen={isLaunchpadOpen}
+        onClose={() => setIsLaunchpadOpen(false)}
+        apps={catalogApps}
+      />
       <Dock className="mb-2 select-none w-max relative z-[9999]">
         {dockApps.map((app) => (
           <DockAppIcon
@@ -83,6 +95,11 @@ export default function Desktop() {
             setAnyMenuOpen={setAnyMenuOpen}
           />
         ))}
+        <div className="h-8 w-px bg-white/20 mx-1" />
+        <LaunchpadDockIcon
+          onClick={() => setIsLaunchpadOpen(!isLaunchpadOpen)}
+          anyMenuOpen={anyMenuOpen}
+        />
       </Dock>
     </div>
   );
