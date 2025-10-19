@@ -77,17 +77,18 @@ export function launch(appId: AppId, init?: Partial<WinInstance>): string {
 }
 
 export function focusWin(id: string) {
-  const s = store.get();
-  const w = s.windows[id];
-  if (!w) return;
-  const z = s.zCounter + 1;
-  store.set((prev) => ({
-    ...prev,
-    zCounter: z,
-    windows: { ...prev.windows, [id]: { ...w, z, focused: true } },
-    order: [id, ...prev.order.filter((x) => x !== id)],
-    activeId: id,
-  }));
+  store.set((prev) => {
+    const w = prev.windows[id];
+    if (!w) return prev;
+    const z = prev.zCounter + 1;
+    return {
+      ...prev,
+      zCounter: z,
+      windows: { ...prev.windows, [id]: { ...w, z, focused: true } },
+      order: [id, ...prev.order.filter((x) => x !== id)],
+      activeId: id,
+    };
+  });
 }
 
 export function setWinState(id: string, st: WinState) {
