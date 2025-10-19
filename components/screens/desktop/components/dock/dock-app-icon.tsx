@@ -119,7 +119,7 @@ export function DockAppIcon({
         )}
         {isRunning && (
           <div
-            className={`absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-full shadow-lg ${hasFocusedWindow ? "h-1.5 w-3 bg-sky-400/90" : "h-1.5 w-1.5 bg-white/80"}`}
+            className={`absolute bottom-1 left-1/2 -translate-x-1/2 rounded-full shadow-lg ${hasFocusedWindow ? "h-1.5 w-3 bg-sky-400/90" : "h-1.5 w-1.5 bg-white/80"}`}
           />
         )}
       </DockIcon>
