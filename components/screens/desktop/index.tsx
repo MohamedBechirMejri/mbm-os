@@ -10,7 +10,7 @@ import { BrightnessOverlay } from "./components/brightness-overlay";
 import { Dock } from "./components/dock";
 import { DockAppIcon } from "./components/dock/dock-app-icon";
 import { Launchpad } from "./components/launchpad";
-import { LaunchpadTrigger } from "./components/launchpad/trigger";
+// import { LaunchpadTrigger } from "./components/launchpad/trigger";
 import MenuBar from "./components/menu-bar";
 import {
   DesktopAPI,
@@ -84,10 +84,11 @@ export default function Desktop() {
         apps={catalogApps}
       />
       <div className="flex items-center justify-center gap-2 mb-2">
-        <LaunchpadTrigger
+        {/* <LaunchpadTrigger
           onClick={() => setIsLaunchpadOpen(!isLaunchpadOpen)}
           isOpen={isLaunchpadOpen}
-        />
+        /> */}
+        <div className="mx-auto mr-0"></div>
         <Dock className="select-none w-max relative z-[9999]">
           {dockApps.map((app) => (
             <DockAppIcon
