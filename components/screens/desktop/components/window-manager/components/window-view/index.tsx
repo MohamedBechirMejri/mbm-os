@@ -8,6 +8,7 @@ import { useWindowDrag, useWindowResize } from "../../hooks";
 import { useDesktop } from "../../store";
 import type { WinInstance } from "../../types";
 import { isWindowTransitionActive } from "../../view-transitions";
+import { createGenieProfile, type GenieProfile } from "./genie";
 import { TitlebarPortalProvider } from "./titlebar-portal";
 import { WindowContent } from "./window-content";
 import { WindowResizeHandles } from "./window-resize-handles";
@@ -42,42 +43,77 @@ const createWindowSpring = (overrides?: Partial<Transition>): Transition => ({
 
 const ZERO_TWEEN: Transition = { type: "tween", duration: 0.0001 };
 
+const easeOutQuad = (t: number) => 1 - (1 - t) * (1 - t);
+const linearEase = (t: number) => t;
+
 function createWindowVariants(
   minimizeVector: { x: number; y: number },
   vtActive: boolean,
+  genie: GenieProfile,
 ): Variants {
-  const minimizeTransition = vtActive
-    ? { default: ZERO_TWEEN, filter: ZERO_TWEEN }
-    : {
-        default: createWindowSpring({
-          stiffness: 380,
-          damping: 28,
-          mass: 0.95,
-        }),
-        filter: createWindowSpring({ stiffness: 320, damping: 30, mass: 1.0 }),
-      };
+  const minimizeTransition = (
+    vtActive
+      ? { default: ZERO_TWEEN, filter: ZERO_TWEEN, clipPath: ZERO_TWEEN }
+      : {
+          default: {
+            type: "tween",
+            duration: genie.duration,
+            ease: genie.ease,
+          },
+          filter: {
+            duration: genie.duration * 0.8,
+            ease: easeOutQuad,
+          },
+          clipPath: {
+            duration: genie.duration,
+            ease: linearEase,
+            times: genie.minimize.times,
+          },
+        }
+  ) as Transition;
 
-  const restoreTransition = vtActive
-    ? { default: ZERO_TWEEN, opacity: ZERO_TWEEN, filter: ZERO_TWEEN }
-    : {
-        default: createWindowSpring({
-          bounce: 0.18,
-          stiffness: 420,
-          damping: 28,
-        }),
-        opacity: createWindowSpring({ damping: 32, stiffness: 380 }),
-        filter: createWindowSpring({ damping: 36, stiffness: 350 }),
-      };
+  const restoreTransition = (
+    vtActive
+      ? {
+          default: ZERO_TWEEN,
+          opacity: ZERO_TWEEN,
+          filter: ZERO_TWEEN,
+          clipPath: ZERO_TWEEN,
+        }
+      : {
+          default: {
+            type: "tween",
+            duration: genie.duration * 0.86,
+            ease: genie.ease,
+          },
+          opacity: {
+            duration: genie.duration * 0.7,
+            ease: [0.2, 0.7, 0.3, 1],
+          },
+          filter: {
+            duration: genie.duration * 0.74,
+            ease: easeOutQuad,
+          },
+          clipPath: {
+            duration: genie.duration,
+            ease: linearEase,
+            times: genie.restore.times,
+          },
+        }
+  ) as Transition;
 
-  const minimizedTransition = vtActive
-    ? { default: ZERO_TWEEN }
-    : {
-        default: createWindowSpring({
-          stiffness: 720,
-          damping: 40,
-          mass: 0.58,
-        }),
-      };
+  const minimizedTransition = (
+    vtActive
+      ? { default: ZERO_TWEEN, clipPath: ZERO_TWEEN }
+      : {
+          default: createWindowSpring({
+            stiffness: 720,
+            damping: 40,
+            mass: 0.58,
+          }),
+          clipPath: { duration: 0.16, ease: easeOutQuad },
+        }
+  ) as Transition;
 
   return {
     spawn: {
@@ -88,6 +124,7 @@ function createWindowVariants(
       opacity: 0,
       rotateX: 12,
       filter: "blur(16px)",
+      clipPath: genie.idleClip,
     },
     idle: {
       x: 0,
@@ -97,6 +134,7 @@ function createWindowVariants(
       opacity: 1,
       rotateX: 0,
       filter: "blur(0px)",
+      clipPath: genie.idleClip,
     },
     entering: {
       x: 0,
@@ -106,6 +144,7 @@ function createWindowVariants(
       opacity: 1,
       rotateX: 0,
       filter: "blur(0px)",
+      clipPath: genie.idleClip,
       transition: {
         default: createWindowSpring({ bounce: 0.24 }),
         opacity: createWindowSpring({ damping: 40, stiffness: 480 }),
@@ -120,6 +159,7 @@ function createWindowVariants(
       opacity: 0,
       rotateX: -12,
       filter: "blur(18px)",
+      clipPath: genie.idleClip,
       transition: {
         default: createWindowSpring({
           damping: 26,
@@ -138,6 +178,7 @@ function createWindowVariants(
       opacity: MINIMIZED_SIGNATURE.opacity,
       rotateX: MINIMIZED_SIGNATURE.rotateX,
       filter: MINIMIZED_SIGNATURE.filter,
+      clipPath: vtActive ? genie.idleClip : genie.minimize.frames,
       transition: minimizeTransition,
     },
     restoring: {
@@ -148,12 +189,14 @@ function createWindowVariants(
       opacity: 1,
       rotateX: 0,
       filter: "blur(0px)",
+      clipPath: vtActive ? genie.idleClip : genie.restore.frames,
       transition: restoreTransition,
     },
     minimized: {
       x: minimizeVector.x,
       y: minimizeVector.y,
       ...MINIMIZED_SIGNATURE,
+      clipPath: vtActive ? genie.idleClip : genie.minimizedClip,
       transition: minimizedTransition,
     },
   } satisfies Variants;
@@ -190,6 +233,8 @@ export function WindowView({
 
   const dockOrigin = getDockOrigin();
   const dockHeight = dockRect?.height ?? 56;
+  const dockOriginX = dockOrigin.x - win.bounds.x;
+  const dockOriginY = dockOrigin.y - win.bounds.y;
   const minimizeVector = useMemo(() => {
     const windowCenterX = win.bounds.x + win.bounds.w / 2;
     const windowCenterY = win.bounds.y + win.bounds.h / 2;
@@ -209,9 +254,21 @@ export function WindowView({
   ]);
 
   const viewTransitionActive = isWindowTransitionActive(win.id);
+  const genieProfile = useMemo(() => {
+    const anchorX = dockOriginX;
+    const anchorY = dockOriginY + dockHeight * 0.35;
+    return createGenieProfile({
+      width: win.bounds.w,
+      height: win.bounds.h,
+      anchorX,
+      anchorY,
+    });
+  }, [dockHeight, dockOriginX, dockOriginY, win.bounds.w, win.bounds.h]);
+
   const variants = useMemo(
-    () => createWindowVariants(minimizeVector, viewTransitionActive),
-    [minimizeVector, viewTransitionActive],
+    () =>
+      createWindowVariants(minimizeVector, viewTransitionActive, genieProfile),
+    [genieProfile, minimizeVector, viewTransitionActive],
   );
 
   const getAnimationVariant = (): AnimationVariant => {
@@ -264,8 +321,6 @@ export function WindowView({
     win.animationState !== "restoring" &&
     win.animationState !== "minimizing";
 
-  const dockOriginX = dockOrigin.x - win.bounds.x;
-  const dockOriginY = dockOrigin.y - win.bounds.y;
   const centerOrigin = `${win.bounds.w / 2}px ${win.bounds.h / 2}px`;
   const dockAlignedOrigin = `${dockOriginX}px ${dockOriginY}px`;
   const transformOrigin =
@@ -295,6 +350,8 @@ export function WindowView({
           visibility: isDormant ? "hidden" : "visible",
           pointerEvents: isDormant ? "none" : "auto",
           transformStyle: "preserve-3d",
+          clipPath: genieProfile.idleClip,
+          willChange: "transform, filter, opacity, clip-path",
         }}
         initial={win.animationState === "opening" ? "spawn" : false}
         animate={currentVariant}
