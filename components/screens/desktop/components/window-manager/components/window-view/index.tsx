@@ -7,7 +7,6 @@ import { focusWin, setAnimationState, setWinState } from "../../api";
 import { useWindowDrag, useWindowResize } from "../../hooks";
 import { useDesktop } from "../../store";
 import type { WinInstance } from "../../types";
-import { isWindowTransitionActive } from "../../view-transitions";
 import { TitlebarPortalProvider } from "./titlebar-portal";
 import { WindowContent } from "./window-content";
 import { WindowResizeHandles } from "./window-resize-handles";
@@ -46,69 +45,60 @@ const createWindowSpring = (overrides?: Partial<Transition>): Transition => ({
   ...overrides,
 });
 
-const ZERO_TWEEN: Transition = { duration: 0.0001 };
-
 function createWindowVariants(
   minimizeVector: { x: number; y: number },
   minimizedSignature: MinimizedSignature,
-  vtActive: boolean,
 ): Variants {
-  const minimizeTransition = vtActive
-    ? { default: ZERO_TWEEN, filter: ZERO_TWEEN }
-    : {
-        default: {
-          duration: 0.56,
-          ease: [0.19, 0.84, 0.36, 1] as const,
-        },
-        opacity: {
-          duration: 0.28,
-          ease: [0.3, 0.72, 0.46, 1] as const,
-        },
-        filter: {
-          duration: 0.48,
-          ease: [0.28, 0.8, 0.38, 1] as const,
-        },
-        rotateX: {
-          duration: 0.52,
-          ease: [0.24, 0.82, 0.42, 1] as const,
-        },
-        borderRadius: {
-          duration: 0.4,
-          ease: [0.26, 0.82, 0.4, 1] as const,
-        },
-      };
+  const minimizeTransition = {
+    default: {
+      duration: 0.56,
+      ease: [0.19, 0.84, 0.36, 1] as const,
+    },
+    opacity: {
+      duration: 0.36,
+      ease: [0.24, 0.82, 0.38, 1] as const,
+    },
+    filter: {
+      duration: 0.5,
+      ease: [0.28, 0.8, 0.38, 1] as const,
+    },
+    rotateX: {
+      duration: 0.52,
+      ease: [0.24, 0.82, 0.42, 1] as const,
+    },
+    borderRadius: {
+      duration: 0.4,
+      ease: [0.26, 0.82, 0.4, 1] as const,
+    },
+  } satisfies Record<string, Transition>;
 
-  const restoreTransition = vtActive
-    ? { default: ZERO_TWEEN, opacity: ZERO_TWEEN, filter: ZERO_TWEEN }
-    : {
-        default: createWindowSpring({
-          bounce: 0.14,
-          stiffness: 520,
-          damping: 34,
-        }),
-        opacity: {
-          duration: 0.28,
-          ease: [0.18, 0.86, 0.32, 1] as const,
-        },
-        filter: {
-          duration: 0.32,
-          ease: [0.18, 0.82, 0.38, 1] as const,
-        },
-        borderRadius: {
-          duration: 0.34,
-          ease: [0.2, 0.74, 0.32, 1] as const,
-        },
-      };
+  const restoreTransition = {
+    default: createWindowSpring({
+      bounce: 0.14,
+      stiffness: 520,
+      damping: 34,
+    }),
+    opacity: {
+      duration: 0.28,
+      ease: [0.18, 0.86, 0.32, 1] as const,
+    },
+    filter: {
+      duration: 0.32,
+      ease: [0.18, 0.82, 0.38, 1] as const,
+    },
+    borderRadius: {
+      duration: 0.34,
+      ease: [0.2, 0.74, 0.32, 1] as const,
+    },
+  } satisfies Record<string, Transition>;
 
-  const minimizedTransition = vtActive
-    ? { default: ZERO_TWEEN }
-    : {
-        default: createWindowSpring({
-          stiffness: 640,
-          damping: 36,
-          mass: 0.54,
-        }),
-      };
+  const minimizedTransition = {
+    default: createWindowSpring({
+      stiffness: 640,
+      damping: 36,
+      mass: 0.54,
+    }),
+  };
 
   return {
     spawn: {
@@ -175,6 +165,9 @@ function createWindowVariants(
       filter: minimizedSignature.filter,
       borderRadius: minimizedSignature.borderRadius,
       transition: minimizeTransition,
+      transitionEnd: {
+        opacity: 0,
+      },
     },
     restoring: {
       x: 0,
@@ -191,6 +184,7 @@ function createWindowVariants(
       x: minimizeVector.x,
       y: minimizeVector.y,
       ...minimizedSignature,
+      opacity: 0,
       transition: minimizedTransition,
     },
   } satisfies Variants;
@@ -238,7 +232,7 @@ export function WindowView({
     return {
       scaleX: Number(scaleX.toFixed(3)),
       scaleY: Number(scaleY.toFixed(3)),
-      opacity: 0.12,
+      opacity: 0.24,
       rotateX: 6,
       filter: "blur(12px)",
       borderRadius: pxToRem(circleRadius),
@@ -267,15 +261,9 @@ export function WindowView({
     win.bounds.h,
   ]);
 
-  const viewTransitionActive = isWindowTransitionActive(win.id);
   const variants = useMemo(
-    () =>
-      createWindowVariants(
-        minimizeVector,
-        minimizedSignature,
-        viewTransitionActive,
-      ),
-    [minimizeVector, minimizedSignature, viewTransitionActive],
+    () => createWindowVariants(minimizeVector, minimizedSignature),
+    [minimizeVector, minimizedSignature],
   );
 
   const getAnimationVariant = (): AnimationVariant => {
@@ -301,19 +289,11 @@ export function WindowView({
       setAnimationState(win.id, "idle");
     }
 
-    if (
-      variant === "minimizing" &&
-      win.animationState === "minimizing" &&
-      !viewTransitionActive
-    ) {
+    if (variant === "minimizing" && win.animationState === "minimizing") {
       setAnimationState(win.id, "idle");
     }
 
-    if (
-      variant === "restoring" &&
-      win.animationState === "restoring" &&
-      !viewTransitionActive
-    ) {
+    if (variant === "restoring" && win.animationState === "restoring") {
       setAnimationState(win.id, "idle");
     }
   };
