@@ -22,13 +22,16 @@ type AnimationVariant =
   | "restoring"
   | "minimized";
 
-const MINIMIZED_SIGNATURE = {
-  scaleX: 0.52,
-  scaleY: 0.24,
-  opacity: 0,
-  rotateX: 8,
-  filter: "blur(12px)",
-} as const;
+interface MinimizedSignature {
+  scaleX: number;
+  scaleY: number;
+  opacity: number;
+  rotateX: number;
+  filter: string;
+}
+
+const clamp = (value: number, min: number, max: number) =>
+  Math.min(Math.max(value, min), max);
 
 const createWindowSpring = (overrides?: Partial<Transition>): Transition => ({
   type: "spring",
@@ -40,42 +43,59 @@ const createWindowSpring = (overrides?: Partial<Transition>): Transition => ({
   ...overrides,
 });
 
-const ZERO_TWEEN: Transition = { type: "tween", duration: 0.0001 };
+const ZERO_TWEEN: Transition = { duration: 0.0001 };
 
 function createWindowVariants(
   minimizeVector: { x: number; y: number },
+  minimizedSignature: MinimizedSignature,
   vtActive: boolean,
 ): Variants {
   const minimizeTransition = vtActive
     ? { default: ZERO_TWEEN, filter: ZERO_TWEEN }
     : {
-        default: createWindowSpring({
-          stiffness: 380,
-          damping: 28,
-          mass: 0.95,
-        }),
-        filter: createWindowSpring({ stiffness: 320, damping: 30, mass: 1.0 }),
+        default: {
+          duration: 0.56,
+          ease: [0.19, 0.84, 0.36, 1] as const,
+        },
+        opacity: {
+          duration: 0.28,
+          ease: [0.3, 0.72, 0.46, 1] as const,
+        },
+        filter: {
+          duration: 0.48,
+          ease: [0.28, 0.8, 0.38, 1] as const,
+        },
+        rotateX: {
+          duration: 0.52,
+          ease: [0.24, 0.82, 0.42, 1] as const,
+        },
       };
 
   const restoreTransition = vtActive
     ? { default: ZERO_TWEEN, opacity: ZERO_TWEEN, filter: ZERO_TWEEN }
     : {
         default: createWindowSpring({
-          bounce: 0.18,
-          stiffness: 420,
-          damping: 28,
+          bounce: 0.14,
+          stiffness: 520,
+          damping: 34,
         }),
-        opacity: createWindowSpring({ damping: 32, stiffness: 380 }),
-        filter: createWindowSpring({ damping: 36, stiffness: 350 }),
+        opacity: {
+          duration: 0.28,
+          ease: [0.18, 0.86, 0.32, 1] as const,
+        },
+        filter: {
+          duration: 0.32,
+          ease: [0.18, 0.82, 0.38, 1] as const,
+        },
       };
 
   const minimizedTransition = vtActive
     ? { default: ZERO_TWEEN }
     : {
         default: createWindowSpring({
-          stiffness: 720,
-          damping: 40,
-          mass: 0.58,
+          stiffness: 640,
+          damping: 36,
+          mass: 0.54,
         }),
       };
 
@@ -133,11 +153,11 @@ function createWindowVariants(
     minimizing: {
       x: minimizeVector.x,
       y: minimizeVector.y,
-      scaleX: MINIMIZED_SIGNATURE.scaleX,
-      scaleY: MINIMIZED_SIGNATURE.scaleY,
-      opacity: MINIMIZED_SIGNATURE.opacity,
-      rotateX: MINIMIZED_SIGNATURE.rotateX,
-      filter: MINIMIZED_SIGNATURE.filter,
+      scaleX: minimizedSignature.scaleX,
+      scaleY: minimizedSignature.scaleY,
+      opacity: minimizedSignature.opacity,
+      rotateX: minimizedSignature.rotateX,
+      filter: minimizedSignature.filter,
       transition: minimizeTransition,
     },
     restoring: {
@@ -153,7 +173,7 @@ function createWindowVariants(
     minimized: {
       x: minimizeVector.x,
       y: minimizeVector.y,
-      ...MINIMIZED_SIGNATURE,
+      ...minimizedSignature,
       transition: minimizedTransition,
     },
   } satisfies Variants;
@@ -190,18 +210,52 @@ export function WindowView({
 
   const dockOrigin = getDockOrigin();
   const dockHeight = dockRect?.height ?? 56;
+  const minimizedSignature = useMemo<MinimizedSignature>(() => {
+    const iconWidth = dockRect?.width ?? 72;
+    const iconHeight = dockHeight;
+    const baseScaleX = 0.18;
+    const baseScaleY = 0.12;
+    const scaledX = dockRect
+      ? clamp(
+          (iconWidth / win.bounds.w) * 2.1,
+          baseScaleX * 0.85,
+          baseScaleX * 1.6,
+        )
+      : baseScaleX;
+    const scaledY = dockRect
+      ? clamp(
+          (iconHeight / win.bounds.h) * 3.1,
+          baseScaleY * 0.8,
+          baseScaleY * 1.8,
+        )
+      : baseScaleY;
+
+    return {
+      scaleX: Number(scaledX.toFixed(3)),
+      scaleY: Number(scaledY.toFixed(3)),
+      opacity: 0.08,
+      rotateX: 12,
+      filter: "blur(14px)",
+    };
+  }, [dockRect, dockHeight, win.bounds.h, win.bounds.w]);
+
   const minimizeVector = useMemo(() => {
     const windowCenterX = win.bounds.x + win.bounds.w / 2;
     const windowCenterY = win.bounds.y + win.bounds.h / 2;
-    const targetY = dockOrigin.y - dockHeight * 0.28;
+    const targetX = dockOrigin.x;
+    const targetY = dockOrigin.y + dockHeight * 0.06;
+    const diffX = windowCenterX - dockOrigin.x;
+    const diffY = windowCenterY - dockOrigin.y;
     return {
-      x: dockOrigin.x - windowCenterX,
-      y: targetY - windowCenterY,
+      x: targetX - (dockOrigin.x + minimizedSignature.scaleX * diffX),
+      y: targetY - (dockOrigin.y + minimizedSignature.scaleY * diffY),
     };
   }, [
     dockHeight,
     dockOrigin.x,
     dockOrigin.y,
+    minimizedSignature.scaleX,
+    minimizedSignature.scaleY,
     win.bounds.x,
     win.bounds.y,
     win.bounds.w,
@@ -210,8 +264,13 @@ export function WindowView({
 
   const viewTransitionActive = isWindowTransitionActive(win.id);
   const variants = useMemo(
-    () => createWindowVariants(minimizeVector, viewTransitionActive),
-    [minimizeVector, viewTransitionActive],
+    () =>
+      createWindowVariants(
+        minimizeVector,
+        minimizedSignature,
+        viewTransitionActive,
+      ),
+    [minimizeVector, minimizedSignature, viewTransitionActive],
   );
 
   const getAnimationVariant = (): AnimationVariant => {

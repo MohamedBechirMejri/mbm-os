@@ -123,6 +123,26 @@
   mix-blend-mode: normal;
 }
 
+.wm-view-transition-minimize ::view-transition-group(*) {
+  animation-duration: 0.6s;
+  animation-timing-function: cubic-bezier(0.18, 0.86, 0.36, 1);
+}
+
+.wm-view-transition-minimize ::view-transition-old(*),
+.wm-view-transition-minimize ::view-transition-new(*) {
+  animation-timing-function: cubic-bezier(0.18, 0.86, 0.36, 1);
+}
+
+.wm-view-transition-restore ::view-transition-group(*) {
+  animation-duration: 0.5s;
+  animation-timing-function: cubic-bezier(0.16, 0.86, 0.28, 1);
+}
+
+.wm-view-transition-restore ::view-transition-old(*),
+.wm-view-transition-restore ::view-transition-new(*) {
+  animation-timing-function: cubic-bezier(0.2, 0.72, 0.32, 1);
+}
+
 [data-dock-app]::after {
   content: "";
   position: absolute;
