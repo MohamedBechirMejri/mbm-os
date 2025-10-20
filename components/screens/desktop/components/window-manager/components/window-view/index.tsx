@@ -6,7 +6,7 @@ import { useMemo, useRef } from "react";
 import { focusWin, setAnimationState, setWinState } from "../../api";
 import { useWindowDrag, useWindowResize } from "../../hooks";
 import { useDesktop } from "../../store";
-import type { WinInstance } from "../../types";
+import type { AnimationState, WinInstance } from "../../types";
 import { TitlebarPortalProvider } from "./titlebar-portal";
 import { WindowContent } from "./window-content";
 import { WindowResizeHandles } from "./window-resize-handles";
@@ -30,6 +30,8 @@ interface MinimizedSignature {
   borderRadius: string;
 }
 
+const MINIMIZED_SCALE_FLOOR = 0.0001;
+
 const clamp = (value: number, min: number, max: number) =>
   Math.min(Math.max(value, min), max);
 
@@ -51,6 +53,14 @@ function createWindowVariants(
 ): Variants {
   const minimizeTransition = {
     default: {
+      duration: 0.56,
+      ease: [0.19, 0.84, 0.36, 1] as const,
+    },
+    scaleX: {
+      duration: 0.56,
+      ease: [0.19, 0.84, 0.36, 1] as const,
+    },
+    scaleY: {
       duration: 0.56,
       ease: [0.19, 0.84, 0.36, 1] as const,
     },
@@ -99,6 +109,15 @@ function createWindowVariants(
       mass: 0.54,
     }),
   };
+
+  const collapseScaleX = Math.max(
+    minimizedSignature.scaleX * 0.24,
+    MINIMIZED_SCALE_FLOOR,
+  );
+  const collapseScaleY = Math.max(
+    minimizedSignature.scaleY * 0.24,
+    MINIMIZED_SCALE_FLOOR,
+  );
 
   return {
     spawn: {
@@ -156,14 +175,22 @@ function createWindowVariants(
       },
     },
     minimizing: {
-      x: minimizeVector.x,
-      y: minimizeVector.y,
-      scaleX: minimizedSignature.scaleX,
-      scaleY: minimizedSignature.scaleY,
-      opacity: minimizedSignature.opacity,
-      rotateX: minimizedSignature.rotateX,
-      filter: minimizedSignature.filter,
-      borderRadius: minimizedSignature.borderRadius,
+      x: [0, minimizeVector.x, minimizeVector.x],
+      y: [0, minimizeVector.y, minimizeVector.y],
+      scaleX: [1, minimizedSignature.scaleX, collapseScaleX],
+      scaleY: [1, minimizedSignature.scaleY, collapseScaleY],
+      opacity: [1, minimizedSignature.opacity, 0],
+      rotateX: [0, minimizedSignature.rotateX, minimizedSignature.rotateX],
+      filter: [
+        "blur(0px)",
+        minimizedSignature.filter,
+        minimizedSignature.filter,
+      ],
+      borderRadius: [
+        "0.75rem",
+        minimizedSignature.borderRadius,
+        minimizedSignature.borderRadius,
+      ],
       transition: minimizeTransition,
       transitionEnd: {
         opacity: 0,
@@ -183,8 +210,12 @@ function createWindowVariants(
     minimized: {
       x: minimizeVector.x,
       y: minimizeVector.y,
-      ...minimizedSignature,
+      scaleX: collapseScaleX,
+      scaleY: collapseScaleY,
       opacity: 0,
+      rotateX: minimizedSignature.rotateX,
+      filter: minimizedSignature.filter,
+      borderRadius: minimizedSignature.borderRadius,
       transition: minimizedTransition,
     },
   } satisfies Variants;
@@ -220,10 +251,11 @@ export function WindowView({
   };
 
   const dockOrigin = getDockOrigin();
+  const dockWidth = dockRect?.width ?? 72;
   const dockHeight = dockRect?.height ?? 56;
   const minimizedSignature = useMemo<MinimizedSignature>(() => {
-    const iconWidth = dockRect?.width ?? 72;
-    const iconHeight = dockRect?.height ?? dockHeight;
+    const iconWidth = dockWidth;
+    const iconHeight = dockHeight;
     const dominantEdge = Math.max(iconWidth, iconHeight);
     const targetSize = clamp(dominantEdge * 0.94, 48, 88);
     const scaleX = clamp(targetSize / win.bounds.w, 0.06, 0.28);
@@ -237,7 +269,7 @@ export function WindowView({
       filter: "blur(12px)",
       borderRadius: pxToRem(circleRadius),
     };
-  }, [dockRect, dockHeight, win.bounds.h, win.bounds.w]);
+  }, [dockWidth, dockHeight, win.bounds.h, win.bounds.w]);
 
   const minimizeVector = useMemo(() => {
     const windowCenterX = win.bounds.x + win.bounds.w / 2;
@@ -261,9 +293,39 @@ export function WindowView({
     win.bounds.h,
   ]);
 
+  const minimizeVectorRef = useRef(minimizeVector);
+  const minimizedSignatureRef = useRef(minimizedSignature);
+  const previousAnimationStateRef = useRef<AnimationState | undefined>(
+    win.animationState,
+  );
+
+  // Freeze minimizing target so unrelated re-renders don't restart the glide.
+  if (
+    win.animationState === "minimizing" &&
+    previousAnimationStateRef.current !== "minimizing"
+  ) {
+    minimizeVectorRef.current = minimizeVector;
+    minimizedSignatureRef.current = minimizedSignature;
+  } else if (win.animationState !== "minimizing") {
+    minimizeVectorRef.current = minimizeVector;
+    minimizedSignatureRef.current = minimizedSignature;
+  }
+
+  previousAnimationStateRef.current = win.animationState;
+
+  const vectorForAnimation =
+    win.animationState === "minimizing"
+      ? minimizeVectorRef.current
+      : minimizeVector;
+
+  const signatureForAnimation =
+    win.animationState === "minimizing"
+      ? minimizedSignatureRef.current
+      : minimizedSignature;
+
   const variants = useMemo(
-    () => createWindowVariants(minimizeVector, minimizedSignature),
-    [minimizeVector, minimizedSignature],
+    () => createWindowVariants(vectorForAnimation, signatureForAnimation),
+    [vectorForAnimation, signatureForAnimation],
   );
 
   const getAnimationVariant = (): AnimationVariant => {
