@@ -35,7 +35,13 @@ const MINIMIZE_KEYFRAMES = {
   scaleX: [1, 0.98, 0.92, 0.78, MINIMIZED_SIGNATURE.scaleX],
   scaleY: [1, 0.94, 0.7, 0.42, MINIMIZED_SIGNATURE.scaleY],
   rotateX: [0, 1.8, 4.2, 6.4, MINIMIZED_SIGNATURE.rotateX],
-  filter: ["blur(0px)", "blur(2px)", "blur(5px)", "blur(9px)", MINIMIZED_SIGNATURE.filter],
+  filter: [
+    "blur(0px)",
+    "blur(2px)",
+    "blur(5px)",
+    "blur(9px)",
+    MINIMIZED_SIGNATURE.filter,
+  ],
   opacity: [1, 1, 0.96, 0.4, MINIMIZED_SIGNATURE.opacity],
 };
 
@@ -225,14 +231,21 @@ function createWindowVariants(
       y: minimizeVector.y,
       scaleX: vtActive ? MINIMIZED_SIGNATURE.scaleX : MINIMIZE_KEYFRAMES.scaleX,
       scaleY: vtActive ? MINIMIZED_SIGNATURE.scaleY : MINIMIZE_KEYFRAMES.scaleY,
-      opacity: vtActive ? MINIMIZED_SIGNATURE.opacity : MINIMIZE_KEYFRAMES.opacity,
-      rotateX: vtActive ? MINIMIZED_SIGNATURE.rotateX : MINIMIZE_KEYFRAMES.rotateX,
+      opacity: vtActive
+        ? MINIMIZED_SIGNATURE.opacity
+        : MINIMIZE_KEYFRAMES.opacity,
+      rotateX: vtActive
+        ? MINIMIZED_SIGNATURE.rotateX
+        : MINIMIZE_KEYFRAMES.rotateX,
       filter: vtActive ? MINIMIZED_SIGNATURE.filter : MINIMIZE_KEYFRAMES.filter,
       clipPath: vtActive ? genie.idleClip : genie.minimize.frames,
       transition: minimizeTransition,
       transitionEnd: vtActive
         ? undefined
-        : { opacity: MINIMIZED_SIGNATURE.opacity, filter: MINIMIZED_SIGNATURE.filter },
+        : {
+            opacity: MINIMIZED_SIGNATURE.opacity,
+            filter: MINIMIZED_SIGNATURE.filter,
+          },
     },
     restoring: {
       x: 0,
