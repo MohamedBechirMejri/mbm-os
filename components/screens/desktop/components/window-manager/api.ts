@@ -16,7 +16,6 @@ import {
   MENU_BAR_HEIGHT,
   viewportRect,
 } from "./utils";
-import { runWindowViewTransition } from "./view-transitions";
 
 export function registerApps(apps: AppMeta[]) {
   store.set((s) => ({
@@ -169,21 +168,8 @@ export function setWinState(id: string, st: WinState) {
         windows: { ...prev.windows, [id]: nextWin },
       }));
     };
-
-    const transitioned = runWindowViewTransition({
-      win: w,
-      kind: "minimize",
-      commit,
-      onFinished: () => {
-        setAnimationState(id, "idle");
-      },
-    });
-
-    if (transitioned) {
-      return;
-    }
-
-    next = nextWin;
+    commit();
+    return;
   } else {
     // Other states (hidden) — pass through without changing bounds
     next = { ...next, state: st, snap: null } as WinInstance;
@@ -254,18 +240,7 @@ export function restoreFromMinimized(id: string) {
     }));
   };
 
-  const transitioned = runWindowViewTransition({
-    win: w,
-    kind: "restore",
-    commit,
-    onFinished: () => {
-      setAnimationState(id, "idle");
-    },
-  });
-
-  if (!transitioned) {
-    commit();
-  }
+  commit();
 
   focusWin(id);
 }
