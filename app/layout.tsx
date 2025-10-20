@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Figtree } from "next/font/google";
 import "./globals.css";
 import { MotionConfig } from "motion/react";
-import LiquidGlassFilters from "@/components/screens/login/components/liquid-glass-filters";
+// import LiquidGlassFilters from "@/components/screens/login/components/liquid-glass-filters";
 
 const figtree = Figtree({
   preload: true,
@@ -32,7 +32,7 @@ export default function RootLayout({
         <MotionConfig reducedMotion="never">{children}</MotionConfig>
 
         {/* SVG Filters */}
-        <LiquidGlassFilters />
+        {/* <LiquidGlassFilters /> */}
       </body>
     </html>
   );
