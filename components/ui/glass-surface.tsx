@@ -1,7 +1,7 @@
-/** biome-ignore-all lint/correctness/useExhaustiveDependencies: lll */
+"use client";
 
 import type React from "react";
-import { useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 export interface GlassSurfaceProps {
@@ -102,7 +102,7 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
 
   const isDarkMode = useDarkMode();
 
-  const generateDisplacementMap = () => {
+  const generateDisplacementMap = useCallback(() => {
     const rect = containerRef.current?.getBoundingClientRect();
     const actualWidth = rect?.width || 400;
     const actualHeight = rect?.height || 200;
@@ -128,13 +128,22 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
     `;
 
     return `data:image/svg+xml,${encodeURIComponent(svgContent)}`;
-  };
+  }, [
+    borderWidth,
+    borderRadius,
+    redGradId,
+    blueGradId,
+    mixBlendMode,
+    brightness,
+    opacity,
+    blur,
+  ]);
 
   const clampedRefraction = Math.max(refractionIntensity, 0);
 
-  const updateDisplacementMap = () => {
+  const updateDisplacementMap = useCallback(() => {
     feImageRef.current?.setAttribute("href", generateDisplacementMap());
-  };
+  }, [generateDisplacementMap]);
 
   useEffect(() => {
     updateDisplacementMap();
@@ -158,21 +167,14 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
       (displace * clampedRefraction).toString(),
     );
   }, [
-    width,
-    height,
-    borderRadius,
-    borderWidth,
-    brightness,
-    opacity,
-    blur,
-    displace,
+    updateDisplacementMap,
     distortionScale,
     redOffset,
     greenOffset,
     blueOffset,
     xChannel,
     yChannel,
-    mixBlendMode,
+    displace,
     clampedRefraction,
   ]);
 
@@ -188,25 +190,14 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
     return () => {
       resizeObserver.disconnect();
     };
-  }, []);
+  }, [updateDisplacementMap]);
 
-  useEffect(() => {
-    if (!containerRef.current) return;
+  /* removed duplicate resize observer effect */
 
-    const resizeObserver = new ResizeObserver(() => {
-      setTimeout(updateDisplacementMap, 0);
-    });
-
-    resizeObserver.observe(containerRef.current);
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, []);
-
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     setTimeout(updateDisplacementMap, 0);
-  }, [width, height]);
+  }, [updateDisplacementMap]);
 
   const supportsSVGFilters = () => {
     if (typeof window === "undefined") return false;
