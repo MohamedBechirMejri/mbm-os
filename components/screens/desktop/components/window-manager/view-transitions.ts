@@ -36,10 +36,6 @@ export function isWindowTransitionActive(id: string): boolean {
 export function runWindowViewTransition(
   options: WindowTransitionOptions,
 ): boolean {
-  // Genie minimize/restore relies on motion-based animation; bail out to let that run.
-  if (options.kind === "minimize" || options.kind === "restore") {
-    return false;
-  }
   if (!isViewTransitionSupported()) return false;
   const { win, kind, commit, onFinished } = options;
   const doc = document;
