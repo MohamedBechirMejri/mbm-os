@@ -41,12 +41,14 @@ export function AppStoreApp({ instanceId: _ }: { instanceId: string }) {
     <div className="flex h-full w-full flex-col overflow-hidden bg-[#1D1F21]">
       {/* Titlebar toolbar */}
       <div className="flex w-full items-center justify-between gap-3 px-3 py-1.5">
-        <div className="flex items-center gap-2 pl-16">
+        {/* make container relative so the back button can be absolutely positioned */}
+        <div className="flex items-center gap-2 pl-16 relative">
           {view.type !== "discover" && (
             <Button
               size="icon"
               variant="ghost"
-              className="size-7 rounded-full text-white/90 hover:bg-white/10"
+              // absolute so it's not obstructed by titlebar traffic lights; vertically centered-ish
+              className="absolute left-4 top-3 size-7 rounded-full text-white/90 hover:bg-white/10 z-50"
               onClick={() => setView({ type: "discover" })}
               aria-label="Back to Discover"
             >
