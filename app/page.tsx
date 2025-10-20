@@ -1,9 +1,9 @@
 "use client";
 
 import { AnimatePresence } from "motion/react";
-import { useEffect, useRef } from "react";
+import dynamic from "next/dynamic";
+import { useRef } from "react";
 import BootScreen from "@/components/screens/boot";
-import Desktop from "@/components/screens/desktop";
 import LoginScreen from "@/components/screens/login";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -12,6 +12,10 @@ import {
   useAppSnapshot,
 } from "@/lib/app-machine-context";
 import { cn } from "@/lib/utils";
+
+const Desktop = dynamic(() => import("@/components/screens/desktop"), {
+  ssr: false,
+});
 
 export default function AppShellRoot() {
   return (
@@ -29,80 +33,7 @@ function AppShell() {
 
   const isBoot = state.matches("boot");
   const isLogin = state.matches("login");
-  const isDesktop = state.matches("desktop");
-
-  // useEffect(() => {
-  //   const video = videoRef.current;
-  //   if (!video) return;
-  //   const easeOutQuint = (t: number) => 1 - (1 - t) ** 5;
-  //   const MIN_RATE = 0.35;
-  //   const SLOWDOWN_DURATION = 1800;
-  //   const FREEZE_DELAY = 200;
-
-  //   let frameId: number | undefined;
-  //   let freezeTimeout: number | undefined;
-  //   let cancelled = false;
-
-  //   const cancelAnimation = () => {
-  //     cancelled = true;
-  //     if (frameId !== undefined) cancelAnimationFrame(frameId);
-  //     if (freezeTimeout !== undefined) clearTimeout(freezeTimeout);
-  //   };
-
-  //   if (isDesktop) {
-  //     const runSlowdown = async () => {
-  //       try {
-  //         video.playbackRate = 1;
-  //         if (video.paused) {
-  //           await video.play();
-  //         }
-  //       } catch {
-  //         // Autoplay might be blocked; nothing we can do except bail quietly.
-  //         return;
-  //       }
-
-  //       const initialRate = video.playbackRate || 1;
-  //       let startTime: number | null = null;
-
-  //       const step = (timestamp: number) => {
-  //         if (cancelled) return;
-  //         if (startTime === null) startTime = timestamp;
-
-  //         const elapsed = timestamp - startTime;
-  //         const progress = Math.min(elapsed / SLOWDOWN_DURATION, 1);
-  //         const eased = easeOutQuint(progress);
-  //         const rateDrop = initialRate - MIN_RATE;
-  //         const nextRate = initialRate - rateDrop * eased;
-
-  //         video.playbackRate = Math.max(nextRate, MIN_RATE);
-
-  //         if (progress < 1) {
-  //           frameId = requestAnimationFrame(step);
-  //         } else {
-  //           freezeTimeout = window.setTimeout(() => {
-  //             if (cancelled) return;
-  //             video.pause();
-  //             video.playbackRate = 1;
-  //           }, FREEZE_DELAY);
-  //         }
-  //       };
-
-  //       frameId = requestAnimationFrame(step);
-  //     };
-
-  //     runSlowdown();
-
-  //     return () => cancelAnimation();
-  //   }
-
-  //   cancelAnimation();
-  //   video.playbackRate = 1;
-  //   if (video.paused) {
-  //     void video.play().catch(() => {});
-  //   }
-
-  //   return () => cancelAnimation();
-  // }, [isDesktop]);
+  // const isDesktop = state.matches("desktop");
 
   const renderScreen = () => {
     if (isBoot)
