@@ -28,10 +28,13 @@ interface MinimizedSignature {
   opacity: number;
   rotateX: number;
   filter: string;
+  borderRadius: string;
 }
 
 const clamp = (value: number, min: number, max: number) =>
   Math.min(Math.max(value, min), max);
+
+const pxToRem = (value: number) => `${(value / 16).toFixed(3)}rem`;
 
 const createWindowSpring = (overrides?: Partial<Transition>): Transition => ({
   type: "spring",
@@ -69,6 +72,10 @@ function createWindowVariants(
           duration: 0.52,
           ease: [0.24, 0.82, 0.42, 1] as const,
         },
+        borderRadius: {
+          duration: 0.4,
+          ease: [0.26, 0.82, 0.4, 1] as const,
+        },
       };
 
   const restoreTransition = vtActive
@@ -86,6 +93,10 @@ function createWindowVariants(
         filter: {
           duration: 0.32,
           ease: [0.18, 0.82, 0.38, 1] as const,
+        },
+        borderRadius: {
+          duration: 0.34,
+          ease: [0.2, 0.74, 0.32, 1] as const,
         },
       };
 
@@ -108,6 +119,7 @@ function createWindowVariants(
       opacity: 0,
       rotateX: 12,
       filter: "blur(16px)",
+      borderRadius: "0.75rem",
     },
     idle: {
       x: 0,
@@ -117,6 +129,7 @@ function createWindowVariants(
       opacity: 1,
       rotateX: 0,
       filter: "blur(0px)",
+      borderRadius: "0.75rem",
     },
     entering: {
       x: 0,
@@ -126,6 +139,7 @@ function createWindowVariants(
       opacity: 1,
       rotateX: 0,
       filter: "blur(0px)",
+      borderRadius: "0.75rem",
       transition: {
         default: createWindowSpring({ bounce: 0.24 }),
         opacity: createWindowSpring({ damping: 40, stiffness: 480 }),
@@ -140,6 +154,7 @@ function createWindowVariants(
       opacity: 0,
       rotateX: -12,
       filter: "blur(18px)",
+      borderRadius: "0.75rem",
       transition: {
         default: createWindowSpring({
           damping: 26,
@@ -158,6 +173,7 @@ function createWindowVariants(
       opacity: minimizedSignature.opacity,
       rotateX: minimizedSignature.rotateX,
       filter: minimizedSignature.filter,
+      borderRadius: minimizedSignature.borderRadius,
       transition: minimizeTransition,
     },
     restoring: {
@@ -168,6 +184,7 @@ function createWindowVariants(
       opacity: 1,
       rotateX: 0,
       filter: "blur(0px)",
+      borderRadius: "0.75rem",
       transition: restoreTransition,
     },
     minimized: {
@@ -212,30 +229,19 @@ export function WindowView({
   const dockHeight = dockRect?.height ?? 56;
   const minimizedSignature = useMemo<MinimizedSignature>(() => {
     const iconWidth = dockRect?.width ?? 72;
-    const iconHeight = dockHeight;
-    const baseScaleX = 0.18;
-    const baseScaleY = 0.12;
-    const scaledX = dockRect
-      ? clamp(
-          (iconWidth / win.bounds.w) * 2.1,
-          baseScaleX * 0.85,
-          baseScaleX * 1.6,
-        )
-      : baseScaleX;
-    const scaledY = dockRect
-      ? clamp(
-          (iconHeight / win.bounds.h) * 3.1,
-          baseScaleY * 0.8,
-          baseScaleY * 1.8,
-        )
-      : baseScaleY;
-
+    const iconHeight = dockRect?.height ?? dockHeight;
+    const dominantEdge = Math.max(iconWidth, iconHeight);
+    const targetSize = clamp(dominantEdge * 0.94, 48, 88);
+    const scaleX = clamp(targetSize / win.bounds.w, 0.06, 0.28);
+    const scaleY = clamp(targetSize / win.bounds.h, 0.06, 0.28);
+    const circleRadius = targetSize / 2;
     return {
-      scaleX: Number(scaledX.toFixed(3)),
-      scaleY: Number(scaledY.toFixed(3)),
-      opacity: 0.08,
-      rotateX: 12,
-      filter: "blur(14px)",
+      scaleX: Number(scaleX.toFixed(3)),
+      scaleY: Number(scaleY.toFixed(3)),
+      opacity: 0.12,
+      rotateX: 6,
+      filter: "blur(12px)",
+      borderRadius: pxToRem(circleRadius),
     };
   }, [dockRect, dockHeight, win.bounds.h, win.bounds.w]);
 
@@ -243,7 +249,7 @@ export function WindowView({
     const windowCenterX = win.bounds.x + win.bounds.w / 2;
     const windowCenterY = win.bounds.y + win.bounds.h / 2;
     const targetX = dockOrigin.x;
-    const targetY = dockOrigin.y + dockHeight * 0.06;
+    const targetY = dockOrigin.y;
     const diffX = windowCenterX - dockOrigin.x;
     const diffY = windowCenterY - dockOrigin.y;
     return {
@@ -251,7 +257,6 @@ export function WindowView({
       y: targetY - (dockOrigin.y + minimizedSignature.scaleY * diffY),
     };
   }, [
-    dockHeight,
     dockOrigin.x,
     dockOrigin.y,
     minimizedSignature.scaleX,
