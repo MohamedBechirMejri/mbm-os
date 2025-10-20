@@ -23,11 +23,11 @@ type AnimationVariant =
   | "minimized";
 
 const MINIMIZED_SIGNATURE = {
-  scaleX: 0.46,
-  scaleY: 0.18,
+  scaleX: 0.52,
+  scaleY: 0.24,
   opacity: 0,
-  rotateX: 14,
-  filter: "blur(18px)",
+  rotateX: 8,
+  filter: "blur(12px)",
 } as const;
 
 const createWindowSpring = (overrides?: Partial<Transition>): Transition => ({
@@ -50,23 +50,23 @@ function createWindowVariants(
     ? { default: ZERO_TWEEN, filter: ZERO_TWEEN }
     : {
         default: createWindowSpring({
-          stiffness: 620,
-          damping: 34,
-          mass: 0.74,
+          stiffness: 380,
+          damping: 28,
+          mass: 0.95,
         }),
-        filter: createWindowSpring({ stiffness: 520, damping: 38, mass: 0.8 }),
+        filter: createWindowSpring({ stiffness: 320, damping: 30, mass: 1.0 }),
       };
 
   const restoreTransition = vtActive
     ? { default: ZERO_TWEEN, opacity: ZERO_TWEEN, filter: ZERO_TWEEN }
     : {
         default: createWindowSpring({
-          bounce: 0.2,
-          stiffness: 560,
-          damping: 30,
+          bounce: 0.18,
+          stiffness: 420,
+          damping: 28,
         }),
-        opacity: createWindowSpring({ damping: 38, stiffness: 460 }),
-        filter: createWindowSpring({ damping: 44, stiffness: 420 }),
+        opacity: createWindowSpring({ damping: 32, stiffness: 380 }),
+        filter: createWindowSpring({ damping: 36, stiffness: 350 }),
       };
 
   const minimizedTransition = vtActive
