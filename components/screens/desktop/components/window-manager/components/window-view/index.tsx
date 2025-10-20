@@ -31,6 +31,28 @@ const MINIMIZED_SIGNATURE = {
   filter: "blur(12px)",
 } as const;
 
+const MINIMIZE_KEYFRAMES = {
+  scaleX: [1, 0.98, 0.92, 0.78, MINIMIZED_SIGNATURE.scaleX],
+  scaleY: [1, 0.94, 0.7, 0.42, MINIMIZED_SIGNATURE.scaleY],
+  rotateX: [0, 1.8, 4.2, 6.4, MINIMIZED_SIGNATURE.rotateX],
+  filter: ["blur(0px)", "blur(2px)", "blur(5px)", "blur(9px)", MINIMIZED_SIGNATURE.filter],
+  opacity: [1, 1, 0.96, 0.4, MINIMIZED_SIGNATURE.opacity],
+};
+
+const RESTORE_KEYFRAMES = {
+  scaleX: [MINIMIZED_SIGNATURE.scaleX, 0.74, 0.88, 0.98, 1],
+  scaleY: [MINIMIZED_SIGNATURE.scaleY, 0.46, 0.74, 0.92, 1],
+  rotateX: [MINIMIZED_SIGNATURE.rotateX, 6.2, 2.8, -1.2, 0],
+  filter: [
+    MINIMIZED_SIGNATURE.filter,
+    "blur(10px)",
+    "blur(5px)",
+    "blur(1.2px)",
+    "blur(0px)",
+  ],
+  opacity: [0, 0.38, 0.82, 1, 1],
+};
+
 const createWindowSpring = (overrides?: Partial<Transition>): Transition => ({
   type: "spring",
   mass: 0.82,
@@ -64,6 +86,22 @@ function createWindowVariants(
             duration: genie.duration * 0.8,
             ease: easeOutQuad,
           },
+          scaleX: {
+            duration: genie.duration,
+            ease: genie.ease,
+          },
+          scaleY: {
+            duration: genie.duration,
+            ease: genie.ease,
+          },
+          rotateX: {
+            duration: genie.duration,
+            ease: genie.ease,
+          },
+          opacity: {
+            duration: genie.duration,
+            ease: [0.18, 0.48, 0.32, 0.94],
+          },
           clipPath: {
             duration: genie.duration,
             ease: linearEase,
@@ -93,6 +131,18 @@ function createWindowVariants(
           filter: {
             duration: genie.duration * 0.74,
             ease: easeOutQuad,
+          },
+          scaleX: {
+            duration: genie.duration * 0.86,
+            ease: genie.ease,
+          },
+          scaleY: {
+            duration: genie.duration * 0.86,
+            ease: genie.ease,
+          },
+          rotateX: {
+            duration: genie.duration * 0.82,
+            ease: genie.ease,
           },
           clipPath: {
             duration: genie.duration,
@@ -173,22 +223,25 @@ function createWindowVariants(
     minimizing: {
       x: minimizeVector.x,
       y: minimizeVector.y,
-      scaleX: MINIMIZED_SIGNATURE.scaleX,
-      scaleY: MINIMIZED_SIGNATURE.scaleY,
-      opacity: MINIMIZED_SIGNATURE.opacity,
-      rotateX: MINIMIZED_SIGNATURE.rotateX,
-      filter: MINIMIZED_SIGNATURE.filter,
+      scaleX: vtActive ? MINIMIZED_SIGNATURE.scaleX : MINIMIZE_KEYFRAMES.scaleX,
+      scaleY: vtActive ? MINIMIZED_SIGNATURE.scaleY : MINIMIZE_KEYFRAMES.scaleY,
+      opacity: vtActive ? MINIMIZED_SIGNATURE.opacity : MINIMIZE_KEYFRAMES.opacity,
+      rotateX: vtActive ? MINIMIZED_SIGNATURE.rotateX : MINIMIZE_KEYFRAMES.rotateX,
+      filter: vtActive ? MINIMIZED_SIGNATURE.filter : MINIMIZE_KEYFRAMES.filter,
       clipPath: vtActive ? genie.idleClip : genie.minimize.frames,
       transition: minimizeTransition,
+      transitionEnd: vtActive
+        ? undefined
+        : { opacity: MINIMIZED_SIGNATURE.opacity, filter: MINIMIZED_SIGNATURE.filter },
     },
     restoring: {
       x: 0,
       y: 0,
-      scaleX: 1,
-      scaleY: 1,
-      opacity: 1,
-      rotateX: 0,
-      filter: "blur(0px)",
+      scaleX: vtActive ? 1 : RESTORE_KEYFRAMES.scaleX,
+      scaleY: vtActive ? 1 : RESTORE_KEYFRAMES.scaleY,
+      opacity: vtActive ? 1 : RESTORE_KEYFRAMES.opacity,
+      rotateX: vtActive ? 0 : RESTORE_KEYFRAMES.rotateX,
+      filter: vtActive ? "blur(0px)" : RESTORE_KEYFRAMES.filter,
       clipPath: vtActive ? genie.idleClip : genie.restore.frames,
       transition: restoreTransition,
     },
