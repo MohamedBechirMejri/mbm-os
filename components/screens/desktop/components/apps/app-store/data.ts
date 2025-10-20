@@ -61,7 +61,7 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     tagline: "Audio-reactive 3D graphics",
     description:
       "Real-time music visualization using WebGL and Web Audio API. Watch your music come to life with reactive particles and shaders.",
-    icon: "audio-x-generic",
+    icon: "media-player-banshee",
     category: "webgl",
     tags: ["webgl", "audio", "3d", "shaders"],
     featured: true,
@@ -108,7 +108,7 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     tagline: "Classic arcade action",
     description:
       "The timeless snake game with modern graphics and smooth controls.",
-    icon: "games",
+    icon: "game-center",
     category: "games",
     tags: ["arcade", "classic"],
     available: false,
@@ -131,7 +131,7 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     tagline: "Conversational AI assistant",
     description:
       "Chat with a local AI model. Experiment with prompts and see how language models work.",
-    icon: "internet-chat",
+    icon: "hexchat",
     category: "ai-tools",
     tags: ["ai", "llm", "chat"],
     available: false,
@@ -153,7 +153,7 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     tagline: "Artistic filters powered by AI",
     description:
       "Apply the style of famous paintings to your photos using neural networks.",
-    icon: "image-x-generic",
+    icon: "imagefan-reloaded",
     category: "ai-tools",
     tags: ["ai", "image", "neural-network"],
     available: false,

@@ -40,13 +40,13 @@ export function AppStoreApp({ instanceId: _ }: { instanceId: string }) {
   return (
     <div className="flex h-full w-full flex-col overflow-hidden bg-[#1D1F21]">
       {/* Titlebar toolbar */}
-      <div className="flex w-full items-center justify-between gap-3 px-3 py-1.5 pointer-events-none">
+      <div className="flex w-full items-center justify-between gap-3 px-3 py-1.5">
         <div className="flex items-center gap-2 pl-16">
           {view.type !== "discover" && (
             <Button
               size="icon"
               variant="ghost"
-              className="size-7 rounded-full text-white/90 hover:bg-white/10 pointer-events-auto"
+              className="size-7 rounded-full text-white/90 hover:bg-white/10"
               onClick={() => setView({ type: "discover" })}
               aria-label="Back to Discover"
             >
@@ -54,7 +54,7 @@ export function AppStoreApp({ instanceId: _ }: { instanceId: string }) {
             </Button>
           )}
           {currentCategory && (
-            <div className="flex items-center gap-2 text-[0.8125rem] text-white/80 pointer-events-none">
+            <div className="flex items-center gap-2 text-[0.8125rem] text-white/80">
               <span>{currentCategory.name}</span>
             </div>
           )}
@@ -66,7 +66,7 @@ export function AppStoreApp({ instanceId: _ }: { instanceId: string }) {
         {/* Sidebar */}
         <aside className="flex w-[180px] flex-col border-r border-white/5 bg-white/[0.02] rounded-2xl m-2 mb-3 mt-0 mr-0 pt-6">
           <div className="flex flex-col gap-4 p-3">
-            <div className="relative w-full max-w-[40vw] pointer-events-auto">
+            <div className="relative w-full max-w-[40vw]">
               <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-white/50" />
               <Input
                 value={searchQuery}
@@ -127,6 +127,9 @@ export function AppStoreApp({ instanceId: _ }: { instanceId: string }) {
             ) : view.type === "discover" ? (
               <DiscoverView
                 onViewApp={(id) => setView({ type: "app-detail", appId: id })}
+                onViewCategory={(id) =>
+                  setView({ type: "category", categoryId: id })
+                }
               />
             ) : view.type === "category" && view.categoryId ? (
               <CategoryView
@@ -137,6 +140,7 @@ export function AppStoreApp({ instanceId: _ }: { instanceId: string }) {
               <AppDetailView
                 appId={view.appId}
                 onBack={() => setView({ type: "discover" })}
+                onViewApp={(id) => setView({ type: "app-detail", appId: id })}
               />
             ) : null}
           </div>
@@ -195,7 +199,13 @@ function SidebarItem({
   );
 }
 
-function DiscoverView({ onViewApp }: { onViewApp: (id: string) => void }) {
+function DiscoverView({
+  onViewApp,
+  onViewCategory,
+}: {
+  onViewApp: (id: string) => void;
+  onViewCategory: (id: Category) => void;
+}) {
   const featured = getFeaturedApps();
 
   return (
@@ -235,7 +245,11 @@ function DiscoverView({ onViewApp }: { onViewApp: (id: string) => void }) {
         </h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {CATEGORIES.map((cat) => (
-            <CategoryCard key={cat.id} category={cat} />
+            <CategoryCard
+              key={cat.id}
+              category={cat}
+              onClick={() => onViewCategory(cat.id)}
+            />
           ))}
         </div>
       </section>
@@ -318,9 +332,11 @@ function CategoryView({
 function AppDetailView({
   appId,
   onBack: _,
+  onViewApp,
 }: {
   appId: string;
   onBack: () => void;
+  onViewApp: (id: string) => void;
 }) {
   const app = EXPERIMENT_APPS.find((a) => a.id === appId);
 
@@ -389,7 +405,7 @@ function AppDetailView({
                   <GridAppCard
                     key={relApp.id}
                     app={relApp}
-                    onClick={() => {}}
+                    onClick={() => onViewApp(relApp.id)}
                   />
                 ))}
               </div>
@@ -555,9 +571,19 @@ function FeaturedCard({
   );
 }
 
-function CategoryCard({ category }: { category: CategoryInfo }) {
+function CategoryCard({
+  category,
+  onClick,
+}: {
+  category: CategoryInfo;
+  onClick?: () => void;
+}) {
   return (
-    <div className="group relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-white/5 to-transparent p-4 transition-all hover:border-white/20 hover:from-white/10">
+    <button
+      type="button"
+      onClick={onClick}
+      className="group relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-white/5 to-transparent p-4 transition-all hover:border-white/20 hover:from-white/10 text-left"
+    >
       <div className="flex items-center gap-3">
         <div className="flex size-12 items-center justify-center rounded-xl bg-white/10">
           <Image
@@ -578,7 +604,7 @@ function CategoryCard({ category }: { category: CategoryInfo }) {
           </div>
         </div>
       </div>
-    </div>
+    </button>
   );
 }
 
