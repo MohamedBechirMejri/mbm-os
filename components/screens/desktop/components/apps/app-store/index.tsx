@@ -47,8 +47,8 @@ export function AppStoreApp({ instanceId: _ }: { instanceId: string }) {
             <Button
               size="icon"
               variant="ghost"
-              // absolute so it's not obstructed by titlebar traffic lights; vertically centered-ish
-              className="absolute left-4 top-3 size-7 rounded-full text-white/90 hover:bg-white/10 z-50"
+              // absolute so it's not obstructed by titlebar traffic lights; place after traffic lights
+              className="absolute left-17 top-2.5 size-7 rounded-full text-white/90 hover:bg-white/10 z-50"
               onClick={() => setView({ type: "discover" })}
               aria-label="Back to Discover"
             >
