@@ -50,8 +50,8 @@ The new structure makes it incredibly simple to add experiments:
   tagline: "What it does in one line",
   description: "Full description...",
   icon: "icon-name",
-  category: "webgl",
-  tags: ["webgl", "cool"],
+  category: "webgpu",
+  tags: ["webgpu", "cool"],
   featured: true, // optional
   available: false, // set to true when ready
 }
@@ -61,7 +61,7 @@ The new structure makes it incredibly simple to add experiments:
 
 I've set up 7 categories with sample experiments:
 
-1. **WebGL & Graphics** - 3D experiences and visual experiments
+1. **WebGPU & Graphics** - 3D experiences and visual experiments
 2. **Games** - Interactive entertainment
 3. **AI Tools** - ML and AI-powered apps
 4. **Productivity** - Workflow enhancement tools
@@ -72,8 +72,8 @@ I've set up 7 categories with sample experiments:
 ## Sample Experiments Added
 
 I've added 15+ placeholder experiments across categories including:
-- Music Visualizer (WebGL, featured)
-- Particle System (WebGL)
+- Music Visualizer (WebGPU, featured)
+- Particle System (WebGPU)
 - AI Chat (AI Tools)
 - Image Generator (AI Tools)
 - Pomodoro Timer (Productivity)

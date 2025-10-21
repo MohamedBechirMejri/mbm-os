@@ -15,8 +15,8 @@ To add a new experiment to the app store, simply add a new entry to the `EXPERIM
   tagline: "A short one-liner describing what it does",
   description: "A longer description explaining the experiment, what technologies it uses, and what makes it interesting.",
   icon: "icon-name", // Icon filename from /public/assets/icons/apps/ (without .ico extension)
-  category: "webgl", // Choose from: webgl, games, ai-tools, productivity, creative, utilities, experiments
-  tags: ["webgl", "particles", "interactive"], // Tags for search
+  category: "webgpu", // Choose from: webgpu, games, ai-tools, productivity, creative, utilities, experiments
+  tags: ["webgpu", "particles", "interactive"], // Tags for search
   featured: false, // Set to true to show on the discover page
   available: false, // Set to true when the app is actually implemented
 }

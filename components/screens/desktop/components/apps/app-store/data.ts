@@ -2,8 +2,8 @@ import type { CategoryInfo, ExperimentApp } from "./types";
 
 export const CATEGORIES: CategoryInfo[] = [
   {
-    id: "webgl",
-    name: "WebGL & Graphics",
+    id: "webgpu",
+    name: "WebGPU & Graphics",
     description: "Interactive 3D experiences and visual experiments",
     icon: "preferences-desktop-display",
     color: "#FF6B6B",
@@ -54,16 +54,16 @@ export const CATEGORIES: CategoryInfo[] = [
 
 // Sample apps - you can expand this as you build more experiments
 export const EXPERIMENT_APPS: ExperimentApp[] = [
-  // WebGL
+  // WebGPU
   {
     id: "music-visualizer",
     name: "Music Visualizer",
     tagline: "Audio-reactive 3D graphics",
     description:
-      "Real-time music visualization using WebGL and Web Audio API. Watch your music come to life with reactive particles and shaders.",
+      "Real-time music visualization using WebGPU and Web Audio API. Watch your music come to life with reactive particles and shaders.",
     icon: "media-player-banshee",
-    category: "webgl",
-    tags: ["webgl", "audio", "3d", "shaders"],
+    category: "webgpu",
+    tags: ["webgpu", "audio", "3d", "shaders"],
     featured: true,
     available: false,
   },
@@ -74,8 +74,8 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     description:
       "Millions of particles rendered at 60fps using compute shaders and instancing.",
     icon: "preferences-desktop-display",
-    category: "webgl",
-    tags: ["webgl", "particles", "gpu"],
+    category: "webgpu",
+    tags: ["webgpu", "particles", "gpu"],
     available: false,
   },
   {
@@ -85,8 +85,8 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     description:
       "Write and experiment with vertex and fragment shaders in real-time.",
     icon: "imagefan-reloaded",
-    category: "webgl",
-    tags: ["webgl", "shaders", "glsl"],
+    category: "webgpu",
+    tags: ["webgpu", "shaders", "glsl"],
     available: false,
   },
 

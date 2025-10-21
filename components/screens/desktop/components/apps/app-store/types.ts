@@ -1,5 +1,5 @@
 export type Category =
-  | "webgl"
+  | "webgpu"
   | "games"
   | "ai-tools"
   | "productivity"

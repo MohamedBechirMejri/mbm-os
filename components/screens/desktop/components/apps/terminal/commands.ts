@@ -76,7 +76,7 @@ export function buildCommands(): CommandDictionary {
     skills: () =>
       lines(
         "Core skills:",
-        "  • TypeScript, React/Next.js, WebGL/Three.js",
+        "  • TypeScript, React/Next.js, WebGPU/Three.js",
         "  • Motion design, micro-interactions, a11y",
         "  • Design systems, performance tuning, DX",
       ),
