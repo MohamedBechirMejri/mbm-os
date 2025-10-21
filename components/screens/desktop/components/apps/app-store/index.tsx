@@ -55,11 +55,6 @@ export function AppStoreApp({ instanceId: _ }: { instanceId: string }) {
               <ArrowLeft className="size-4" />
             </Button>
           )}
-          {currentCategory && (
-            <div className="flex items-center gap-2 text-[0.8125rem] text-white/80">
-              <span>{currentCategory.name}</span>
-            </div>
-          )}
         </div>
       </div>
 
