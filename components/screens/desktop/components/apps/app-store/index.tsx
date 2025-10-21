@@ -77,7 +77,10 @@ export function AppStoreApp({ instanceId: _ }: { instanceId: string }) {
                 label="Featured"
                 icon={<Sparkles className="size-4 text-purple-400" />}
                 active={view.type === "discover"}
-                onClick={() => setView({ type: "discover" })}
+                onClick={() => {
+                  setSearchQuery("");
+                  setView({ type: "discover" });
+                }}
               />
             </SidebarSection>
 
@@ -98,9 +101,10 @@ export function AppStoreApp({ instanceId: _ }: { instanceId: string }) {
                   active={
                     view.type === "category" && view.categoryId === cat.id
                   }
-                  onClick={() =>
-                    setView({ type: "category", categoryId: cat.id })
-                  }
+                  onClick={() => {
+                    setSearchQuery("");
+                    setView({ type: "category", categoryId: cat.id });
+                  }}
                   color={cat.color}
                 />
               ))}
@@ -119,25 +123,38 @@ export function AppStoreApp({ instanceId: _ }: { instanceId: string }) {
             {filteredApps ? (
               <SearchResults
                 apps={filteredApps}
-                onViewApp={(id) => setView({ type: "app-detail", appId: id })}
+                onViewApp={(id) => {
+                  setSearchQuery("");
+                  setView({ type: "app-detail", appId: id });
+                }}
               />
             ) : view.type === "discover" ? (
               <DiscoverView
-                onViewApp={(id) => setView({ type: "app-detail", appId: id })}
-                onViewCategory={(id) =>
-                  setView({ type: "category", categoryId: id })
-                }
+                onViewApp={(id) => {
+                  setSearchQuery("");
+                  setView({ type: "app-detail", appId: id });
+                }}
+                onViewCategory={(id) => {
+                  setSearchQuery("");
+                  setView({ type: "category", categoryId: id });
+                }}
               />
             ) : view.type === "category" && view.categoryId ? (
               <CategoryView
                 categoryId={view.categoryId}
-                onViewApp={(id) => setView({ type: "app-detail", appId: id })}
+                onViewApp={(id) => {
+                  setSearchQuery("");
+                  setView({ type: "app-detail", appId: id });
+                }}
               />
             ) : view.type === "app-detail" && view.appId ? (
               <AppDetailView
                 appId={view.appId}
                 onBack={() => setView({ type: "discover" })}
-                onViewApp={(id) => setView({ type: "app-detail", appId: id })}
+                onViewApp={(id) => {
+                  setSearchQuery("");
+                  setView({ type: "app-detail", appId: id });
+                }}
               />
             ) : null}
           </div>
