@@ -228,239 +228,105 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     tags: ["ml", "webcam", "interaction"],
     available: false,
   },
-
-  // NEW: Shareable, viral-leaning experiments
-  // WebGPU & Graphics
   {
-    id: "fluid-lab",
-    name: "Fluid Lab",
-    tagline: "Satisfying goo physics",
+    id: "water-caustics",
+    name: "Water Caustics Sandbox",
+    tagline: "Fake water that fools your brain",
     description:
-      "Real-time 2D fluid simulation with mouse/touch interaction, WebGPU compute and dye advection. Record short clips for socials.",
+      "Heightfield water with physically‑plausible reflections/refractions and moving caustics. Toss draggable objects, tweak viscosity and wind, and record 4–6s loops. Includes a 'reveal grid' dev view for tuning.",
     icon: "preferences-desktop-display",
     category: "webgpu",
-    tags: ["webgpu", "fluid", "physics", "2d"],
+    tags: ["webgpu", "water", "caustics", "physics"],
+    available: false,
+  },
+  {
+    id: "rotating-snakes",
+    name: "Rotating Snakes Live",
+    tagline: "Nothing moves. It just looks like it does",
+    description:
+      "Interactive take on Kitaoka’s illusion. Sliders for contrast, luminance and spacing to dial the effect; a 'prove it' button freezes the illusion for a side‑by‑side share image.",
+    icon: "preferences-desktop-display",
+    category: "experiments",
+    tags: ["illusion", "perception", "education"],
+    available: false,
+  },
+  {
+    id: "color-lies",
+    name: "Color Lies",
+    tagline: "Same color, different minds",
+    description:
+      "Classic same‑color illusions with masks and a hex picker. One‑click 'reveal' generates a before/after card for quote‑tweet ammo.",
+    icon: "preferences-desktop-display",
+    category: "experiments",
+    tags: ["illusion", "color", "education"],
+    available: false,
+  },
+  {
+    id: "ghostly-gaze",
+    name: "Ghostly Gaze",
+    tagline: "It looks at you until you step back",
+    description:
+      "Spatial‑frequency blending demo: up close the portrait faces left, far away it faces right. Distance slider and 'toggle blur bands' explain why. Auto‑generate a share image with both views.",
+    icon: "preferences-desktop-display",
+    category: "experiments",
+    tags: ["illusion", "perception", "blend"],
+    available: false,
+  },
+  {
+    id: "clickclickclone",
+    name: "ClickClickClone",
+    tagline: "A website that roasts your browsing",
+    description:
+      "Records simple client‑side events for 30 seconds and generates a snarky session receipt card (scrolls, hesitations, rage‑clicks). Privacy‑friendly: never uploads raw events; only the generated card is shareable.",
+    icon: "utilities-system-monitor",
+    category: "experiments",
+    tags: ["behavior", "funny", "share"],
     featured: true,
     available: false,
   },
   {
-    id: "fractal-zoom",
-    name: "Infinite Fractal Zoom",
-    tagline: "Dive forever",
+    id: "falling-sand-2025",
+    name: "Falling Sand 2025",
+    tagline: "Paint lava, water, smoke and plants",
     description:
-      "GPU-powered Mandelbrot/Mandelbulb zoom with bookmarks and shareable seeds.",
+      "Modern GPU cellular‑automata take on the classic. Tool palette with reactive materials (water + lava → obsidian), simple logic gates, and challenge prompts. Export tiny timelapse loops.",
     icon: "preferences-desktop-display",
-    category: "webgpu",
-    tags: ["webgpu", "fractal", "shader", "3d"],
+    category: "games",
+    tags: ["sandbox", "cellular-automata", "sim"],
     available: false,
   },
   {
-    id: "audio-constellations",
-    name: "Audio Constellations",
-    tagline: "Stars that dance to your music",
+    id: "pointer-pointer-plus",
+    name: "PointerPointer+",
+    tagline: "We always point at your cursor",
     description:
-      "Microphone-driven particle field that syncs to beat onsets and morphs into word shapes.",
-    icon: "media-player-banshee",
-    category: "webgpu",
-    tags: ["audio", "particles", "webgpu"],
-    available: false,
-  },
-  {
-    id: "tiny-city",
-    name: "Tiny Procedural City",
-    tagline: "Build a city with sliders",
-    description:
-      "Procedurally generate roads and blocks, then fly around your miniature city.",
-    icon: "preferences-desktop-display",
-    category: "webgpu",
-    tags: ["procedural", "city", "3d", "webgpu"],
-    available: false,
-  },
-
-  // Creative (highly shareable)
-  {
-    id: "timewarp-scan",
-    name: "Timewarp Scan",
-    tagline: "The TikTok bar, in your browser",
-    description:
-      "Rolling shutter effect using WebGL. Freeze and share cursed portraits.",
-    icon: "imagefan-reloaded",
-    category: "creative",
-    tags: ["webcam", "filter", "fun"],
-    featured: true,
-    available: false,
-  },
-  {
-    id: "kaleidoscope-cam",
-    name: "Kaleidoscope Cam",
-    tagline: "Mirror-world selfie",
-    description:
-      "Webcam kaleidoscope and slit-scan tricks with export to GIF.",
-    icon: "imagefan-reloaded",
-    category: "creative",
-    tags: ["webcam", "kaleidoscope", "gif"],
-    available: false,
-  },
-  {
-    id: "pixel-sorter",
-    name: "Pixel Sorter",
-    tagline: "Glitch that looks expensive",
-    description:
-      "Upload an image and sort pixels along gradients for that album‑cover vibe.",
-    icon: "imagefan-reloaded",
-    category: "creative",
-    tags: ["glitch", "image", "canvas"],
-    available: false,
-  },
-  {
-    id: "datamosh-studio",
-    name: "Datamosh Studio",
-    tagline: "Break video the pretty way",
-    description:
-      "Iframe removal, P‑frame chaos, export looping webm clips. No installs.",
-    icon: "imagefan-reloaded",
-    category: "creative",
-    tags: ["video", "glitch", "webm"],
-    available: false,
-  },
-  {
-    id: "lowpoly-portrait",
-    name: "Low‑Poly Portrait",
-    tagline: "Triangulate your face",
-    description:
-      "Delaunay triangulation with draggable points and color quantization.",
-    icon: "imagefan-reloaded",
-    category: "creative",
-    tags: ["image", "triangulation", "canvas"],
-    available: false,
-  },
-  {
-    id: "3d-parallax-photo",
-    name: "3D Parallax Photo",
-    tagline: "Depth from a single image",
-    description:
-      "Sketch a depth map and generate parallax video with lighting and camera moves.",
-    icon: "imagefan-reloaded",
-    category: "creative",
-    tags: ["parallax", "image", "depth"],
-    featured: true,
-    available: false,
-  },
-  {
-    id: "text-physics",
-    name: "Kinetic Typography",
-    tagline: "Type that falls apart",
-    description:
-      "A mini physics engine for letters. Make them bounce, shatter and melt.",
-    icon: "preferences-desktop-display",
-    category: "creative",
-    tags: ["physics", "typography", "play"],
-    available: false,
-  },
-  {
-    id: "emoji-mosaic",
-    name: "Emoji Mosaic",
-    tagline: "Your photo, thousands of emoji",
-    description:
-      "Turn images into emoji mosaics with a shareable permalink gallery.",
+      "Reimagining the classic with themed packs (celebrations, anime poses), crisp crops and fast lookups. Generates a still or a short 'chase' animation for posting.",
     icon: "accessories-character-map",
+    category: "experiments",
+    tags: ["fun", "cursor", "nostalgia"],
+    available: false,
+  },
+  {
+    id: "shader-roulette",
+    name: "Shader Roulette",
+    tagline: "Press space for hypnosis",
+    description:
+      "Curated set of mesmerizing shaders with seed controls and BPM sync. Emoji ratings feed a daily 'Top 5' share card.",
+    icon: "preferences-desktop-display",
+    category: "webgpu",
+    tags: ["shader", "webgpu", "visual"],
+    available: false,
+  },
+  {
+    id: "zoomquilt-canvas",
+    name: "Zoomquilt Canvas",
+    tagline: "Community infinite zoom",
+    description:
+      "Submit a frame to the never‑ending zoom. Moderated queue, nightly stitch. Viewer has ambient music and one‑tap clip export with your username stamped in the corner.",
+    icon: "imagefan-reloaded",
     category: "creative",
-    tags: ["image", "emoji", "fun"],
-    available: false,
-  },
-
-  // Multiplayer / Social experiments
-  {
-    id: "cursor-party",
-    name: "Cursor Party",
-    tagline: "100 cursors, one canvas",
-    description:
-      "P2P WebRTC swarm. Everyone’s cursors leave trails, collide and spark.",
-    icon: "hexchat",
-    category: "experiments",
-    tags: ["multiplayer", "webrtc", "p2p"],
+    tags: ["collab", "zoom", "art"],
     featured: true,
-    available: false,
-  },
-  {
-    id: "multiplayer-doodle",
-    name: "Multiplayer Doodle",
-    tagline: "Draw together. Chaos optional",
-    description:
-      "CRDT + WebRTC canvas with replay and time‑lapse export.",
-    icon: "hexchat",
-    category: "experiments",
-    tags: ["multiplayer", "webrtc", "crdt"],
-    available: false,
-  },
-
-  // XR / Camera / Perception
-  {
-    id: "face-mesh-booth",
-    name: "Face Mesh Booth",
-    tagline: "3D mask filters",
-    description:
-      "Face mesh with 3D masks and scene lighting. Screenshot to share.",
-    icon: "input-tablet",
-    category: "experiments",
-    tags: ["webcam", "3d", "face"],
-    available: false,
-  },
-  {
-    id: "illusion-lab",
-    name: "Illusion Lab",
-    tagline: "Optical tricks you can feel",
-    description:
-      "A set of interactive optical illusions with sliders and explainers.",
-    icon: "preferences-desktop-display",
-    category: "experiments",
-    tags: ["optical", "perception", "education"],
-    available: false,
-  },
-  {
-    id: "xr-portal",
-    name: "XR Portal",
-    tagline: "Step through your screen",
-    description:
-      "AR/WebXR portal to 360 scenes. Works with phone gyroscope.",
-    icon: "preferences-desktop-display",
-    category: "experiments",
-    tags: ["webxr", "ar", "360"],
-    available: false,
-  },
-  {
-    id: "screen-peel",
-    name: "Screen Peel",
-    tagline: "Peel the page like a sticker",
-    description:
-      "Physics-based page peel that reveals another website underneath.",
-    icon: "preferences-desktop-display",
-    category: "experiments",
-    tags: ["css", "trick", "dom"],
-    available: false,
-  },
-
-  // AI Tools (share-first)
-  {
-    id: "meme-writer",
-    name: "Meme Writer",
-    tagline: "Context‑aware captions",
-    description:
-      "Drop an image, get 10 spicy captions. One‑click share.",
-    icon: "gpt",
-    category: "ai-tools",
-    tags: ["ai", "caption", "meme"],
-    available: false,
-  },
-  {
-    id: "beat-dj",
-    name: "AI Beat DJ",
-    tagline: "Auto‑cut clips to music",
-    description:
-      "Upload a song and a clip, get beat‑synced edits and captions.",
-    icon: "media-player-banshee",
-    category: "ai-tools",
-    tags: ["ai", "audio", "video"],
     available: false,
   },
 ];
