@@ -329,6 +329,41 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     featured: true,
     available: false,
   },
+  {
+    id: "million-row-grid",
+    name: "Million Row Grid",
+    tagline: "1,000,000 rows at 60 fps",
+    description:
+      "Arrow/Parquet decoded in a Web Worker, windowed virtualization, worker-backed sort/filter with backpressure, and a live perf HUD (FPS, mem, query time). Export visible slice to CSV.",
+    icon: "calc",
+    category: "productivity",
+    tags: ["virtualization", "arrow", "wasm", "workers"],
+    featured: true,
+    available: false,
+  },
+  {
+    id: "gpu-scatterplot",
+    name: "GPU Scatterplot",
+    tagline: "10M points, buttery zoom",
+    description:
+      "WebGPU instanced points with pan/zoom, GPU color ramps, density mode for overplotting, and lasso selection. Optional tile-based LOD for absurd scales.",
+    icon: "preferences-desktop-display",
+    category: "webgpu",
+    tags: ["webgpu", "dataviz", "instancing", "lod"],
+    featured: true,
+    available: false,
+  },
+  {
+    id: "log-tail",
+    name: "Streaming Log Tail",
+    tagline: "100k lines/s without choking",
+    description:
+      "WebSocket ingest into a ring buffer with drop counters and backpressure, regex search with incremental index in a Worker, and a windowed list UI with pause/resume and jump-to-newest.",
+    icon: "utilities-system-monitor",
+    category: "utilities",
+    tags: ["streaming", "backpressure", "workers", "virtualization"],
+    available: false,
+  },
 ];
 
 export const getFeaturedApps = () =>
