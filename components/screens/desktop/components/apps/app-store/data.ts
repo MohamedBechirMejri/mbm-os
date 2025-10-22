@@ -394,8 +394,10 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
 ];
 
 export const getFeaturedApps = () =>
-  EXPERIMENT_APPS.filter((app) => app.featured);
+  EXPERIMENT_APPS.filter((app) => app.featured && !app.hidden);
 export const getAppsByCategory = (categoryId: string) =>
-  EXPERIMENT_APPS.filter((app) => app.category === categoryId);
+  EXPERIMENT_APPS.filter(
+    (app) => app.category === categoryId && !app.hidden,
+  );
 export const getCategoryInfo = (categoryId: string) =>
   CATEGORIES.find((cat) => cat.id === categoryId);

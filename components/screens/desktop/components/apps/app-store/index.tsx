@@ -24,18 +24,16 @@ export function AppStoreApp({ instanceId: _ }: { instanceId: string }) {
   const filteredApps = searchQuery
     ? EXPERIMENT_APPS.filter(
         (app) =>
-          app.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          app.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          app.tags.some((tag) =>
-            tag.toLowerCase().includes(searchQuery.toLowerCase()),
-          ),
+          !app.hidden &&
+          (app.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            app.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            app.tags.some((tag) =>
+              tag.toLowerCase().includes(searchQuery.toLowerCase()),
+            )),
       )
     : null;
 
-  const currentCategory =
-    view.type === "category" && view.categoryId
-      ? CATEGORIES.find((c) => c.id === view.categoryId)
-      : null;
+  // currentCategory is not used in this component; keep logic pure in child views
 
   return (
     <div className="flex h-full w-full flex-col overflow-hidden bg-[#1D1F21]">
@@ -274,7 +272,7 @@ function DiscoverView({
           All Experiments
         </h2>
         <div className="grid gap-3 grid-cols-[repeat(auto-fill,minmax(140px,1fr))]">
-          {EXPERIMENT_APPS.map((app) => (
+          {EXPERIMENT_APPS.filter((a) => !a.hidden).map((app) => (
             <GridAppCard
               key={app.id}
               app={app}
@@ -295,7 +293,9 @@ function CategoryView({
   onViewApp: (id: string) => void;
 }) {
   const category = CATEGORIES.find((c) => c.id === categoryId);
-  const apps = EXPERIMENT_APPS.filter((a) => a.category === categoryId);
+  const apps = EXPERIMENT_APPS.filter(
+    (a) => a.category === categoryId && !a.hidden,
+  );
 
   if (!category) return null;
 
@@ -352,15 +352,14 @@ function AppDetailView({
   onBack: () => void;
   onViewApp: (id: string) => void;
 }) {
-  const app = EXPERIMENT_APPS.find((a) => a.id === appId);
+  const app = EXPERIMENT_APPS.find((a) => a.id === appId && !a.hidden);
 
   if (!app) return null;
 
   const category = CATEGORIES.find((c) => c.id === app.category);
   const relatedApps = EXPERIMENT_APPS.filter(
-    (a) => a.category === app.category && a.id !== app.id,
+    (a) => a.category === app.category && a.id !== app.id && !a.hidden,
   ).slice(0, 6);
-
   return (
     <div className="space-y-8">
       <div className="flex items-start gap-6">
