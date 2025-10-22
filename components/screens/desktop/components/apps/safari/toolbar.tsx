@@ -9,7 +9,6 @@ import {
   SquareArrowOutUpRight,
   X,
 } from "lucide-react";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -93,7 +92,7 @@ export function Toolbar({
         <div className="group relative mx-auto flex h-9 w-full max-w-[32rem] items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 pointer-events-auto">
           <div className="flex items-center justify-center rounded-full bg-white/10 p-1">
             {activeTab.favicon ? (
-              <Image
+              <img
                 src={activeTab.favicon}
                 alt="favicon"
                 width={18}

@@ -13,13 +13,14 @@ export function normalizeUrl(raw: string): string {
     const hasDot = trimmed.includes(".");
     if (!hasSpace && hasDot) return `https://${trimmed}`;
     const q = encodeURIComponent(trimmed);
-    return `https://google.com/?q=${q}`;
+    return `https://www.dogpile.com/serp?q=${q}`;
   }
 }
 
 export function faviconFromUrl(url: string): string | null {
   try {
     const { hostname } = new URL(url);
+    console.log(`https://www.google.com/s2/favicons?domain=${hostname}&sz=64`);
     return `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`;
   } catch {
     return null;

@@ -1,7 +1,6 @@
 "use client";
 
-import { Globe, X } from "lucide-react";
-import Image from "next/image";
+import { Globe, X } from "lucide-react"; 
 import { cn } from "@/lib/utils";
 import type { Tab } from "../types";
 
@@ -45,7 +44,7 @@ export function TabButton({
       onClick={onActivate}
     >
       {tab.favicon ? (
-        <Image
+        <img
           src={tab.favicon}
           alt="favicon"
           width={16}

@@ -15,4 +15,4 @@ export type Tab = {
   restricted: boolean;
 };
 
-export const START_PAGE = "https://mohamedbechirmejri.dev";
+export const START_PAGE = "https://www.dogpile.com";

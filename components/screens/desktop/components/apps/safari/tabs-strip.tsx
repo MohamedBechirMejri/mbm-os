@@ -1,8 +1,7 @@
 "use client";
 
 import { BookOpen, Globe, X } from "lucide-react";
-import { motion } from "motion/react";
-import Image from "next/image";
+import { motion } from "motion/react"; 
 import { cn } from "@/lib/utils";
 import type { Tab } from "./types";
 
@@ -31,7 +30,7 @@ export function TabsStrip({ tabs, activeId, onSetActive, onClose }: Props) {
             title={t.title}
           >
             {t.favicon ? (
-              <Image
+              <img
                 src={t.favicon}
                 alt="favicon"
                 width={16}
