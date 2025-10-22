@@ -194,6 +194,20 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     hidden: true,
   },
 
+  // Utilities
+  {
+    id: "calculator",
+    name: "Calculator",
+    tagline: "Fast arithmetic and conversions",
+    description:
+      "A lightweight calculator with basic, scientific, and unit conversion modes.",
+    icon: "calc",
+    category: "utilities",
+    tags: ["math", "utility", "converter"],
+    available: true,
+    hidden: false,
+  },
+
   // Creative
   {
     id: "drawing-app",
