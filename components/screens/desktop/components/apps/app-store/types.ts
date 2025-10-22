@@ -21,6 +21,7 @@ export interface ExperimentApp {
   demoUrl?: string;
   // For future when apps are actually implemented
   available?: boolean;
+  hidden?: boolean;
 }
 
 export interface CategoryInfo {

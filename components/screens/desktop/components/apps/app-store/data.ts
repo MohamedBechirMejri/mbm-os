@@ -66,6 +66,7 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     tags: ["webgpu", "audio", "3d", "shaders"],
     featured: true,
     available: false,
+    hidden: true,
   },
   {
     id: "particle-system",
@@ -77,6 +78,7 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     category: "webgpu",
     tags: ["webgpu", "particles", "gpu"],
     available: false,
+    hidden: true,
   },
   {
     id: "shader-playground",
@@ -88,6 +90,7 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     category: "webgpu",
     tags: ["webgpu", "shaders", "glsl"],
     available: false,
+    hidden: true,
   },
 
   // Games
@@ -101,6 +104,7 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     category: "games",
     tags: ["puzzle", "casual"],
     available: false,
+    hidden: true,
   },
   {
     id: "snake",
@@ -112,6 +116,7 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     category: "games",
     tags: ["arcade", "classic"],
     available: false,
+    hidden: true,
   },
   {
     id: "tetris",
@@ -122,6 +127,7 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     category: "games",
     tags: ["puzzle", "classic"],
     available: false,
+    hidden: true,
   },
 
   // AI Tools
@@ -135,6 +141,7 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     category: "ai-tools",
     tags: ["ai", "llm", "chat"],
     available: false,
+    hidden: true,
   },
   {
     id: "image-generator",
@@ -146,6 +153,7 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     category: "ai-tools",
     tags: ["ai", "image", "generation"],
     available: false,
+    hidden: true,
   },
   {
     id: "style-transfer",
@@ -157,6 +165,7 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     category: "ai-tools",
     tags: ["ai", "image", "neural-network"],
     available: false,
+    hidden: true,
   },
 
   // Productivity
@@ -170,6 +179,7 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     category: "productivity",
     tags: ["writing", "markdown"],
     available: false,
+    hidden: true,
   },
   {
     id: "pomodoro",
@@ -181,6 +191,7 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     category: "productivity",
     tags: ["time", "focus"],
     available: false,
+    hidden: true,
   },
 
   // Creative
@@ -193,6 +204,7 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     category: "creative",
     tags: ["drawing", "art"],
     available: false,
+    hidden: true,
   },
   {
     id: "ascii-art",
@@ -203,6 +215,7 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     category: "creative",
     tags: ["ascii", "art", "image"],
     available: false,
+    hidden: true,
   },
 
   // Experiments
@@ -217,6 +230,7 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     tags: ["css", "svg", "filters"],
     featured: true,
     available: false,
+    hidden: true,
   },
   {
     id: "gesture-recognition",
@@ -227,6 +241,7 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     category: "experiments",
     tags: ["ml", "webcam", "interaction"],
     available: false,
+    hidden: true,
   },
   {
     id: "water-caustics",
@@ -238,6 +253,7 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     category: "webgpu",
     tags: ["webgpu", "water", "caustics", "physics"],
     available: false,
+    hidden: true,
   },
   {
     id: "rotating-snakes",
@@ -249,6 +265,7 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     category: "experiments",
     tags: ["illusion", "perception", "education"],
     available: false,
+    hidden: true,
   },
   {
     id: "color-lies",
@@ -260,6 +277,7 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     category: "experiments",
     tags: ["illusion", "color", "education"],
     available: false,
+    hidden: true,
   },
   {
     id: "ghostly-gaze",
@@ -271,6 +289,7 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     category: "experiments",
     tags: ["illusion", "perception", "blend"],
     available: false,
+    hidden: true,
   },
   {
     id: "clickclickclone",
@@ -283,6 +302,7 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     tags: ["behavior", "funny", "share"],
     featured: true,
     available: false,
+    hidden: true,
   },
   {
     id: "falling-sand-2025",
@@ -294,6 +314,7 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     category: "games",
     tags: ["sandbox", "cellular-automata", "sim"],
     available: false,
+    hidden: true,
   },
   {
     id: "pointer-pointer-plus",
@@ -305,6 +326,7 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     category: "experiments",
     tags: ["fun", "cursor", "nostalgia"],
     available: false,
+    hidden: true,
   },
   {
     id: "shader-roulette",
@@ -316,6 +338,7 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     category: "webgpu",
     tags: ["shader", "webgpu", "visual"],
     available: false,
+    hidden: true,
   },
   {
     id: "zoomquilt-canvas",
@@ -328,6 +351,7 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     tags: ["collab", "zoom", "art"],
     featured: true,
     available: false,
+    hidden: true,
   },
   {
     id: "million-row-grid",
@@ -340,6 +364,7 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     tags: ["virtualization", "arrow", "wasm", "workers"],
     featured: true,
     available: false,
+    hidden: true,
   },
   {
     id: "gpu-scatterplot",
@@ -352,6 +377,7 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     tags: ["webgpu", "dataviz", "instancing", "lod"],
     featured: true,
     available: false,
+    hidden: true,
   },
   {
     id: "log-tail",
@@ -363,6 +389,7 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     category: "utilities",
     tags: ["streaming", "backpressure", "workers", "virtualization"],
     available: false,
+    hidden: true,
   },
 ];
 
