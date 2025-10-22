@@ -206,6 +206,22 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     tags: ["math", "utility", "converter"],
     available: true,
     hidden: false,
+    installManifest: {
+      sizeEstimate: 4_200_000,
+      assets: [
+        {
+          url: "/assets/icons/apps/calc.ico",
+          kind: "icon",
+          bytes: 6_144,
+          cacheKey: "calculator/icon",
+        },
+        {
+          url: "/assets/mp3/bittersweet.mp3",
+          kind: "audio",
+          cacheKey: "calculator/audio/bittersweet",
+        },
+      ],
+    },
   },
 
   // Creative

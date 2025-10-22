@@ -22,6 +22,7 @@ export interface ExperimentApp {
   // For future when apps are actually implemented
   available?: boolean;
   hidden?: boolean;
+  installManifest?: InstallManifest;
 }
 
 export interface CategoryInfo {
@@ -30,4 +31,16 @@ export interface CategoryInfo {
   description: string;
   icon: string;
   color: string;
+}
+
+export interface InstallManifest {
+  sizeEstimate?: number;
+  assets: InstallAsset[];
+}
+
+export interface InstallAsset {
+  url: string;
+  cacheKey?: string;
+  bytes?: number;
+  kind?: "binary" | "gltf" | "texture" | "audio" | "font" | "icon" | "data";
 }

@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import { useAppInstallationStore } from "@/lib/app-installation-store";
 import { registerApps } from "../window-manager/api";
+import { getDesktop } from "../window-manager/store";
 import type { AppMeta } from "../window-manager/types";
 import { AppStoreApp } from "./app-store";
 import { CalculatorApp } from "./calculator";
@@ -72,17 +74,33 @@ const PREINSTALLED_IDS = new Set<string>([
   "file-manager",
   "game-center",
   "terminal",
-  "calculator",
 ]);
 export const preinstalledApps = catalogApps.filter((a) =>
   PREINSTALLED_IDS.has(a.id),
 );
 
 export function AppRegistry() {
+  const installedRecords = useAppInstallationStore((state) => state.installed);
+  const installedIds = useMemo(
+    () => Object.keys(installedRecords),
+    [installedRecords],
+  );
+
   useEffect(() => {
     // Register only preinstalled apps at boot
     registerApps(preinstalledApps);
   }, []);
+
+  useEffect(() => {
+    if (installedIds.length === 0) return;
+    const { apps: registered } = getDesktop();
+    const metas = catalogApps.filter(
+      (app) => installedIds.includes(app.id) && !registered[app.id],
+    );
+    if (metas.length > 0) {
+      registerApps(metas);
+    }
+  }, [installedIds]);
 
   return null;
 }

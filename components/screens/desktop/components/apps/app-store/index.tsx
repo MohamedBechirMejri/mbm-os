@@ -2,9 +2,15 @@
 
 import { ArrowLeft, Search, Sparkles } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import {
+  DesktopAPI,
+  useDesktop,
+} from "@/components/screens/desktop/components/window-manager";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
+import { useAppInstallationStore } from "@/lib/app-installation-store";
 import { cn } from "@/lib/utils";
 import { CATEGORIES, EXPERIMENT_APPS, getFeaturedApps } from "./data";
 import type { Category, CategoryInfo, ExperimentApp } from "./types";
@@ -352,11 +358,109 @@ function AppDetailView({
   onBack: () => void;
   onViewApp: (id: string) => void;
 }) {
-  const app = EXPERIMENT_APPS.find((a) => a.id === appId && !a.hidden);
+  const app = useMemo(
+    () => EXPERIMENT_APPS.find((a) => a.id === appId && !a.hidden),
+    [appId],
+  );
+  const appAvailable = Boolean(app?.available);
+  const appManifest = app?.installManifest;
+  const appCategoryId = app?.category;
+
+  const [localError, setLocalError] = useState<string | null>(null);
+  const installedRecord = useAppInstallationStore(
+    (state) => state.installed[appId],
+  );
+  const progressState = useAppInstallationStore(
+    (state) => state.progress[appId],
+  );
+  const installApp = useAppInstallationStore((state) => state.installApp);
+  const resetProgress = useAppInstallationStore((state) => state.resetProgress);
+  const isRegistered = useDesktop((s) => Boolean(s.apps[appId]));
+
+  const isInstalling =
+    progressState?.status === "installing" ||
+    progressState?.status === "finalizing";
+  const isInstalled = Boolean(installedRecord) || isRegistered;
+  const progressPercent = progressState ? Math.round(progressState.percent) : 0;
+  const downloadedLabel =
+    progressState && progressState.downloadedBytes > 0
+      ? formatBytes(progressState.downloadedBytes)
+      : null;
+  const totalLabel = progressState?.totalBytes
+    ? formatBytes(progressState.totalBytes)
+    : null;
+
+  const handleInstall = useCallback(async () => {
+    if (!appAvailable) return;
+    setLocalError(null);
+    if (progressState?.status === "failed") {
+      resetProgress(appId);
+    }
+    try {
+      await installApp({ appId, manifest: appManifest });
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Installation failed.";
+      setLocalError(message);
+    }
+  }, [
+    appAvailable,
+    appManifest,
+    appId,
+    installApp,
+    progressState?.status,
+    resetProgress,
+  ]);
+
+  const handleOpen = useCallback(() => {
+    if (!isInstalled) {
+      setLocalError("Install the app before launching it.");
+      return;
+    }
+    try {
+      const state = DesktopAPI.getState();
+      if (!state.apps[appId]) {
+        setLocalError("Finalizing installation. Try again in a moment.");
+        return;
+      }
+      setLocalError(null);
+      DesktopAPI.launch(appId);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Unable to launch the app.";
+      setLocalError(message);
+    }
+  }, [appId, isInstalled]);
+
+  const handlePrimaryAction = useCallback(() => {
+    if (!appAvailable && !isInstalled) return;
+    if (isInstalling) return;
+    if (isInstalled) {
+      handleOpen();
+      return;
+    }
+    void handleInstall();
+  }, [appAvailable, handleInstall, handleOpen, isInstalled, isInstalling]);
+
+  const handleRetry = useCallback(() => {
+    resetProgress(appId);
+    void handleInstall();
+  }, [appId, handleInstall, resetProgress]);
+
+  const primaryLabel = useMemo(() => {
+    if (isInstalled) return "Open";
+    if (!appAvailable) return "Coming Soon";
+    if (isInstalling) {
+      return progressPercent > 0
+        ? `Installing ${progressPercent}%`
+        : "Installing…";
+    }
+    return "Install";
+  }, [appAvailable, isInstalled, isInstalling, progressPercent]);
 
   if (!app) return null;
 
-  const category = CATEGORIES.find((c) => c.id === app.category);
+  const category = CATEGORIES.find((c) => c.id === appCategoryId);
   const relatedApps = EXPERIMENT_APPS.filter(
     (a) => a.category === app.category && a.id !== app.id && !a.hidden,
   ).slice(0, 6);
@@ -380,14 +484,61 @@ function AppDetailView({
             <p className="mt-3 text-[1.125rem] text-white/70">{app.tagline}</p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col gap-3">
             <Button
-              disabled={!app.available}
+              disabled={(!appAvailable && !isInstalled) || isInstalling}
               size="lg"
               className="rounded-full px-8 text-[0.9375rem] font-semibold disabled:opacity-50"
+              onClick={handlePrimaryAction}
+              aria-busy={isInstalling}
             >
-              {app.available ? "Download" : "Coming Soon"}
+              {primaryLabel}
             </Button>
+            {(isInstalling ||
+              progressState?.status === "failed" ||
+              localError) && (
+              <div className="space-y-2">
+                {isInstalling && (
+                  <div className="space-y-1">
+                    <Progress
+                      value={progressPercent}
+                      className="h-1.5 bg-white/15"
+                    />
+                    <div className="flex justify-between text-[0.75rem] text-white/60">
+                      <span>{progressPercent}%</span>
+                      {downloadedLabel && (
+                        <span>
+                          {totalLabel
+                            ? `${downloadedLabel} / ${totalLabel}`
+                            : downloadedLabel}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+                {progressState?.status === "failed" && (
+                  <div className="space-y-2">
+                    <div className="text-[0.75rem] text-red-300/90">
+                      {progressState.error ??
+                        "Installation failed. Please try again."}
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-max rounded-full px-4"
+                      onClick={handleRetry}
+                    >
+                      Retry Download
+                    </Button>
+                  </div>
+                )}
+                {localError && progressState?.status !== "failed" && (
+                  <div className="text-[0.75rem] text-red-300/90">
+                    {localError}
+                  </div>
+                )}
+              </div>
+            )}
             {category && (
               <span className="text-[0.875rem] text-white/50">
                 {category.name}
@@ -518,6 +669,13 @@ function GridAppCard({
   app: ExperimentApp;
   onClick: () => void;
 }) {
+  const isInstalled = useDesktop((s) => Boolean(s.apps[app.id]));
+  const installStatus = useAppInstallationStore(
+    (state) => state.progress[app.id]?.status,
+  );
+  const isInstalling =
+    installStatus === "installing" || installStatus === "finalizing";
+
   return (
     <button
       type="button"
@@ -537,9 +695,13 @@ function GridAppCard({
         <div className="truncate text-[0.8125rem] font-semibold text-white">
           {app.name}
         </div>
-        {!app.available && (
+        {isInstalled ? (
+          <div className="text-[0.6875rem] text-emerald-300/80">Installed</div>
+        ) : isInstalling ? (
+          <div className="text-[0.6875rem] text-white/60">Installing…</div>
+        ) : !app.available ? (
           <div className="text-[0.6875rem] text-white/40">Coming Soon</div>
-        )}
+        ) : null}
       </div>
     </button>
   );
@@ -622,3 +784,16 @@ function CategoryCard({
 }
 
 export default AppStoreApp;
+
+function formatBytes(bytes: number): string {
+  if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
+  const units = ["B", "KB", "MB", "GB", "TB"] as const;
+  let value = bytes;
+  let unitIndex = 0;
+  while (value >= 1024 && unitIndex < units.length - 1) {
+    value /= 1024;
+    unitIndex += 1;
+  }
+  const decimals = value >= 10 || unitIndex === 0 ? 0 : 1;
+  return `${value.toFixed(decimals)} ${units[unitIndex]}`;
+}
