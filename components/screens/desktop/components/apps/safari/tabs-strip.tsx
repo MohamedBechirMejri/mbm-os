@@ -1,6 +1,6 @@
 "use client";
 
-import { Globe, X } from "lucide-react";
+import { BookOpen, Globe, X } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -15,14 +15,16 @@ type Props = {
 
 export function TabsStrip({ tabs, activeId, onSetActive, onClose }: Props) {
   return (
-    <div className="relative z-[1] flex items-center gap-2 overflow-x-auto bg-background/50 backdrop-blur supports-[backdrop-filter]:bg-background/20">
+    <div className="relative z-[1] flex items-center gap-2 overflow-x-auto bg-white/5 backdrop-blur-md supports-[backdrop-filter]:bg-white/10">
       <div className="flex min-w-max items-center gap-2">
         {tabs.map((t) => (
           <button
             key={t.id}
             className={cn(
-              "group relative flex max-w-[16rem] items-center gap-2 px-3 py-1.5 text-[0.9rem]",
-              t.id === activeId ? "bg-foreground/10" : "hover:bg-foreground/5",
+              "group relative flex max-w-[16rem] items-center gap-2 rounded-xl px-4 py-1.5 text-[0.9rem] text-white/85",
+              t.id === activeId
+                ? "bg-white/15 shadow-[0_6px_20px_-12px_rgba(0,0,0,0.8)]"
+                : "hover:bg-white/10",
             )}
             type="button"
             onClick={() => onSetActive(t.id)}
@@ -49,6 +51,12 @@ export function TabsStrip({ tabs, activeId, onSetActive, onClose }: Props) {
                 }
               })()}
             </span>
+            {t.mode === "reader" ? (
+              <span className="flex items-center gap-1 rounded-full border border-white/20 bg-white/10 px-2 py-[0.1rem] text-[0.75rem] text-white/75">
+                <BookOpen className="size-3" />
+                Reader
+              </span>
+            ) : null}
             <button
               className="ml-1 rounded p-0.5 opacity-70 hover:bg-foreground/10 hover:opacity-100"
               type="button"

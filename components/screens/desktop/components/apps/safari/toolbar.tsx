@@ -3,11 +3,13 @@
 import {
   ChevronLeft,
   ChevronRight,
+  Globe,
   Plus,
   RotateCw,
   SquareArrowOutUpRight,
   X,
 } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -34,6 +36,7 @@ type Props = {
   onNavigate: (raw: string) => void;
   onInputChange: (value: string) => void;
   onNewTab: () => void;
+  onOpenExternal: () => void;
 };
 
 export function Toolbar({
@@ -47,9 +50,10 @@ export function Toolbar({
   onNavigate,
   onInputChange,
   onNewTab,
+  onOpenExternal,
 }: Props) {
   return (
-    <div className="wm-safari-toolbar relative z-[1] grid grid-cols-[auto_1fr_auto] items-center gap-3 w-full py-2 pointer-events-none">
+    <div className="wm-safari-toolbar relative z-[1] grid w-full grid-cols-[auto_1fr_auto] items-center gap-4 px-4 py-2 pointer-events-none">
       {/* Left: Back/Forward group */}
       <div className="flex h-9 items-center gap-1">
         <Tooltip>
@@ -86,9 +90,22 @@ export function Toolbar({
 
       {/* Center: Address/Search field */}
       <div className="flex min-w-0 flex-1 items-center">
-        <div className="group relative mx-auto flex h-8 w-full max-w-[26rem] items-center gap-2 rounded-lg border border-white/15 bg-black/25 pointer-events-auto">
+        <div className="group relative mx-auto flex h-9 w-full max-w-[32rem] items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 pointer-events-auto">
+          <div className="flex items-center justify-center rounded-full bg-white/10 p-1">
+            {activeTab.favicon ? (
+              <Image
+                src={activeTab.favicon}
+                alt="favicon"
+                width={18}
+                height={18}
+                className="rounded-full"
+              />
+            ) : (
+              <Globe className="size-4 text-white/70" />
+            )}
+          </div>
           <Input
-            className="h-8 w-full border-0 bg-transparent p-0 text-[0.9rem] outline-none ring-0 placeholder:text-white/60 text-white focus-visible:ring-0"
+            className="h-9 w-full border-0 bg-transparent p-0 text-[0.95rem] text-white placeholder:text-white/60 focus-visible:ring-0"
             placeholder="Search or enter website name"
             value={activeTab.input}
             onChange={(e) => onInputChange(e.target.value)}
@@ -105,7 +122,7 @@ export function Toolbar({
                 size="icon"
                 aria-label={activeTab.loading ? "Stop" : "Reload"}
                 onClick={() => (activeTab.loading ? onStop() : onReload())}
-                className="h-8 w-8 rounded-full text-white/90 hover:bg-white/10"
+                className="h-8 w-8 rounded-full text-white/90 hover:bg-white/15"
               >
                 {activeTab.loading ? (
                   <X className="size-4" />
@@ -129,10 +146,8 @@ export function Toolbar({
               variant="ghost"
               size="icon"
               aria-label="Share / Open"
-              onClick={() =>
-                window.open(activeTab.url, "_blank", "noopener,noreferrer")
-              }
-              className="h-9 w-9 rounded-full text-white/90 hover:bg-white/10"
+              onClick={onOpenExternal}
+              className="h-9 w-9 rounded-full text-white/90 hover:bg-white/15"
             >
               <SquareArrowOutUpRight className="size-[1.05rem]" />
             </Button>
@@ -146,7 +161,7 @@ export function Toolbar({
               size="icon"
               aria-label="New tab"
               onClick={onNewTab}
-              className="h-9 w-9 rounded-full text-white/90 hover:bg-white/10"
+              className="h-9 w-9 rounded-full text-white/90 hover:bg-white/15"
             >
               <Plus className="size-[1.05rem]" />
             </Button>

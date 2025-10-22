@@ -1,4 +1,6 @@
-import { START_PAGE } from "./types";
+import { START_PAGE, type TabMode } from "./types";
+
+const READER_PROXY_BASE = "https://r.jina.ai/http";
 
 export function normalizeUrl(raw: string): string {
   const trimmed = raw.trim();
@@ -22,4 +24,14 @@ export function faviconFromUrl(url: string): string | null {
   } catch {
     return null;
   }
+}
+
+export function frameUrlFor(url: string, mode: TabMode): string {
+  if (mode === "reader") return readerProxyUrl(url);
+  return url;
+}
+
+export function readerProxyUrl(url: string): string {
+  const normalized = normalizeUrl(url);
+  return `${READER_PROXY_BASE}/${normalized}`;
 }

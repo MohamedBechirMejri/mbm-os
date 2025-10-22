@@ -1,19 +1,19 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { TitlebarPortal } from "../../window-manager/components/window-view/titlebar-portal";
 import { ContentView } from "./content-view";
 import { LoadingBar } from "./loading-bar";
 import { TabsStrip } from "./tabs";
 import { Toolbar } from "./toolbar";
-import type { Tab } from "./types";
+import type { Tab, TabMode } from "./types";
 import { START_PAGE } from "./types";
-import { faviconFromUrl, normalizeUrl } from "./utils";
+import { faviconFromUrl, frameUrlFor, normalizeUrl } from "./utils";
 
 export function SafariApp({ instanceId: _ }: { instanceId: string }) {
-  const [tabs, setTabs] = useState<Tab[]>(() => [
-    {
+  const [tabs, setTabs] = useState<Tab[]>(() => {
+    const initial: Tab = {
       id: crypto.randomUUID(),
       title: "Mohamed Bechir Mejri",
       url: START_PAGE,
@@ -21,16 +21,17 @@ export function SafariApp({ instanceId: _ }: { instanceId: string }) {
       history: [START_PAGE],
       historyIndex: 0,
       loading: false,
-      favicon:
-        "https://www.google.com/s2/favicons?domain=mohamedbechirmejri.dev&sz=64",
-    },
-  ]);
+      favicon: faviconFromUrl(START_PAGE),
+      frameUrl: frameUrlFor(START_PAGE, "direct"),
+      revision: 0,
+      mode: "direct",
+      restricted: false,
+    };
+    return [initial];
+  });
   const [activeId, setActiveId] = useState<string>(() =>
     tabs[0] ? tabs[0].id : "",
   );
-
-  // Keep separate refs per tab so we can stop/reload targeted frames
-  const frameRefs = useRef<Record<string, HTMLIFrameElement | null>>({});
 
   const activeTab = useMemo(() => {
     const found = tabs.find((t) => t.id === activeId) ?? tabs[0];
@@ -43,14 +44,11 @@ export function SafariApp({ instanceId: _ }: { instanceId: string }) {
         history: [START_PAGE],
         historyIndex: 0,
         loading: false,
-        favicon: (() => {
-          try {
-            const { hostname } = new URL(START_PAGE);
-            return `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`;
-          } catch {
-            return null;
-          }
-        })(),
+        favicon: faviconFromUrl(START_PAGE),
+        frameUrl: frameUrlFor(START_PAGE, "direct"),
+        revision: 0,
+        mode: "direct",
+        restricted: false,
       }
     );
   }, [tabs, activeId]);
@@ -74,6 +72,10 @@ export function SafariApp({ instanceId: _ }: { instanceId: string }) {
           loading: true,
           // optimistic favicon from hostname
           favicon: faviconFromUrl(url),
+          frameUrl: frameUrlFor(url, "direct"),
+          revision: t.revision + 1,
+          mode: "direct",
+          restricted: false,
         };
       }),
     );
@@ -97,6 +99,10 @@ export function SafariApp({ instanceId: _ }: { instanceId: string }) {
           url: nextUrl,
           input: nextUrl,
           loading: true,
+          frameUrl: frameUrlFor(nextUrl, "direct"),
+          revision: t.revision + 1,
+          mode: "direct",
+          restricted: false,
         };
       }),
     );
@@ -113,44 +119,50 @@ export function SafariApp({ instanceId: _ }: { instanceId: string }) {
           url: nextUrl,
           input: nextUrl,
           loading: true,
+          frameUrl: frameUrlFor(nextUrl, "direct"),
+          revision: t.revision + 1,
+          mode: "direct",
+          restricted: false,
         };
       }),
     );
   }
 
   function reload(id: string) {
-    const frame = frameRefs.current[id];
-    try {
-      // Best-effort reload for cross-origin
-      if (frame) {
-        // Changing src to same value triggers reload in many browsers
-        const current = frame.src;
-        frame.src = current;
-      }
-    } catch {}
-    updateTab(id, { loading: true });
+    setTabs((prev) =>
+      prev.map((t) =>
+        t.id === id
+          ? {
+              ...t,
+              revision: t.revision + 1,
+              loading: true,
+              restricted: false,
+            }
+          : t,
+      ),
+    );
   }
 
   function stop(id: string) {
-    const frame = frameRefs.current[id];
-    try {
-      // window.stop is allowed cross-origin
-      frame?.contentWindow?.stop?.();
-    } catch {}
     updateTab(id, { loading: false });
   }
 
   function addTab(url: string = START_PAGE) {
+    const normalized = normalizeUrl(url);
     const id = crypto.randomUUID();
     const tab: Tab = {
       id,
       title: "New Tab",
-      url,
-      input: url,
-      history: [url],
+      url: normalized,
+      input: normalized,
+      history: [normalized],
       historyIndex: 0,
       loading: false,
-      favicon: faviconFromUrl(url),
+      favicon: faviconFromUrl(normalized),
+      frameUrl: frameUrlFor(normalized, "direct"),
+      revision: 0,
+      mode: "direct",
+      restricted: false,
     };
     setTabs((prev) => [...prev, tab]);
     setActiveId(id);
@@ -169,6 +181,10 @@ export function SafariApp({ instanceId: _ }: { instanceId: string }) {
           historyIndex: 0,
           loading: false,
           favicon: faviconFromUrl(START_PAGE),
+          frameUrl: frameUrlFor(START_PAGE, "direct"),
+          revision: 0,
+          mode: "direct",
+          restricted: false,
         };
         return [
           {
@@ -180,6 +196,10 @@ export function SafariApp({ instanceId: _ }: { instanceId: string }) {
             title: "Mohamed Bechir Mejri",
             loading: false,
             favicon: faviconFromUrl(START_PAGE),
+            frameUrl: frameUrlFor(START_PAGE, "direct"),
+            revision: current.revision + 1,
+            mode: "direct",
+            restricted: false,
           },
         ];
       }
@@ -194,9 +214,58 @@ export function SafariApp({ instanceId: _ }: { instanceId: string }) {
     });
   }
 
+  function handleTabLoaded(
+    id: string,
+    payload: { title?: string; restricted: boolean },
+  ) {
+    setTabs((prev) =>
+      prev.map((t) => {
+        if (t.id !== id) return t;
+        return {
+          ...t,
+          title: payload.title ?? t.title,
+          loading: false,
+          restricted: payload.restricted && t.mode === "direct",
+        };
+      }),
+    );
+  }
+
+  function handleModeChange(id: string, mode: TabMode) {
+    setTabs((prev) =>
+      prev.map((t) => {
+        if (t.id !== id) return t;
+        return {
+          ...t,
+          mode,
+          frameUrl: frameUrlFor(t.url, mode),
+          revision: t.revision + 1,
+          loading: true,
+          restricted: false,
+        };
+      }),
+    );
+  }
+
+  function handleOpenExternal(url: string) {
+    if (typeof globalThis === "undefined") return;
+    const candidate = (
+      globalThis as typeof globalThis & {
+        open?: (
+          input?: string,
+          target?: string,
+          features?: string,
+        ) => Window | null;
+      }
+    ).open;
+    if (typeof candidate === "function") {
+      candidate.call(globalThis, url, "_blank", "noopener,noreferrer");
+    }
+  }
+
   return (
     <TooltipProvider>
-      <div className="flex h-full min-h-[18rem] w-full flex-col overflow-hidden rounded-md">
+      <div className="flex h-full min-h-[18rem] w-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-black/75 via-black/60 to-black/80">
         <TitlebarPortal>
           <Toolbar
             activeTab={activeTab}
@@ -211,6 +280,7 @@ export function SafariApp({ instanceId: _ }: { instanceId: string }) {
               updateTab(activeId, { input: value })
             }
             onNewTab={() => addTab()}
+            onOpenExternal={() => handleOpenExternal(activeTab.url)}
           />
         </TitlebarPortal>
 
@@ -228,12 +298,9 @@ export function SafariApp({ instanceId: _ }: { instanceId: string }) {
         <ContentView
           tabs={tabs}
           activeId={activeId}
-          setFrameRef={(id: string, el: HTMLIFrameElement | null) => {
-            frameRefs.current[id] = el;
-          }}
-          onTabLoaded={(id: string, title: string | undefined) =>
-            updateTab(id, { loading: false, title })
-          }
+          onTabLoaded={handleTabLoaded}
+          onRequestModeChange={handleModeChange}
+          onOpenInNewWindow={handleOpenExternal}
         />
       </div>
     </TooltipProvider>
