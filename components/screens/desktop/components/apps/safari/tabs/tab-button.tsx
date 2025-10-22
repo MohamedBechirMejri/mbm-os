@@ -1,6 +1,6 @@
 "use client";
 
-import { Globe, X } from "lucide-react"; 
+import { Globe, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Tab } from "../types";
 
@@ -28,35 +28,38 @@ export function TabButton({
   })();
 
   return (
-    <button
-      type="button"
-      role="tab"
-      aria-selected={isActive}
-      aria-label={displayTitle}
-      title={displayTitle}
+    <div
       className={cn(
-        "group relative flex max-w-[16rem] items-center gap-2 px-3 py-1.5 text-[0.9rem] outline-none rounded-md transition-colors",
+        "group relative flex max-w-[16rem] items-center gap-2 px-3 py-1.5 text-[0.9rem] rounded-md transition-colors",
         isActive
           ? "bg-foreground/15 text-foreground font-medium shadow-inner"
           : "hover:bg-foreground/5 text-foreground/90",
-        "focus-visible:ring-2 focus-visible:ring-primary/40",
       )}
-      onClick={onActivate}
     >
-      {tab.favicon ? (
-        <img
-          src={tab.favicon}
-          alt="favicon"
-          width={16}
-          height={16}
-          className="rounded-sm"
-        />
-      ) : (
-        <Globe className="size-4" />
-      )}
-      <span className="truncate text-left" data-tab-title>
-        {displayTitle}
-      </span>
+      <button
+        type="button"
+        role="tab"
+        aria-selected={isActive}
+        aria-label={displayTitle}
+        title={displayTitle}
+        className="flex flex-1 items-center gap-2 text-left outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded"
+        onClick={onActivate}
+      >
+        {tab.favicon ? (
+          <img
+            src={tab.favicon}
+            alt=""
+            width={16}
+            height={16}
+            className="rounded-sm"
+          />
+        ) : (
+          <Globe className="size-4" />
+        )}
+        <span className="truncate" data-tab-title>
+          {displayTitle}
+        </span>
+      </button>
       <button
         type="button"
         aria-label="Close tab"
@@ -69,6 +72,6 @@ export function TabButton({
         <X className="size-3.5" />
       </button>
       {/* Underline removed for simplicity; background + weight indicate active state */}
-    </button>
+    </div>
   );
 }
