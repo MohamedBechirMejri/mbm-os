@@ -192,7 +192,7 @@ export function Sidebar({ path, onNavigate }: SidebarProps) {
     "flex items-center gap-2 px-3 py-[0.35rem] text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-white/55 transition-colors hover:text-white/75";
 
   return (
-    <aside className="flex h-full w-[248px] flex-col px-2 py-2">
+    <aside className="flex h-full w-48 flex-col p-1.5">
       <GlassSurface
         width="100%"
         height="100%"

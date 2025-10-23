@@ -48,7 +48,7 @@ export function Toolbar({
 }: ToolbarProps) {
   return (
     <TitlebarPortal>
-      <div className="pointer-events-none w-full px-4 pt-[1.1rem]">
+      <div className="pointer-events-none w-full pl-32 px-4 pt-[1.1rem]">
         <GlassSurface
           width="100%"
           height="auto"
