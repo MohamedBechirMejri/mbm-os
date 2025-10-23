@@ -109,7 +109,7 @@ function ActionButton({
         onClick();
       }}
       className={cn(
-        `h-3 w-3 rounded-full border border-black/15 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.35)] cursor-default`,
+        `size-3.5 rounded-full cursor-default`,
         "hover:brightness-90 active:brightness-75",
         className,
       )}

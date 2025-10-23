@@ -21,6 +21,11 @@ export const catalogApps: AppMeta[] = [
     minSize: { w: 520, h: 380 },
     floatingActionBar: true,
     titlebarHeight: 46,
+    actionButtonsStyle:{
+      top: 22,
+      left: 22,
+      position: "absolute",
+    }
   },
   {
     id: "safari",
