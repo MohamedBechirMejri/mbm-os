@@ -40,37 +40,162 @@ function formatLiveAliasHelp(): string[] {
   });
 }
 
-function formatLiveAliasOutput(result: LiveAliasResult): string {
-  const linesBuffer: string[] = [];
-  linesBuffer.push(result.headline);
-  linesBuffer.push("────────────────────────────────────────");
+function formatLiveAliasOutput(result: LiveAliasResult): React.ReactNode {
+  const sectionTitleStyle: React.CSSProperties = {
+    fontWeight: 600,
+    letterSpacing: "0.02em",
+    marginBottom: "0.25rem",
+  };
 
+  const monoBlockStyle: React.CSSProperties = {
+    fontFamily: "inherit",
+    whiteSpace: "pre-wrap",
+    lineHeight: 1.5,
+  };
+
+  const header = React.createElement(
+    "div",
+    { style: { display: "flex", flexDirection: "column", gap: "0.25rem" } },
+    React.createElement(
+      "span",
+      { style: { fontWeight: 700, letterSpacing: "0.04em" } },
+      result.headline,
+    ),
+    React.createElement("span", {
+      "aria-hidden": "true",
+      style: {
+        width: "100%",
+        height: "1px",
+        background: "rgba(255,255,255,0.24)",
+        display: "block",
+      },
+    }),
+  );
+
+  let metricsSection: React.ReactNode = null;
   if (result.metrics.length > 0) {
-    const labelWidth = result.metrics.reduce(
-      (width, metric) => Math.max(width, metric.label.length),
-      0,
+    const metricCells = result.metrics.map((metric) =>
+      React.createElement(
+        React.Fragment,
+        { key: `${metric.label}-${metric.value}` },
+        React.createElement("span", { style: { opacity: 0.7 } }, metric.label),
+        React.createElement(
+          "span",
+          { style: { fontWeight: 500 } },
+          metric.value,
+        ),
+      ),
     );
 
-    for (const metric of result.metrics) {
-      linesBuffer.push(
-        `  ${metric.label.padEnd(labelWidth, " ")}: ${metric.value}`,
-      );
-    }
+    metricsSection = React.createElement(
+      "div",
+      null,
+      React.createElement("div", { style: sectionTitleStyle }, "Metrics"),
+      React.createElement(
+        "div",
+        {
+          style: {
+            display: "grid",
+            gridTemplateColumns: "max-content 1fr",
+            rowGap: "0.35rem",
+            columnGap: "1.25rem",
+          },
+        },
+        metricCells,
+      ),
+    );
   }
 
+  let highlightsSection: React.ReactNode = null;
   if (result.highlights && result.highlights.length > 0) {
-    linesBuffer.push("");
-    for (const highlight of result.highlights) {
-      linesBuffer.push(`• ${highlight.prefix}: ${highlight.detail}`);
-    }
+    const highlightItems = result.highlights.map((highlight, index) =>
+      React.createElement(
+        "li",
+        {
+          key: `${highlight.prefix}-${index}`,
+          style: { paddingLeft: "0.25rem" },
+        },
+        React.createElement(
+          "div",
+          { style: { fontWeight: 600, marginBottom: "0.25rem" } },
+          highlight.prefix,
+        ),
+        React.createElement(
+          "div",
+          { style: { ...monoBlockStyle, opacity: 0.85 } },
+          highlight.detail,
+        ),
+      ),
+    );
+
+    highlightsSection = React.createElement(
+      "div",
+      null,
+      React.createElement("div", { style: sectionTitleStyle }, "Highlights"),
+      React.createElement(
+        "ol",
+        {
+          style: {
+            listStyle: "decimal",
+            paddingLeft: "1.5rem",
+            margin: 0,
+            display: "flex",
+            flexDirection: "column",
+            gap: "0.75rem",
+          },
+        },
+        highlightItems,
+      ),
+    );
   }
 
+  let footerSection: React.ReactNode = null;
   if (result.footer && result.footer.length > 0) {
-    linesBuffer.push("");
-    linesBuffer.push(...result.footer);
+    const footerItems = result.footer.map((line, index) =>
+      React.createElement(
+        "li",
+        { key: `${line}-${index}`, style: monoBlockStyle },
+        line,
+      ),
+    );
+
+    footerSection = React.createElement(
+      "div",
+      null,
+      React.createElement("div", { style: sectionTitleStyle }, "Links"),
+      React.createElement(
+        "ul",
+        {
+          style: {
+            listStyle: "none",
+            padding: 0,
+            margin: 0,
+            display: "flex",
+            flexDirection: "column",
+            gap: "0.35rem",
+          },
+        },
+        footerItems,
+      ),
+    );
   }
 
-  return linesBuffer.join("\n");
+  return React.createElement(
+    "div",
+    {
+      style: {
+        display: "flex",
+        flexDirection: "column",
+        gap: "1rem",
+        padding: "0.25rem 0",
+        fontFamily: "inherit",
+      },
+    },
+    header,
+    metricsSection,
+    highlightsSection,
+    footerSection,
+  );
 }
 
 export function buildCommands(): CommandDictionary {

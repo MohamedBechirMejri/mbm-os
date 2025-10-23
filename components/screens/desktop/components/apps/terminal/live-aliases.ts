@@ -140,10 +140,24 @@ function formatRelativeTime(value: string): string {
 function formatRepoHighlights(
   repos: GithubPulseResponse["recentRepos"],
 ): HighlightRow[] {
-  return repos.map((repo) => ({
-    prefix: repo.name,
-    detail: `${repo.description ? `${truncate(repo.description.trim(), 84)} • ` : ""}${repo.language ?? "Multi"} • Updated ${formatRelativeTime(repo.pushedAt)}`,
-  }));
+  return repos.map((repo) => {
+    const detailParts: string[] = [];
+    const description = repo.description?.trim();
+    if (description) {
+      detailParts.push(`Summary: ${truncate(description, 84)}`);
+    }
+    detailParts.push(`Language: ${repo.language ?? "Multi"}`);
+    detailParts.push(
+      `Stars: ${repo.stars.toString()} • Forks: ${repo.forks.toString()}`,
+    );
+    detailParts.push(
+      `Last push: ${formatRelativeTime(repo.pushedAt)} (${formatDate(repo.pushedAt)})`,
+    );
+    return {
+      prefix: repo.name,
+      detail: detailParts.join("\n"),
+    } satisfies HighlightRow;
+  });
 }
 
 function formatRepoFooter(repos: GithubPulseResponse["recentRepos"]): string[] {
@@ -153,10 +167,17 @@ function formatRepoFooter(repos: GithubPulseResponse["recentRepos"]): string[] {
 function formatActivityHighlights(
   activity: GithubPulseResponse["recentActivity"],
 ): HighlightRow[] {
-  return activity.map((item, index) => ({
-    prefix: `#${index + 1}`,
-    detail: `${item.summary} (${formatRelativeTime(item.occurredAt)})`,
-  }));
+  return activity.map((item, index) => {
+    const detailParts = [
+      `Summary: ${truncate(item.summary, 96)}`,
+      `When: ${formatRelativeTime(item.occurredAt)} (${formatDate(item.occurredAt)})`,
+    ];
+
+    return {
+      prefix: `Event ${index + 1}`,
+      detail: detailParts.join("\n"),
+    } satisfies HighlightRow;
+  });
 }
 
 function truncate(value: string, maxLength: number): string {
@@ -182,20 +203,24 @@ export const liveAliasRegistry: LiveAliasDefinition[] = [
         const highlights: HighlightRow[] = [];
 
         if (pulse.latestRepo) {
+          const lastPushLines = [
+            `Repository: ${pulse.latestRepo.name}`,
+            `When: ${formatDate(pulse.latestRepo.pushedAt)} (${formatRelativeTime(pulse.latestRepo.pushedAt)})`,
+          ];
           highlights.push({
             prefix: "Latest push",
-            detail: `${pulse.latestRepo.name} • ${formatDate(pulse.latestRepo.pushedAt)}`,
+            detail: lastPushLines.join("\n"),
           });
           const trimmedDescription = pulse.latestRepo.description?.trim();
           if (trimmedDescription) {
             highlights.push({
               prefix: "Focus",
-              detail: trimmedDescription,
+              detail: truncate(trimmedDescription, 120),
             });
           }
           highlights.push({
             prefix: "Repo",
-            detail: `${pulse.latestRepo.url} (${pulse.latestRepo.language ?? "Multi"} • ★ ${pulse.latestRepo.stars})`,
+            detail: `Language: ${pulse.latestRepo.language ?? "Multi"}\nStars: ${pulse.latestRepo.stars.toString()}\nURL: ${pulse.latestRepo.url}`,
           });
         }
 
