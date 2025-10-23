@@ -386,7 +386,7 @@ export function WindowView({
       <motion.div
         className={
           `wm-window absolute rounded-xl overflow-hidden select-none ` +
-          `bg-black/40 backdrop-blur-[1.4rem] ` +
+          `bg-black/40 border border-[#484848] backdrop-blur-[1.4rem] ` +
           (win.focused
             ? "shadow-[0_10px_32px_rgba(0,0,0,0.45)]"
             : "shadow-[0_10px_28px_rgba(0,0,0,0.28)]")
