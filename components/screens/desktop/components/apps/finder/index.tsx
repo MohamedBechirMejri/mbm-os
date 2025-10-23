@@ -149,7 +149,7 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
   const selectionKind = selectedNode ? getKindLabel(selectedNode) : null;
 
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden bg-[#080a10] text-white">
+    <div className="flex h-full w-full flex-col overflow-hidden bg-[#1E1E1E] text-white">
       {/* Titlebar toolbar */}
       <TitlebarPortal>
         <div className="pointer-events-none w-full px-4 pt-[1.1rem]">
