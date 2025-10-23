@@ -132,20 +132,35 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [selected, selectedNode, openFolder, goUp]);
 
+  const currentCrumb = crumbs.at(-1);
+  const handleCrumbNavigate = useCallback(
+    (index: number) => {
+      if (index === crumbs.length - 1) return;
+      setPath(
+        index === 0 ? [] : crumbs.slice(1, index + 1).map((crumb) => crumb.id),
+      );
+      setSelected(null);
+    },
+  [crumbs],
+  );
+
+  const statusLabel = `${items.length} item${items.length === 1 ? "" : "s"}`;
+  const selectionKind = selectedNode ? getKindLabel(selectedNode) : null;
+
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden bg-[#0f0f11] text-white">
+    <div className="flex h-full w-full flex-col overflow-hidden bg-[#080a10] text-white">
       {/* Titlebar toolbar */}
       <TitlebarPortal>
         <div className="pointer-events-none w-full px-3 pt-1">
-          <div className="pointer-events-auto flex items-center justify-between rounded-2xl border border-white/10 bg-[rgba(28,28,32,0.9)] px-3 py-1.5 text-[13px] shadow-[0_16px_48px_rgba(0,0,0,0.35)] backdrop-blur-2xl">
+          <div className="pointer-events-auto flex items-center justify-between rounded-2xl border border-white/12 bg-[#12141c]/90 px-3 py-1.5 text-[13px] shadow-[0_18px_40px_rgba(0,0,0,0.45)] backdrop-blur-xl">
             <div className="flex min-w-0 items-center gap-3">
-              <div className="flex items-center gap-1 rounded-full bg-white/5 px-1 py-0.5">
+              <div className="flex items-center gap-1 rounded-full bg-white/8 px-1 py-0.5">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
                       size="icon"
                       variant="ghost"
-                      className="size-7 rounded-full text-white/90 hover:bg-white/15 disabled:opacity-30"
+                      className="size-7 rounded-full text-white/90 hover:bg-white/20 disabled:opacity-30"
                       onClick={goUp}
                       disabled={path.length === 0}
                       aria-label="Go Back"
@@ -161,7 +176,7 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
                       <Button
                         size="icon"
                         variant="ghost"
-                        className="size-7 rounded-full text-white/50 hover:bg-white/15 disabled:opacity-30"
+                        className="size-7 rounded-full text-white/50 hover:bg-white/18 disabled:opacity-30"
                         disabled
                         aria-label="Go Forward"
                       >
@@ -173,31 +188,21 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
                 </Tooltip>
               </div>
 
-              <nav className="hidden min-w-0 items-center gap-1 text-white/70 md:flex">
-                {crumbs.map((c, i) => (
-                  <div key={c.id} className="flex items-center gap-1 min-w-0">
-                    <button
-                      type="button"
-                      className="truncate rounded-md px-2 py-1 transition-colors hover:bg-white/10 hover:text-white"
-                      onClick={() =>
-                        setPath(
-                          i === 0
-                            ? []
-                            : crumbs.slice(1, i + 1).map((x) => x.id),
-                        )
-                      }
-                    >
-                      {c.name}
-                    </button>
-                    {i < crumbs.length - 1 ? (
-                      <span className="text-white/30">›</span>
-                    ) : null}
-                  </div>
-                ))}
-              </nav>
+              <div className="hidden min-w-0 items-center gap-2 rounded-xl bg-white/8 px-2 py-1 md:flex">
+                {currentCrumb ? (
+                  <>
+                    <FileIcon node={folder} size={20} />
+                    <span className="truncate text-[13px] font-medium text-white/85">
+                      {currentCrumb.name}
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-white/60">Finder</span>
+                )}
+              </div>
             </div>
 
-            <div className="flex items-center gap-1 rounded-lg bg-white/6 p-1">
+            <div className="flex items-center gap-1 rounded-lg bg-white/8 p-1">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
@@ -269,7 +274,7 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Search"
-                  className="h-8 w-full rounded-xl border border-white/10 bg-black/30 pl-9 text-[13px] text-white placeholder:text-white/50"
+                  className="h-8 w-full rounded-xl border border-white/12 bg-black/40 pl-9 text-[13px] text-white placeholder:text-white/50"
                 />
               </div>
             </div>
@@ -282,7 +287,7 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
         <Sidebar path={path} onNavigate={handleNavigate} />
 
         {/* Content */}
-        <section className="relative flex-1 overflow-auto bg-[rgba(15,15,19,0.78)]">
+        <section className="relative flex-1 overflow-auto bg-[#10131a]">
           {view === "grid" && (
             <div className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-3 p-4">
               {items.map((node) => (
@@ -300,7 +305,7 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
           {view === "list" && (
             <div className="flex flex-col">
               <div
-                className={`${LIST_GRID_TEMPLATE} sticky top-0 z-10 border-b border-white/8 bg-[rgba(18,18,22,0.92)] px-4 py-2 text-[11px] uppercase tracking-[0.18em] text-white/45 backdrop-blur`}
+                className={`${LIST_GRID_TEMPLATE} sticky top-0 z-10 border-b border-white/8 bg-[#0f1218] px-4 py-2 text-[11px] uppercase tracking-[0.18em] text-white/45`}
               >
                 <span className="pl-9">Name</span>
                 <span>Date Modified</span>
@@ -342,6 +347,46 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
 
         {showPreview && <PreviewPanel node={selectedNode} />}
       </div>
+
+      <footer className="flex items-center justify-between gap-4 border-t border-white/10 bg-[#0f1117] px-4 py-2 text-[12px] text-white/65">
+        <div className="flex min-w-0 items-center gap-1 overflow-hidden">
+          {crumbs.map((crumb, index) => (
+            <div key={crumb.id} className="flex min-w-0 items-center">
+              <button
+                type="button"
+                onClick={() => handleCrumbNavigate(index)}
+                className={`truncate rounded-md px-2 py-1 transition-colors ${
+                  index === crumbs.length - 1
+                    ? "cursor-default bg-white/12 text-white"
+                    : "text-white/70 hover:bg-white/10 hover:text-white"
+                }`}
+                disabled={index === crumbs.length - 1}
+              >
+                {crumb.name}
+              </button>
+              {index < crumbs.length - 1 && (
+                <ChevronRight className="mx-1 size-3 text-white/30" />
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-2 text-white/60">
+          {selectedNode && selectionKind ? (
+            <>
+              <FileIcon node={selectedNode} size={18} />
+              <span className="max-w-[220px] truncate text-white/85">
+                {selectedNode.name}
+              </span>
+              <span className="hidden sm:inline text-white/45">
+                {selectionKind}
+              </span>
+            </>
+          ) : (
+            <span>{statusLabel}</span>
+          )}
+        </div>
+      </footer>
 
       {/* Quick Look */}
       <QuickLook file={quickLookFile} onClose={() => setQuickLookFile(null)} />
@@ -491,7 +536,7 @@ function ColumnView({ path, selected, onSelect, onNavigate }: ColumnViewProps) {
       {columns.map((columnItems, columnIndex) => (
         <div
           key={`col-${columnIndex}-${path[columnIndex] || "root"}`}
-          className="flex h-full min-w-[220px] flex-col border-r border-white/10 bg-[rgba(20,20,24,0.85)]"
+          className="flex h-full min-w-[220px] flex-col border-r border-white/12 bg-[#0f1117]"
         >
           {columnItems.map((node) => {
             const isSelected =

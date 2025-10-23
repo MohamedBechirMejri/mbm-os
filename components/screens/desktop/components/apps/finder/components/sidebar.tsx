@@ -185,7 +185,7 @@ export function Sidebar({ path, onNavigate }: SidebarProps) {
   };
 
   return (
-    <aside className="flex w-[220px] flex-col gap-4 border-r border-white/10 bg-[rgba(26,26,30,0.85)] p-3 text-sm backdrop-blur-xl">
+  <aside className="flex w-[220px] flex-col gap-4 border-r border-white/12 bg-[#0f1117] p-3 text-sm">
       {sections.map((section) => (
         <div key={section.title} className="flex flex-col gap-1">
           {section.collapsible ? (

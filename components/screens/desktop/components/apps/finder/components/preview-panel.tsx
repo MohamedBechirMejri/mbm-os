@@ -13,7 +13,7 @@ interface PreviewPanelProps {
 export function PreviewPanel({ node }: PreviewPanelProps) {
   if (!node) {
     return (
-      <div className="flex h-full w-80 flex-col items-center justify-center border-l border-white/10 bg-gradient-to-b from-white/5 to-transparent p-6 text-white/40 backdrop-blur-xl">
+      <div className="flex h-full w-80 flex-col items-center justify-center border-l border-white/12 bg-[#0f1117] p-6 text-white/40">
         <File className="mb-2 size-12 opacity-50" />
         <p className="text-sm">Select an item to preview</p>
       </div>
@@ -42,7 +42,7 @@ export function PreviewPanel({ node }: PreviewPanelProps) {
   const modifiedLabel = node.modified ?? "--";
 
   return (
-    <div className="flex h-full w-80 flex-col gap-4 border-l border-white/10 bg-gradient-to-b from-white/5 to-transparent p-6 backdrop-blur-xl animate-in fade-in duration-200">
+    <div className="flex h-full w-80 flex-col gap-4 border-l border-white/12 bg-[#0f1117] p-6 animate-in fade-in duration-200">
       {/* Preview */}
       <div className="flex flex-col items-center gap-4">
         {canPreview && file ? (
