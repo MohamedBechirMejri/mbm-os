@@ -128,7 +128,7 @@ function createWindowVariants(
       opacity: 0,
       rotateX: 12,
       filter: "blur(16px)",
-      borderRadius: "0.75rem",
+      borderRadius: "2rem",
     },
     idle: {
       x: 0,
@@ -138,7 +138,7 @@ function createWindowVariants(
       opacity: 1,
       rotateX: 0,
       filter: "blur(0px)",
-      borderRadius: "0.75rem",
+      borderRadius: "2rem",
     },
     entering: {
       x: 0,
@@ -148,7 +148,7 @@ function createWindowVariants(
       opacity: 1,
       rotateX: 0,
       filter: "blur(0px)",
-      borderRadius: "0.75rem",
+      borderRadius: "2rem",
       transition: {
         default: createWindowSpring({ bounce: 0.24 }),
         opacity: createWindowSpring({ damping: 40, stiffness: 480 }),
@@ -163,7 +163,7 @@ function createWindowVariants(
       opacity: 0,
       rotateX: -12,
       filter: "blur(18px)",
-      borderRadius: "0.75rem",
+      borderRadius: "2rem",
       transition: {
         default: createWindowSpring({
           damping: 26,
@@ -187,7 +187,7 @@ function createWindowVariants(
         minimizedSignature.filter,
       ],
       borderRadius: [
-        "0.75rem",
+        "23rem",
         minimizedSignature.borderRadius,
         minimizedSignature.borderRadius,
       ],
@@ -204,7 +204,7 @@ function createWindowVariants(
       opacity: 1,
       rotateX: 0,
       filter: "blur(0px)",
-      borderRadius: "0.75rem",
+      borderRadius: "2rem",
       transition: restoreTransition,
     },
     minimized: {
