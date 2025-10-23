@@ -48,18 +48,8 @@ export function Toolbar({
 }: ToolbarProps) {
   return (
     <TitlebarPortal>
-      <div className="pointer-events-none w-full pl-32 px-4 pt-[1.1rem]">
-        <GlassSurface
-          width="100%"
-          height="auto"
-          borderRadius={26}
-          blur={18}
-          saturation={1.55}
-          brightness={48}
-          opacity={0.9}
-          className="pointer-events-auto w-full !overflow-visible shadow-[0_24px_48px_rgba(6,8,18,0.42)]"
-          containerClassName="!p-0 flex w-full items-center justify-between gap-4 rounded-[inherit] px-4 py-[0.85rem] text-[0.8125rem]"
-        >
+      <div className="pointer-events-none w-full pl-46 pt-[1.1rem]">
+        <div className="w-full !overflow-visible flex border">
           <div className="flex min-w-0 items-center gap-3">
             <div className="flex items-center gap-[0.35rem] rounded-full bg-white/12 px-1.5 py-[0.2rem]">
               <Tooltip>
@@ -185,7 +175,7 @@ export function Toolbar({
               />
             </div>
           </div>
-        </GlassSurface>
+        </div>
       </div>
     </TitlebarPortal>
   );
