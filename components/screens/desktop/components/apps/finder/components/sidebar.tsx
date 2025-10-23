@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useMemo, useState } from "react";
+import GlassSurface from "@/components/ui/glass-surface";
+import { cn } from "@/lib/utils";
 import type { FSPath } from "../fs";
 
 interface SidebarProps {
@@ -184,63 +186,81 @@ export function Sidebar({ path, onNavigate }: SidebarProps) {
     setCollapsed((prev) => ({ ...prev, [title]: !prev[title] }));
   };
 
-  return (
-    <aside className="flex w-[220px] flex-col gap-4 border-r border-white/12 bg-[#0f1117] p-3 text-sm">
-      {sections.map((section) => (
-        <div key={section.title} className="flex flex-col gap-1">
-          {section.collapsible ? (
-            <button
-              type="button"
-              onClick={() => toggleSection(section.title)}
-              className="flex items-center gap-1 px-2 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-white/40 hover:text-white/70"
-            >
-              {collapsed[section.title] ? (
-                <ChevronRight className="size-3" />
-              ) : (
-                <ChevronDown className="size-3" />
-              )}
-              {section.title}
-            </button>
-          ) : (
-            <div className="px-2 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-white/40">
-              {section.title}
-            </div>
-          )}
+  const sectionHeadingClass =
+    "px-3 text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-white/55";
+  const collapsibleHeadingClass =
+    "flex items-center gap-2 px-3 py-[0.35rem] text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-white/55 transition-colors hover:text-white/75";
 
-          {!collapsed[section.title] && (
-            <div className="flex flex-col gap-0.5">
-              {section.items.map((item) => {
-                const itemKey = item.path.join("/");
-                const isActive =
-                  currentPathKey === itemKey ||
-                  (itemKey !== "" && currentPathKey.startsWith(`${itemKey}/`));
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => onNavigate(item.path)}
-                    className={`relative flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left transition-all ${
-                      isActive
-                        ? "bg-white/14 text-white"
-                        : "text-white/70 hover:bg-white/8 hover:text-white"
-                    }`}
-                  >
-                    {isActive && (
-                      <span className="absolute inset-y-1 left-0 w-[3px] rounded-full bg-white/80" />
-                    )}
-                    <span className="flex items-center justify-center">
-                      <RenderIcon config={item.icon} active={isActive} />
-                    </span>
-                    <span className="truncate text-[13px] leading-none">
-                      {item.label}
-                    </span>
-                  </button>
-                );
-              })}
+  return (
+    <aside className="flex h-full w-[248px] flex-col px-3 py-4">
+      <GlassSurface
+        width="100%"
+        height="100%"
+        borderRadius={28}
+        blur={18}
+        saturation={1.45}
+        brightness={52}
+        opacity={0.88}
+        className="h-full w-full !overflow-hidden shadow-[0_32px_60px_rgba(4,6,18,0.38)]"
+        containerClassName="!p-0 flex h-full w-full flex-col overflow-hidden"
+      >
+        <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-3 py-4 text-[0.8125rem] text-white/80">
+          {sections.map((section) => (
+            <div key={section.title} className="flex flex-col gap-2">
+              {section.collapsible ? (
+                <button
+                  type="button"
+                  onClick={() => toggleSection(section.title)}
+                  className={collapsibleHeadingClass}
+                >
+                  {collapsed[section.title] ? (
+                    <ChevronRight className="size-3" />
+                  ) : (
+                    <ChevronDown className="size-3" />
+                  )}
+                  {section.title}
+                </button>
+              ) : (
+                <div className={sectionHeadingClass}>{section.title}</div>
+              )}
+
+              {!collapsed[section.title] && (
+                <div className="flex flex-col gap-[0.3rem]">
+                  {section.items.map((item) => {
+                    const itemKey = item.path.join("/");
+                    const isActive =
+                      itemKey === ""
+                        ? currentPathKey === ""
+                        : currentPathKey === itemKey ||
+                          currentPathKey.startsWith(`${itemKey}/`);
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => onNavigate(item.path)}
+                        className={cn(
+                          "relative flex w-full items-center gap-2 rounded-[1.1rem] px-3 py-[0.55rem] text-left text-[0.8125rem] font-medium transition-all duration-150 ease-out",
+                          isActive
+                            ? "bg-white/90 text-[#0f1117] shadow-[0_16px_36px_rgba(10,12,20,0.28)] before:absolute before:inset-y-[0.35rem] before:-left-[0.55rem] before:w-[0.28rem] before:rounded-full before:bg-[#3c84ff]"
+                            : "text-white/75 hover:bg-white/14 hover:text-white",
+                        )}
+                        aria-current={isActive ? "page" : undefined}
+                      >
+                        <span className="relative flex items-center justify-center">
+                          <RenderIcon config={item.icon} active={isActive} />
+                        </span>
+                        <span className="truncate leading-tight">
+                          {item.label}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
-          )}
+          ))}
         </div>
-      ))}
+      </GlassSurface>
     </aside>
   );
 }
@@ -259,7 +279,10 @@ function RenderIcon({
         alt=""
         width={18}
         height={18}
-        className={`rounded-sm object-contain ${active ? "" : "opacity-75"}`}
+        className={cn(
+          "rounded-[0.35rem] object-contain transition-opacity",
+          active ? "opacity-100" : "opacity-80",
+        )}
         priority={false}
       />
     );
@@ -267,12 +290,20 @@ function RenderIcon({
 
   if (config.type === "lucide") {
     const Icon = config.Icon;
-    return <Icon className="size-[18px]" strokeWidth={1.7} />;
+    return (
+      <Icon
+        className={cn(
+          "size-[1.125rem] transition-colors",
+          active ? "text-[#0f1117]" : "text-white/75",
+        )}
+        strokeWidth={1.6}
+      />
+    );
   }
 
   return (
     <span
-      className="inline-flex size-[10px] items-center justify-center rounded-full"
+      className="inline-flex size-[0.55rem] items-center justify-center rounded-full"
       style={{ backgroundColor: config.color }}
     />
   );

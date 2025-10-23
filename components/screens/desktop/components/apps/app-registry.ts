@@ -19,7 +19,7 @@ export const catalogApps: AppMeta[] = [
     icon: "file-manager",
     Component: FinderApp,
     minSize: { w: 520, h: 380 },
-    floatingActionBar: false,
+    floatingActionBar: true,
     titlebarHeight: 46,
   },
   {

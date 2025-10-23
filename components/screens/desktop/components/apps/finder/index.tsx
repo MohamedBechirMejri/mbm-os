@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import GlassSurface from "@/components/ui/glass-surface";
 import { Input } from "@/components/ui/input";
 import {
   Tooltip,
@@ -151,16 +152,26 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
     <div className="flex h-full w-full flex-col overflow-hidden bg-[#080a10] text-white">
       {/* Titlebar toolbar */}
       <TitlebarPortal>
-        <div className="pointer-events-none w-full px-3 pt-1">
-          <div className="pointer-events-auto flex items-center justify-between rounded-2xl border border-white/12 bg-[#12141c]/90 px-3 py-1.5 text-[13px] shadow-[0_18px_40px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+        <div className="pointer-events-none w-full px-4 pt-[1.1rem]">
+          <GlassSurface
+            width="100%"
+            height="auto"
+            borderRadius={26}
+            blur={18}
+            saturation={1.55}
+            brightness={48}
+            opacity={0.9}
+            className="pointer-events-auto w-full !overflow-visible shadow-[0_24px_48px_rgba(6,8,18,0.42)]"
+            containerClassName="!p-0 flex w-full items-center justify-between gap-4 rounded-[inherit] px-4 py-[0.85rem] text-[0.8125rem]"
+          >
             <div className="flex min-w-0 items-center gap-3">
-              <div className="flex items-center gap-1 rounded-full bg-white/8 px-1 py-0.5">
+              <div className="flex items-center gap-[0.35rem] rounded-full bg-white/12 px-1.5 py-[0.2rem]">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
                       size="icon"
                       variant="ghost"
-                      className="size-7 rounded-full text-white/90 hover:bg-white/20 disabled:opacity-30"
+                      className="size-7 rounded-full text-white/90 hover:bg-white/18 disabled:opacity-30"
                       onClick={goUp}
                       disabled={path.length === 0}
                       aria-label="Go Back"
@@ -176,7 +187,7 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
                       <Button
                         size="icon"
                         variant="ghost"
-                        className="size-7 rounded-full text-white/50 hover:bg-white/18 disabled:opacity-30"
+                        className="size-7 rounded-full text-white/55 hover:bg-white/18 disabled:opacity-30"
                         disabled
                         aria-label="Go Forward"
                       >
@@ -188,21 +199,21 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
                 </Tooltip>
               </div>
 
-              <div className="hidden min-w-0 items-center gap-2 rounded-xl bg-white/8 px-2 py-1 md:flex">
+              <div className="hidden min-w-0 items-center gap-2 rounded-[1.1rem] bg-white/10 px-3 py-[0.45rem] md:flex">
                 {currentCrumb ? (
                   <>
                     <FileIcon node={folder} size={20} />
-                    <span className="truncate text-[13px] font-medium text-white/85">
+                    <span className="truncate text-[0.8125rem] font-medium text-white/85">
                       {currentCrumb.name}
                     </span>
                   </>
                 ) : (
-                  <span className="text-white/60">Finder</span>
+                  <span className="text-white/65">Finder</span>
                 )}
               </div>
             </div>
 
-            <div className="flex items-center gap-1 rounded-lg bg-white/8 p-1">
+            <div className="flex items-center gap-1 rounded-[0.9rem] bg-white/10 p-1">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
@@ -253,7 +264,7 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
                   <Button
                     size="icon"
                     variant={showPreview ? "default" : "ghost"}
-                    className="size-7 rounded-lg"
+                    className="size-7 rounded-[0.85rem]"
                     aria-label="Toggle preview"
                     onClick={() => setShowPreview(!showPreview)}
                   >
@@ -269,16 +280,16 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
                 </TooltipContent>
               </Tooltip>
               <div className="relative w-[15.5rem] max-w-[40vw]">
-                <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-white/50" />
+                <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-white/55" />
                 <Input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Search"
-                  className="h-8 w-full rounded-xl border border-white/12 bg-black/40 pl-9 text-[13px] text-white placeholder:text-white/50"
+                  className="h-8 w-full rounded-[1.1rem] border border-white/12 bg-black/40 pl-9 text-[0.8125rem] text-white placeholder:text-white/55"
                 />
               </div>
             </div>
-          </div>
+          </GlassSurface>
         </div>
       </TitlebarPortal>
 
