@@ -141,7 +141,7 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
       );
       setSelected(null);
     },
-  [crumbs],
+    [crumbs],
   );
 
   const statusLabel = `${items.length} item${items.length === 1 ? "" : "s"}`;
