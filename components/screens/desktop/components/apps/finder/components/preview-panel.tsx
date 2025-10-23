@@ -22,6 +22,24 @@ export function PreviewPanel({ node }: PreviewPanelProps) {
 
   const file = isFile(node) ? (node as FSFile) : null;
   const canPreview = file && (file.kind === "image" || file.kind === "video");
+  const defaultKindLabel =
+    node.type === "folder"
+      ? "Folder"
+      : ({
+          image: "Image",
+          video: "Video",
+          audio: "Audio",
+          text: "Plain Text",
+          pdf: "PDF Document",
+          other: "Application",
+        }[file?.kind ?? "other"] ?? "File");
+  const kindLabel = node.kindLabel ?? defaultKindLabel;
+  const sizeLabel = node.sizeLabel
+    ? node.sizeLabel
+    : file?.size
+      ? formatBytes(file.size)
+      : "--";
+  const modifiedLabel = node.modified ?? "--";
 
   return (
     <div className="flex h-full w-80 flex-col gap-4 border-l border-white/10 bg-gradient-to-b from-white/5 to-transparent p-6 backdrop-blur-xl animate-in fade-in duration-200">
@@ -69,27 +87,23 @@ export function PreviewPanel({ node }: PreviewPanelProps) {
           <File className="size-4 text-white/40" />
           <div className="flex-1">
             <div className="text-white/50">Kind</div>
-            <div className="text-white/80 capitalize">
-              {node.type === "folder" ? "Folder" : (node as FSFile).kind}
-            </div>
+            <div className="text-white/80 capitalize">{kindLabel}</div>
           </div>
         </div>
 
-        {file?.size && (
-          <div className="flex items-center gap-3">
-            <HardDrive className="size-4 text-white/40" />
-            <div className="flex-1">
-              <div className="text-white/50">Size</div>
-              <div className="text-white/80">{formatBytes(file.size)}</div>
-            </div>
+        <div className="flex items-center gap-3">
+          <HardDrive className="size-4 text-white/40" />
+          <div className="flex-1">
+            <div className="text-white/50">Size</div>
+            <div className="text-white/80">{sizeLabel}</div>
           </div>
-        )}
+        </div>
 
         <div className="flex items-center gap-3">
           <Calendar className="size-4 text-white/40" />
           <div className="flex-1">
             <div className="text-white/50">Modified</div>
-            <div className="text-white/80">Today at 12:00 PM</div>
+            <div className="text-white/80">{modifiedLabel}</div>
           </div>
         </div>
       </div>

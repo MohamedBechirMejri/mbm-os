@@ -28,9 +28,13 @@ import { QuickLook } from "./quicklook";
 
 type ViewMode = "grid" | "list" | "columns";
 
+const LIST_GRID_TEMPLATE =
+  "grid grid-cols-[minmax(220px,1.6fr)_minmax(170px,1fr)_minmax(120px,0.8fr)_minmax(140px,0.9fr)]";
+const LIST_ROW_CLASSES = `${LIST_GRID_TEMPLATE} items-center gap-3 px-4 py-2`;
+
 export function FinderApp({ instanceId: _ }: { instanceId: string }) {
   const [path, setPath] = useState<FSPath>([]);
-  const [view, setView] = useState<ViewMode>("grid");
+  const [view, setView] = useState<ViewMode>("list");
   const [selected, setSelected] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [showPreview, setShowPreview] = useState(true);
@@ -39,7 +43,7 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
   const folder = useMemo(() => findNodeByPath(FS, path), [path]);
   const crumbs = useMemo(() => getBreadcrumbs(FS, path), [path]);
   const items = useMemo(() => {
-    const base = folder.children;
+    const base = folder.children.filter((node) => !node.hidden);
     if (!query.trim()) return base;
     const q = query.toLowerCase();
     return base.filter((n) => (n as FSNode).name.toLowerCase().includes(q));
@@ -129,72 +133,77 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
   }, [selected, selectedNode, openFolder, goUp]);
 
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden">
+    <div className="flex h-full w-full flex-col overflow-hidden bg-[#0f0f11] text-white">
       {/* Titlebar toolbar */}
       <TitlebarPortal>
-        <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3 w-full py-1.5 px-2 pointer-events-none">
-          <div className="flex items-center gap-1 pointer-events-auto">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="size-7 rounded-full text-white/90 hover:bg-white/10 disabled:opacity-30"
-                  onClick={goUp}
-                  disabled={path.length === 0}
-                  aria-label="Go Back"
-                >
-                  <ChevronLeft className="size-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Go back</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="size-7 rounded-full text-white/90 hover:bg-white/10 disabled:opacity-30"
-                    disabled
-                    aria-label="Go Forward"
-                  >
-                    <ChevronRight className="size-4" />
-                  </Button>
-                </span>
-              </TooltipTrigger>
-              <TooltipContent>Go forward</TooltipContent>
-            </Tooltip>
-          </div>
+        <div className="pointer-events-none w-full px-3 pt-1">
+          <div className="pointer-events-auto flex items-center justify-between rounded-2xl border border-white/10 bg-[rgba(28,28,32,0.9)] px-3 py-1.5 text-[13px] shadow-[0_16px_48px_rgba(0,0,0,0.35)] backdrop-blur-2xl">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex items-center gap-1 rounded-full bg-white/5 px-1 py-0.5">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="size-7 rounded-full text-white/90 hover:bg-white/15 disabled:opacity-30"
+                      onClick={goUp}
+                      disabled={path.length === 0}
+                      aria-label="Go Back"
+                    >
+                      <ChevronLeft className="size-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Go back</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="size-7 rounded-full text-white/50 hover:bg-white/15 disabled:opacity-30"
+                        disabled
+                        aria-label="Go Forward"
+                      >
+                        <ChevronRight className="size-4" />
+                      </Button>
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>Go forward</TooltipContent>
+                </Tooltip>
+              </div>
 
-          <div className="flex min-w-0 items-center gap-2">
-            <nav className="hidden md:flex min-w-0 items-center gap-1 text-[13px] text-white/80 pointer-events-auto">
-              {crumbs.map((c, i) => (
-                <div key={c.id} className="flex items-center gap-1 min-w-0">
-                  <button
-                    type="button"
-                    className="truncate rounded-md px-2 py-1 hover:bg-white/10 transition-colors"
-                    onClick={() =>
-                      setPath(
-                        i === 0 ? [] : crumbs.slice(1, i + 1).map((x) => x.id),
-                      )
-                    }
-                  >
-                    {c.name}
-                  </button>
-                  {i < crumbs.length - 1 ? (
-                    <span className="text-white/30">›</span>
-                  ) : null}
-                </div>
-              ))}
-            </nav>
-            <div className="ml-auto flex items-center gap-1 rounded-lg bg-white/5 p-1 pointer-events-auto">
+              <nav className="hidden min-w-0 items-center gap-1 text-white/70 md:flex">
+                {crumbs.map((c, i) => (
+                  <div key={c.id} className="flex items-center gap-1 min-w-0">
+                    <button
+                      type="button"
+                      className="truncate rounded-md px-2 py-1 transition-colors hover:bg-white/10 hover:text-white"
+                      onClick={() =>
+                        setPath(
+                          i === 0
+                            ? []
+                            : crumbs.slice(1, i + 1).map((x) => x.id),
+                        )
+                      }
+                    >
+                      {c.name}
+                    </button>
+                    {i < crumbs.length - 1 ? (
+                      <span className="text-white/30">›</span>
+                    ) : null}
+                  </div>
+                ))}
+              </nav>
+            </div>
+
+            <div className="flex items-center gap-1 rounded-lg bg-white/6 p-1">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
                     size="icon"
                     variant={view === "grid" ? "default" : "ghost"}
-                    className="size-6 rounded-md"
+                    className="size-7 rounded-md"
                     aria-label="Grid view"
                     onClick={() => setView("grid")}
                   >
@@ -208,7 +217,7 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
                   <Button
                     size="icon"
                     variant={view === "list" ? "default" : "ghost"}
-                    className="size-6 rounded-md"
+                    className="size-7 rounded-md"
                     aria-label="List view"
                     onClick={() => setView("list")}
                   >
@@ -222,7 +231,7 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
                   <Button
                     size="icon"
                     variant={view === "columns" ? "default" : "ghost"}
-                    className="size-6 rounded-md"
+                    className="size-7 rounded-md"
                     aria-label="Column view"
                     onClick={() => setView("columns")}
                   >
@@ -232,37 +241,37 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
                 <TooltipContent>Column view</TooltipContent>
               </Tooltip>
             </div>
-          </div>
 
-          <div className="flex items-center gap-2">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  size="icon"
-                  variant={showPreview ? "default" : "ghost"}
-                  className="size-7 rounded-lg pointer-events-auto"
-                  aria-label="Toggle preview"
-                  onClick={() => setShowPreview(!showPreview)}
-                >
-                  {showPreview ? (
-                    <Eye className="size-3.5" />
-                  ) : (
-                    <EyeOff className="size-3.5" />
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                {showPreview ? "Hide preview" : "Show preview"}
-              </TooltipContent>
-            </Tooltip>
-            <div className="relative w-[14rem] max-w-[40vw] pointer-events-auto">
-              <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-white/50" />
-              <Input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search"
-                className="h-7 w-full rounded-lg bg-black/20 pl-8 text-[13px] text-white placeholder:text-white/50 border-white/10"
-              />
+            <div className="flex items-center gap-2">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant={showPreview ? "default" : "ghost"}
+                    className="size-7 rounded-lg"
+                    aria-label="Toggle preview"
+                    onClick={() => setShowPreview(!showPreview)}
+                  >
+                    {showPreview ? (
+                      <Eye className="size-3.5" />
+                    ) : (
+                      <EyeOff className="size-3.5" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {showPreview ? "Hide preview" : "Show preview"}
+                </TooltipContent>
+              </Tooltip>
+              <div className="relative w-[15.5rem] max-w-[40vw]">
+                <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-white/50" />
+                <Input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search"
+                  className="h-8 w-full rounded-xl border border-white/10 bg-black/30 pl-9 text-[13px] text-white placeholder:text-white/50"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -273,7 +282,7 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
         <Sidebar path={path} onNavigate={handleNavigate} />
 
         {/* Content */}
-        <section className="relative flex-1 overflow-auto">
+        <section className="relative flex-1 overflow-auto bg-[rgba(15,15,19,0.78)]">
           {view === "grid" && (
             <div className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-3 p-4">
               {items.map((node) => (
@@ -289,16 +298,34 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
           )}
 
           {view === "list" && (
-            <div className="flex flex-col p-2">
-              {items.map((node) => (
-                <ListItem
-                  key={node.id}
-                  node={node}
-                  selected={selected === node.id}
-                  onClick={() => handleItemClick(node)}
-                  onDoubleClick={() => handleItemDoubleClick(node)}
-                />
-              ))}
+            <div className="flex flex-col">
+              <div
+                className={`${LIST_GRID_TEMPLATE} sticky top-0 z-10 border-b border-white/8 bg-[rgba(18,18,22,0.92)] px-4 py-2 text-[11px] uppercase tracking-[0.18em] text-white/45 backdrop-blur`}
+              >
+                <span className="pl-9">Name</span>
+                <span>Date Modified</span>
+                <span className="pr-2 text-right">Size</span>
+                <span>Kind</span>
+              </div>
+
+              <div className="flex flex-col">
+                {items.map((node, index) => (
+                  <ListItem
+                    key={node.id}
+                    node={node}
+                    selected={selected === node.id}
+                    onClick={() => handleItemClick(node)}
+                    onDoubleClick={() => handleItemDoubleClick(node)}
+                    isLast={index === items.length - 1}
+                  />
+                ))}
+
+                {items.length === 0 && (
+                  <div className="flex h-40 items-center justify-center px-4 text-sm text-white/40">
+                    No items to display
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
@@ -357,29 +384,79 @@ interface ListItemProps {
   selected: boolean;
   onClick: () => void;
   onDoubleClick: () => void;
+  isLast: boolean;
 }
 
-function ListItem({ node, selected, onClick, onDoubleClick }: ListItemProps) {
-  const file = isFile(node) ? node : null;
+function ListItem({
+  node,
+  selected,
+  onClick,
+  onDoubleClick,
+  isLast,
+}: ListItemProps) {
+  const modifiedLabel = node.modified ?? "--";
+  const sizeLabel = getSizeLabel(node);
+  const kindLabel = getKindLabel(node);
 
   return (
     <button
       type="button"
       onClick={onClick}
       onDoubleClick={onDoubleClick}
-      className={`grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-lg px-3 py-2 text-left transition-all ${
+      className={`${LIST_ROW_CLASSES} cursor-default select-none border-b border-white/6 text-left transition-colors ${
         selected
-          ? "bg-gradient-to-r from-blue-500/15 to-blue-600/10 ring-1 ring-blue-400/30"
-          : "hover:bg-white/5"
-      }`}
+          ? "bg-blue-500/15 text-white/95 ring-1 ring-blue-400/40"
+          : "hover:bg-white/8"
+      } ${isLast ? "border-b-0" : ""}`}
     >
-      <FileIcon node={node} size={32} />
-      <div className="truncate text-[13px] text-white/90">{node.name}</div>
-      <div className="text-[11px] text-white/40 capitalize">
-        {isFolder(node) ? "Folder" : file?.kind || "File"}
+      <div className="flex items-center gap-3">
+        <FileIcon node={node} size={28} />
+        <span className="truncate text-[13px] text-white/90">{node.name}</span>
       </div>
+      <span className="truncate text-[12px] text-white/60">
+        {modifiedLabel}
+      </span>
+      <span className="pr-2 text-right text-[12px] text-white/60">
+        {sizeLabel || "--"}
+      </span>
+      <span className="truncate text-[12px] text-white/60">{kindLabel}</span>
     </button>
   );
+}
+
+function getSizeLabel(node: FSNode): string {
+  if (node.sizeLabel) return node.sizeLabel;
+  if (isFile(node) && node.size) {
+    return formatBytes(node.size);
+  }
+  return "";
+}
+
+function getKindLabel(node: FSNode): string {
+  if (node.kindLabel) return node.kindLabel;
+  if (isFolder(node)) return "Folder";
+
+  if (!isFile(node)) return "File";
+
+  const labels: Record<FSFile["kind"], string> = {
+    image: "Image",
+    video: "Video",
+    audio: "Audio",
+    text: "Plain Text",
+    pdf: "PDF Document",
+    other: "Application",
+  };
+
+  return labels[node.kind] ?? "File";
+}
+
+function formatBytes(bytes: number): string {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  const size = bytes / k ** i;
+  return `${Math.round(size * 100) / 100} ${sizes[i]}`;
 }
 
 interface ColumnViewProps {
@@ -399,7 +476,7 @@ function ColumnView({ path, selected, onSelect, onNavigate }: ColumnViewProps) {
     for (let i = 0; i <= path.length; i++) {
       const node = findNodeByPath(FS, currentPath);
       if (node.type === "folder") {
-        cols.push(node.children);
+        cols.push(node.children.filter((child) => !child.hidden));
       }
       if (i < path.length) {
         currentPath = [...currentPath, path[i]];
@@ -414,7 +491,7 @@ function ColumnView({ path, selected, onSelect, onNavigate }: ColumnViewProps) {
       {columns.map((columnItems, columnIndex) => (
         <div
           key={`col-${columnIndex}-${path[columnIndex] || "root"}`}
-          className="flex h-full min-w-[200px] flex-col border-r border-white/10 bg-gradient-to-b from-white/5 to-transparent"
+          className="flex h-full min-w-[220px] flex-col border-r border-white/10 bg-[rgba(20,20,24,0.85)]"
         >
           {columnItems.map((node) => {
             const isSelected =
@@ -432,14 +509,16 @@ function ColumnView({ path, selected, onSelect, onNavigate }: ColumnViewProps) {
                   }
                   onSelect(node.id);
                 }}
-                className={`flex items-center gap-2 border-b border-white/5 px-3 py-2 text-left transition-all ${
+                className={`flex items-center gap-2 border-b border-white/5 px-4 py-2 text-left transition-colors ${
                   isSelected
-                    ? "bg-blue-500/20 text-white/95"
-                    : "text-white/70 hover:bg-white/5 hover:text-white/90"
+                    ? "bg-blue-500/15 text-white"
+                    : "text-white/70 hover:bg-white/8 hover:text-white"
                 }`}
               >
-                <FileIcon node={node} size={20} />
-                <span className="flex-1 truncate text-[12px]">{node.name}</span>
+                <FileIcon node={node} size={22} />
+                <span className="flex-1 truncate text-[12px] leading-none">
+                  {node.name}
+                </span>
                 {isFolder(node) && (
                   <ChevronRight className="size-3 text-white/40" />
                 )}

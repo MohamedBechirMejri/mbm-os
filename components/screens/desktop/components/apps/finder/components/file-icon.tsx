@@ -13,6 +13,23 @@ export function FileIcon({ node, size = 32 }: FileIconProps) {
   const iconSize = size * 0.6;
 
   if (node.type === "folder") {
+    if (node.icon) {
+      return (
+        <div
+          className="flex items-center justify-center rounded-lg bg-white/10"
+          style={{ width: size, height: size }}
+        >
+          <Image
+            src={node.icon}
+            alt={`${node.name} icon`}
+            width={Math.round(size * 0.85)}
+            height={Math.round(size * 0.85)}
+            className="object-contain"
+          />
+        </div>
+      );
+    }
+
     return (
       <div
         className="flex items-center justify-center rounded-lg"
@@ -41,6 +58,23 @@ export function FileIcon({ node, size = 32 }: FileIconProps) {
           fill
           sizes={`${size}px`}
           className="object-cover"
+        />
+      </div>
+    );
+  }
+
+  if (file.icon) {
+    return (
+      <div
+        className="flex items-center justify-center rounded-lg bg-white/10"
+        style={{ width: size, height: size }}
+      >
+        <Image
+          src={file.icon}
+          alt={`${file.name} icon`}
+          width={Math.round(size * 0.85)}
+          height={Math.round(size * 0.85)}
+          className="object-contain"
         />
       </div>
     );
