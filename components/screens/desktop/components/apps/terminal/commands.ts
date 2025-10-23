@@ -1,4 +1,6 @@
 import React from "react";
+import type { LiveAliasResult } from "./live-aliases";
+import { liveAliasRegistry } from "./live-aliases";
 import type { CommandDictionary } from "./types";
 
 function lines(...items: string[]) {
@@ -29,7 +31,51 @@ function wrapMultiline<T extends string | React.ReactNode>(
   return value;
 }
 
+function formatLiveAliasHelp(): string[] {
+  if (!liveAliasRegistry.length) return [];
+
+  return liveAliasRegistry.map((alias) => {
+    const paddedId = alias.aliasId.padEnd(14, " ");
+    return `  ${paddedId} ${alias.description}`;
+  });
+}
+
+function formatLiveAliasOutput(result: LiveAliasResult): string {
+  const linesBuffer: string[] = [];
+  linesBuffer.push(result.headline);
+  linesBuffer.push("────────────────────────────────────────");
+
+  if (result.metrics.length > 0) {
+    const labelWidth = result.metrics.reduce(
+      (width, metric) => Math.max(width, metric.label.length),
+      0,
+    );
+
+    for (const metric of result.metrics) {
+      linesBuffer.push(
+        `  ${metric.label.padEnd(labelWidth, " ")}: ${metric.value}`,
+      );
+    }
+  }
+
+  if (result.highlights && result.highlights.length > 0) {
+    linesBuffer.push("");
+    for (const highlight of result.highlights) {
+      linesBuffer.push(`• ${highlight.prefix}: ${highlight.detail}`);
+    }
+  }
+
+  if (result.footer && result.footer.length > 0) {
+    linesBuffer.push("");
+    linesBuffer.push(...result.footer);
+  }
+
+  return linesBuffer.join("\n");
+}
+
 export function buildCommands(): CommandDictionary {
+  const liveAliasHelp = formatLiveAliasHelp();
+
   const dict: CommandDictionary = {
     help: () =>
       lines(
@@ -55,6 +101,9 @@ export function buildCommands(): CommandDictionary {
         "  matrix         Drippy green glyphs",
         "  rick           A very educational link",
         "  sudo <cmd>     Try 'sudo make me a sandwich'",
+        ...(liveAliasHelp.length
+          ? ["", "Live aliases:", ...liveAliasHelp]
+          : []),
       ),
     about: () =>
       lines(
@@ -177,6 +226,11 @@ export function buildCommands(): CommandDictionary {
     echo: (...args: string[]) => (args.length ? args.join(" ") : ""),
     clear: () => "",
   } satisfies CommandDictionary;
+
+  for (const alias of liveAliasRegistry) {
+    dict[alias.aliasId] = async () =>
+      formatLiveAliasOutput(await alias.resolve());
+  }
 
   // Automatically wrap any multiline string responses in <pre> so newlines render.
   const wrapped: CommandDictionary = {};
