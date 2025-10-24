@@ -1,14 +1,28 @@
+import { sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
-import type { demoEvents } from "@/drizzle/schema";
+import { demoEvents } from "@/drizzle/schema";
+import { db } from "@/lib/db";
 
 export const runtime = "edge";
 
-type Payload = typeof demoEvents;
+type Payload = {
+  // demoEvents
+  numberOfRows: number;
+};
 
 export async function GET(): Promise<
   NextResponse<Payload | { error: string }>
 > {
   try {
+    const numberOfRows = await db
+      .select({ count: sql`count(*)` })
+      .from(demoEvents)
+      .execute();
+    const payload = {
+      numberOfRows: Number(numberOfRows[0].count),
+    };
+    console.log(payload);
+
     return NextResponse.json(payload, {
       headers: {
         "Cache-Control": "s-maxage=300, stale-while-revalidate=300",
