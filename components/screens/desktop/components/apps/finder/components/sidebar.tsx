@@ -193,7 +193,7 @@ export function Sidebar({ path, onNavigate }: SidebarProps) {
 
   return (
     <aside className="flex h-full w-48 flex-col p-1.5 pr-0">
-      <div className="h-full w-full overflow-hidden rounded-lg bg-[#1e1e1e]/95 backdrop-blur-xl flex flex-col border border-white/6">
+      <div className="h-full w-full overflow-hidden rounded-3xl bg-[#1e1e1e]/95 backdrop-blur-xl flex flex-col border border-white/6">
         <div className="flex-1 flex flex-col gap-3 overflow-y-auto px-2 py-3 text-[0.75rem] text-white/70 pt-10">
           {sections.map((section) => (
             <div key={section.title} className="flex flex-col gap-1">
