@@ -1,31 +1,20 @@
 import { sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
-import { demoEvents } from "@/drizzle/schema";
 import { db } from "@/lib/db";
 
-type Payload = {
-  // demoEvents
-  numberOfRows: number;
-};
-
-export async function GET(): Promise<
-  NextResponse<Payload | { error: string }>
-> {
+export async function GET(): Promise<NextResponse> {
   try {
-    const numberOfRows = await db
-      .select({ count: sql`count(*)` })
-      .from(demoEvents)
-      .execute();
+    const rows = await db.query.demoEvents.findMany({
+      limit: 10,
+      orderBy: (event) => [sql`${event.id} ASC`],
+    });
+
     const payload = {
-      numberOfRows: Number(numberOfRows[0].count),
+      rows,
     };
     console.log(payload);
 
-    return NextResponse.json(payload, {
-      headers: {
-        "Cache-Control": "s-maxage=300, stale-while-revalidate=300",
-      },
-    });
+    return NextResponse.json(payload, {});
   } catch (error) {
     console.error(error);
     return NextResponse.json(
