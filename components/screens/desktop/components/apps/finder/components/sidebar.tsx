@@ -192,19 +192,9 @@ export function Sidebar({ path, onNavigate }: SidebarProps) {
     "flex items-center gap-2 px-3 py-[0.35rem] text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-white/55 transition-colors hover:text-white/75";
 
   return (
-    <aside className="flex h-full w-48 flex-col p-1.5">
-      <GlassSurface
-        width="100%"
-        height="100%"
-        borderRadius={28}
-        blur={18}
-        saturation={1.45}
-        brightness={52}
-        opacity={0.88}
-        className="h-full w-full overflow-hidden! shadow-[0_32px_60px_rgba(4,6,18,0.38)]"
-        containerClassName="!p-0 flex h-full w-full flex-col overflow-hidden"
-      >
-        <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-3 py-4 text-[0.8125rem] text-white/80">
+    <aside className="flex h-full w-48 flex-col p-1.5 overflow-hidden">
+      <div className="h-full w-full overflow-hidden! border rounded-3xl border-white/10 bg-[#56BBE8]/5 backdrop-blur-[24rem]">
+        <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-3 py-4 text-[0.8125rem] text-white/80 pt-12">
           {sections.map((section) => (
             <div key={section.title} className="flex flex-col gap-2">
               {section.collapsible ? (
@@ -260,7 +250,7 @@ export function Sidebar({ path, onNavigate }: SidebarProps) {
             </div>
           ))}
         </div>
-      </GlassSurface>
+      </div>
     </aside>
   );
 }
