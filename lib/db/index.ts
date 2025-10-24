@@ -7,7 +7,10 @@ if (!process.env.DATABASE_URL) {
 }
 
 // For migrations
-export const client = postgres(process.env.DATABASE_URL, { max: 1 });
+export const client = postgres(process.env.DATABASE_URL, {
+  max: 1,
+  prepare: false,
+});
 
 // For queries
 const queryClient = postgres(process.env.DATABASE_URL);
