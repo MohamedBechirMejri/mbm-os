@@ -223,29 +223,6 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
       ],
     },
   },
-  {
-    id: "million-row-grid",
-    name: "Million Row Grid",
-    tagline: "Blazing fast data table",
-    description:
-      "High-performance virtualized table capable of handling millions of rows with smooth scrolling and instant filtering. Perfect for analyzing large datasets.",
-    icon: "libreoffice-calc",
-    category: "productivity",
-    tags: ["data", "table", "spreadsheet", "performance"],
-    available: true,
-    hidden: false,
-    installManifest: {
-      sizeEstimate: 2_500_000,
-      assets: [
-        {
-          url: "/assets/icons/apps/libreoffice-calc.ico",
-          kind: "icon",
-          bytes: 8_192,
-          cacheKey: "million-row-grid/icon",
-        },
-      ],
-    },
-  },
 
   // Creative
   {
@@ -412,12 +389,23 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     tagline: "1,000,000 rows at 60 fps",
     description:
       "Arrow/Parquet decoded in a Web Worker, windowed virtualization, worker-backed sort/filter with backpressure, and a live perf HUD (FPS, mem, query time). Export visible slice to CSV.",
-    icon: "calc",
+    icon: "libreoffice-calc",
     category: "productivity",
     tags: ["virtualization", "arrow", "wasm", "workers"],
     featured: true,
-    available: false,
+    available: true,
     hidden: false,
+    installManifest: {
+      sizeEstimate: 2_500_000,
+      assets: [
+        {
+          url: "/assets/icons/apps/libreoffice-calc.ico",
+          kind: "icon",
+          bytes: 8_192,
+          cacheKey: "million-row-grid/icon",
+        },
+      ],
+    },
   },
   {
     id: "gpu-scatterplot",
