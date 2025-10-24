@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 export async function GET(): Promise<NextResponse> {
   try {
     const rows = await db.query.demoEvents.findMany({
-      limit: 10,
+      limit: 100,
       orderBy: (event) => [sql`${event.id} ASC`],
     });
 
