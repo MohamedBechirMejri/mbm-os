@@ -223,6 +223,29 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
       ],
     },
   },
+  {
+    id: "million-row-grid",
+    name: "Million Row Grid",
+    tagline: "Blazing fast data table",
+    description:
+      "High-performance virtualized table capable of handling millions of rows with smooth scrolling and instant filtering. Perfect for analyzing large datasets.",
+    icon: "libreoffice-calc",
+    category: "productivity",
+    tags: ["data", "table", "spreadsheet", "performance"],
+    available: true,
+    hidden: false,
+    installManifest: {
+      sizeEstimate: 2_500_000,
+      assets: [
+        {
+          url: "/assets/icons/apps/libreoffice-calc.ico",
+          kind: "icon",
+          bytes: 8_192,
+          cacheKey: "million-row-grid/icon",
+        },
+      ],
+    },
+  },
 
   // Creative
   {

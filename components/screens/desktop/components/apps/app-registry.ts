@@ -8,6 +8,7 @@ import type { AppMeta } from "../window-manager/types";
 import { AppStoreApp } from "./app-store";
 import { CalculatorApp } from "./calculator";
 import { FinderApp } from "./finder";
+import { MillionRowGrid } from "./million-row-grid";
 import { SafariApp } from "./safari";
 import { TerminalApp } from "./terminal";
 
@@ -21,11 +22,11 @@ export const catalogApps: AppMeta[] = [
     minSize: { w: 520, h: 380 },
     floatingActionBar: true,
     titlebarHeight: 46,
-    actionButtonsStyle:{
+    actionButtonsStyle: {
       top: 22,
       left: 22,
       position: "absolute",
-    }
+    },
   },
   {
     id: "safari",
@@ -66,6 +67,15 @@ export const catalogApps: AppMeta[] = [
     minSize: { w: 200, h: 350 },
     maxSize: { w: 200, h: 350 },
     resizable: false,
+    floatingActionBar: true,
+  },
+
+  {
+    id: "million-row-grid",
+    title: "Million Row Grid",
+    icon: "libreoffice-calc",
+    Component: MillionRowGrid,
+    minSize: { w: 600, h: 400 },
     floatingActionBar: true,
   },
 
