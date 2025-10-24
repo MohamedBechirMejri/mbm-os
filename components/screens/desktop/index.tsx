@@ -71,7 +71,7 @@ export default function Desktop() {
   };
 
   return (
-    <div className="relative size-full grid grid-rows-[auto_minmax(0,_1fr)_auto]">
+    <div className="relative size-full grid grid-rows-[auto_minmax(0,1fr)_auto]">
       <BrightnessOverlay />
       <MenuBar />
       <div>
