@@ -89,7 +89,7 @@ export default function Desktop() {
           isOpen={isLaunchpadOpen}
         /> */}
         <div className="mx-auto mr-0"></div>
-        <Dock className="select-none w-max relative z-[9999]">
+        <Dock className="select-none w-max relative z-9999">
           {dockApps.map((app) => (
             <DockAppIcon
               key={app.id}
