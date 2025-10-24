@@ -187,16 +187,16 @@ export function Sidebar({ path, onNavigate }: SidebarProps) {
   };
 
   const sectionHeadingClass =
-    "px-3 text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-white/55";
+    "px-2 py-1 text-[0.625rem] font-semibold uppercase tracking-wider text-white/40";
   const collapsibleHeadingClass =
-    "flex items-center gap-2 px-3 py-[0.35rem] text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-white/55 transition-colors hover:text-white/75";
+    "flex items-center gap-1.5 px-2 py-1 text-[0.625rem] font-semibold uppercase tracking-wider text-white/40 transition-colors hover:text-white/55";
 
   return (
     <aside className="flex h-full w-48 flex-col p-1.5 pr-0">
-      <div className="h-full w-full overflow-hidden border rounded-3xl border-white/10 bg-[#56BBE8]/5 backdrop-blur-[24rem] flex flex-col">
-        <div className="flex-1 flex flex-col gap-4 overflow-y-auto px-3 py-4 text-[0.8125rem] text-white/80 pt-12">
+      <div className="h-full w-full overflow-hidden rounded-lg bg-[#1e1e1e]/95 backdrop-blur-xl flex flex-col border border-white/6">
+        <div className="flex-1 flex flex-col gap-3 overflow-y-auto px-2 py-3 text-[0.75rem] text-white/70 pt-10">
           {sections.map((section) => (
-            <div key={section.title} className="flex flex-col gap-2">
+            <div key={section.title} className="flex flex-col gap-1">
               {section.collapsible ? (
                 <button
                   type="button"
@@ -204,9 +204,9 @@ export function Sidebar({ path, onNavigate }: SidebarProps) {
                   className={collapsibleHeadingClass}
                 >
                   {collapsed[section.title] ? (
-                    <ChevronRight className="size-3" />
+                    <ChevronRight className="size-2.5" />
                   ) : (
-                    <ChevronDown className="size-3" />
+                    <ChevronDown className="size-2.5" />
                   )}
                   {section.title}
                 </button>
@@ -215,7 +215,7 @@ export function Sidebar({ path, onNavigate }: SidebarProps) {
               )}
 
               {!collapsed[section.title] && (
-                <div className="flex flex-col gap-[0.3rem]">
+                <div className="flex flex-col gap-[0.15rem]">
                   {section.items.map((item) => {
                     const itemKey = item.path.join("/");
                     const isActive =
@@ -229,10 +229,10 @@ export function Sidebar({ path, onNavigate }: SidebarProps) {
                         type="button"
                         onClick={() => onNavigate(item.path)}
                         className={cn(
-                          "relative flex w-full items-center gap-2 rounded-[1.1rem] px-3 py-[0.55rem] text-left text-[0.8125rem] font-medium transition-all duration-150 ease-out",
+                          "relative flex w-full items-center gap-2 rounded-md px-2 py-1 text-left text-[0.75rem] font-normal transition-all duration-100 ease-out",
                           isActive
-                            ? "bg-white/90 text-[#0f1117] shadow-[0_16px_36px_rgba(10,12,20,0.28)] before:absolute before:inset-y-[0.35rem] before:-left-[0.55rem] before:w-[0.28rem] before:rounded-full before:bg-[#3c84ff]"
-                            : "text-white/75 hover:bg-white/14 hover:text-white",
+                            ? "bg-white/15 text-white/90"
+                            : "text-white/70 hover:bg-white/8 hover:text-white/85",
                         )}
                         aria-current={isActive ? "page" : undefined}
                       >
@@ -267,11 +267,11 @@ function RenderIcon({
       <Image
         src={config.src}
         alt=""
-        width={18}
-        height={18}
+        width={16}
+        height={16}
         className={cn(
-          "rounded-[0.35rem] object-contain transition-opacity",
-          active ? "opacity-100" : "opacity-80",
+          "rounded-sm object-contain transition-opacity",
+          active ? "opacity-90" : "opacity-70",
         )}
         priority={false}
       />
@@ -283,17 +283,17 @@ function RenderIcon({
     return (
       <Icon
         className={cn(
-          "size-4.5 transition-colors",
-          active ? "text-[#0f1117]" : "text-white/75",
+          "size-4 transition-colors",
+          active ? "text-white/90" : "text-white/60",
         )}
-        strokeWidth={1.6}
+        strokeWidth={1.5}
       />
     );
   }
 
   return (
     <span
-      className="inline-flex size-[0.55rem] items-center justify-center rounded-full"
+      className="inline-flex size-2 items-center justify-center rounded-full"
       style={{ backgroundColor: config.color }}
     />
   );
