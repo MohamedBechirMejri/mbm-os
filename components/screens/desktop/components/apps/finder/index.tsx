@@ -113,7 +113,7 @@ export function FinderApp({ instanceId: _ }: { instanceId: string }) {
       <div className="flex h-full w-full overflow-hidden">
         <Sidebar path={path} onNavigate={handleNavigate} />
 
-        <section className="relative flex-1 overflow-auto">
+        <section className="relative flex-1 overflow-auto pt-14">
           {view === "grid" && (
             <GridView
               items={items}
