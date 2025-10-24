@@ -8,7 +8,7 @@ interface SearchBarProps {
 
 export function SearchBar({ query, onQueryChange }: SearchBarProps) {
   return (
-    <div className="relative w-[15.5rem] max-w-[40vw]">
+    <div className="relative w-62 max-w-[40vw]">
       <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-white/55" />
       <Input
         value={query}
