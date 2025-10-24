@@ -13,7 +13,7 @@ interface PreviewPanelProps {
 export function PreviewPanel({ node }: PreviewPanelProps) {
   if (!node) {
     return (
-      <div className="flex h-full w-80 flex-col items-center justify-center border-l border-white/12 bg-[#0f1117] p-6 text-white/40">
+      <div className="flex h-full w-67 flex-col items-center justify-center border-l border-white/12 bg-[#6363631e] p-6 text-white/40">
         <File className="mb-2 size-12 opacity-50" />
         <p className="text-sm">Select an item to preview</p>
       </div>
