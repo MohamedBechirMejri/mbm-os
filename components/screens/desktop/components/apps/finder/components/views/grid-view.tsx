@@ -15,7 +15,7 @@ export function GridView({
   onItemDoubleClick,
 }: GridViewProps) {
   return (
-    <div className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-3 p-4">
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-3 p-4 h-full">
       {items.map((node) => (
         <GridItem
           key={node.id}

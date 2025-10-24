@@ -192,7 +192,7 @@ export function Sidebar({ path, onNavigate }: SidebarProps) {
     "flex items-center gap-2 px-3 py-[0.35rem] text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-white/55 transition-colors hover:text-white/75";
 
   return (
-    <aside className="flex h-full w-48 flex-col p-1.5 overflow-hidden">
+    <aside className="flex h-full w-48 flex-col p-1.5 overflow-hidden pr-0">
       <div className="h-full w-full overflow-hidden! border rounded-3xl border-white/10 bg-[#56BBE8]/5 backdrop-blur-[24rem]">
         <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-3 py-4 text-[0.8125rem] text-white/80 pt-12">
           {sections.map((section) => (
