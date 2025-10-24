@@ -20,7 +20,7 @@ export function Footer({
   const selectionKind = selectedNode ? getKindLabel(selectedNode) : null;
 
   return (
-    <footer className="flex items-center justify-between gap-4 border-t border-white/10 bg-[#0f1117] px-4 py-2 text-[12px] text-white/65">
+    <footer className="flex items-center justify-between gap-4 border-t border-white/10 px-4 py-2 text-[12px] text-white/65">
       <div className="flex min-w-0 items-center gap-1 overflow-hidden">
         {crumbs.map((crumb, index) => (
           <div key={crumb.id} className="flex min-w-0 items-center">

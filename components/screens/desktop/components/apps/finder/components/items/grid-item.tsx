@@ -21,7 +21,7 @@ export function GridItem({
       onDoubleClick={onDoubleClick}
       className={`flex cursor-default select-none flex-col items-center gap-2 rounded-xl p-3 transition-all ${
         selected
-          ? "bg-gradient-to-br from-blue-500/20 to-blue-600/20 ring-1 ring-blue-400/40 shadow-lg shadow-blue-500/10"
+          ? "bg-linear-to-br from-blue-500/20 to-blue-600/20 ring-1 ring-blue-400/40 shadow-lg shadow-blue-500/10"
           : "hover:bg-white/5"
       }`}
     >

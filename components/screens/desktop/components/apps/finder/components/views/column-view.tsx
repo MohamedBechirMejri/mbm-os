@@ -41,7 +41,7 @@ export function ColumnView({
       {columns.map((columnItems, columnIndex) => (
         <div
           key={`col-${columnIndex}-${path[columnIndex] || "root"}`}
-          className="flex h-full min-w-[220px] flex-col border-r border-white/12 bg-[#0f1117]"
+          className="flex h-full min-w-[220px] flex-col border-r border-white/12 "
         >
           {columnItems.map((node) => {
             const isSelected =

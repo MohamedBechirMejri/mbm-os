@@ -18,7 +18,7 @@ export function ListView({
   return (
     <div className="flex flex-col h-full">
       <div
-        className={`${LIST_GRID_TEMPLATE} sticky top-0 z-10 border-b border-white/8 bg-[#0f1218] px-4 py-2 text-[11px] uppercase tracking-[0.18em] text-white/45`}
+        className={`${LIST_GRID_TEMPLATE} sticky top-0 z-10 border-b border-white/8 px-4 py-2 text-[11px] uppercase tracking-[0.18em] text-white/45`}
       >
         <span className="pl-9">Name</span>
         <span>Date Modified</span>
