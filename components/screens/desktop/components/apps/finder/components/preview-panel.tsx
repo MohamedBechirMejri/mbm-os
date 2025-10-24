@@ -42,7 +42,7 @@ export function PreviewPanel({ node }: PreviewPanelProps) {
   const modifiedLabel = node.modified ?? "--";
 
   return (
-    <div className="flex h-full w-80 flex-col gap-4 border-l border-white/12 bg-[#0f1117] p-6 animate-in fade-in duration-200">
+    <div className="flex h-full w-67 flex-col gap-4 border-l border-white/12 bg-[#6363631e] backdrop-blur-3xl p-6 pt-16 animate-in fade-in duration-200">
       {/* Preview */}
       <div className="flex flex-col items-center gap-4">
         {canPreview && file ? (
@@ -67,7 +67,7 @@ export function PreviewPanel({ node }: PreviewPanelProps) {
             )}
           </div>
         ) : (
-          <div className="flex aspect-square w-full items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 to-white/5 shadow-xl">
+          <div className="flex aspect-square w-full items-center justify-center rounded-2xl border border-white/10 bg-linear-to-br from-white/10 to-white/5 shadow-xl">
             <FileIcon node={node} size={96} />
           </div>
         )}
