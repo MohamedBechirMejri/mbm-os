@@ -34,7 +34,7 @@ export function Toolbar({
 }: ToolbarProps) {
   return (
     <TitlebarPortal>
-      <div className="flex pointer-events-none w-full pl-46 pt-[1.1rem]">
+      <div className="flex pointer-events-none w-full pl-46 pt-2">
         <div className="w-full flex">
           <div className="flex flex-1 items-center gap-3">
             <Navigation canGoBack={path.length > 0} onGoBack={onGoUp} />
