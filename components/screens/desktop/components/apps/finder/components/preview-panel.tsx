@@ -1,6 +1,5 @@
 "use client";
 
-import { Calendar, File, HardDrive } from "lucide-react";
 import Image from "next/image";
 import type { FSFile, FSNode } from "../fs";
 import { isFile } from "../fs";
@@ -13,10 +12,7 @@ interface PreviewPanelProps {
 export function PreviewPanel({ node }: PreviewPanelProps) {
   if (!node) {
     return (
-      <div className="flex h-full w-67 flex-col items-center justify-center border-l border-white/12 bg-[#6363631e] p-6 text-white/40">
-        <File className="mb-2 size-12 opacity-50" />
-        <p className="text-sm">Select an item to preview</p>
-      </div>
+      <div className="flex h-full w-67 flex-col border-l border-white/8 bg-[#1a1a1a]" />
     );
   }
 
@@ -42,24 +38,23 @@ export function PreviewPanel({ node }: PreviewPanelProps) {
   const modifiedLabel = node.modified ?? "--";
 
   return (
-    <div className="flex h-full w-67 flex-col gap-4 border-l border-white/12 bg-[#6363631e] backdrop-blur-3xl p-6 pt-16 animate-in fade-in duration-200">
-      {/* Preview */}
-      <div className="flex flex-col items-center gap-4">
+    <div className="flex h-full w-67 flex-col border-l border-white/8 bg-[#1a1a1a]">
+      {/* Preview Area */}
+      <div className="flex h-[220px] items-center justify-center bg-[#0d0d0d] border-b border-white/8">
         {canPreview && file ? (
-          <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-white/20 bg-black/30 shadow-2xl shadow-black/50">
+          <div className="relative h-[180px] w-[180px]">
             {file.kind === "image" ? (
               <Image
                 src={file.path}
                 alt={file.name}
                 fill
-                sizes="320px"
-                className="object-cover"
+                sizes="180px"
+                className="object-contain"
               />
             ) : (
               <video
                 src={file.path}
-                controls
-                className="h-full w-full object-cover"
+                className="h-full w-full object-contain"
                 aria-label={`Video preview: ${file.name}`}
               >
                 <track kind="captions" label="No captions available" />
@@ -67,43 +62,40 @@ export function PreviewPanel({ node }: PreviewPanelProps) {
             )}
           </div>
         ) : (
-          <div className="flex aspect-square w-full items-center justify-center rounded-2xl border border-white/10 bg-linear-to-br from-white/10 to-white/5 shadow-xl">
-            <FileIcon node={node} size={96} />
-          </div>
+          <FileIcon node={node} size={120} />
         )}
-        <div className="w-full text-center">
-          <h3 className="truncate text-sm font-medium text-white/90">
-            {node.name}
-          </h3>
-          {file && (
-            <p className="mt-1 text-xs text-white/50 capitalize">{file.kind}</p>
-          )}
-        </div>
       </div>
 
-      {/* Info */}
-      <div className="flex flex-col gap-3 rounded-xl border border-white/10 bg-white/5 p-4 text-xs">
-        <div className="flex items-center gap-3">
-          <File className="size-4 text-white/40" />
-          <div className="flex-1">
-            <div className="text-white/50">Kind</div>
-            <div className="text-white/80 capitalize">{kindLabel}</div>
+      {/* Info Section */}
+      <div className="flex flex-col gap-3 px-4 py-5">
+        {/* File name with icon */}
+        <div className="flex items-start gap-2.5">
+          <FileIcon node={node} size={32} />
+          <div className="flex-1 min-w-0">
+            <h3 className="text-[0.8125rem] leading-tight font-medium text-white/90 wrap-break-word">
+              {node.name}
+            </h3>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <HardDrive className="size-4 text-white/40" />
-          <div className="flex-1">
-            <div className="text-white/50">Size</div>
-            <div className="text-white/80">{sizeLabel}</div>
-          </div>
-        </div>
+        {/* Divider */}
+        <div className="h-px bg-white/6 -mx-4" />
 
-        <div className="flex items-center gap-3">
-          <Calendar className="size-4 text-white/40" />
-          <div className="flex-1">
-            <div className="text-white/50">Modified</div>
-            <div className="text-white/80">{modifiedLabel}</div>
+        {/* Info rows */}
+        <div className="flex flex-col gap-2.5 text-[0.6875rem]">
+          <div className="flex justify-between items-baseline">
+            <span className="text-white/50">Kind:</span>
+            <span className="text-white/80 text-right">{kindLabel}</span>
+          </div>
+
+          <div className="flex justify-between items-baseline">
+            <span className="text-white/50">Size:</span>
+            <span className="text-white/80">{sizeLabel}</span>
+          </div>
+
+          <div className="flex justify-between items-baseline">
+            <span className="text-white/50">Modified:</span>
+            <span className="text-white/80">{modifiedLabel}</span>
           </div>
         </div>
       </div>
