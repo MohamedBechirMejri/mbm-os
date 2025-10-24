@@ -8,7 +8,7 @@ interface BreadcrumbProps {
 
 export function Breadcrumb({ folder, currentCrumb }: BreadcrumbProps) {
   return (
-    <div className="hidden min-w-0 items-center gap-2 rounded-[1.1rem] bg-white/10 px-3 py-[0.45rem] md:flex">
+    <div className="hidden min-w-0 items-center gap-2 rounded-[1.1rem] bg-white/10 px-3 py-[0.45rem] md:flex pointer-events-auto">
       {currentCrumb ? (
         <>
           <FileIcon node={folder} size={20} />

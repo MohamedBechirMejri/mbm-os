@@ -21,7 +21,7 @@ export function PreviewToggle({
         <Button
           size="icon"
           variant={showPreview ? "default" : "ghost"}
-          className="size-7 rounded-[0.85rem]"
+          className="size-7 rounded-[0.85rem] pointer-events-auto"
           aria-label="Toggle preview"
           onClick={onPreviewToggle}
         >

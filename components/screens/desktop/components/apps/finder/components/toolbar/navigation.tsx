@@ -13,7 +13,7 @@ interface NavigationProps {
 
 export function Navigation({ canGoBack, onGoBack }: NavigationProps) {
   return (
-    <div className="flex items-center gap-[0.35rem] rounded-full bg-white/12 px-1.5 py-[0.2rem]">
+    <div className="flex items-center gap-[0.35rem] rounded-full bg-white/12 px-1.5 py-[0.2rem] pointer-events-auto">
       <Tooltip>
         <TooltipTrigger asChild>
           <Button

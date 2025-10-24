@@ -17,7 +17,7 @@ export function ViewModeSelector({
   onViewChange,
 }: ViewModeSelectorProps) {
   return (
-    <div className="flex items-center gap-1 rounded-[0.9rem] bg-white/10 p-1">
+    <div className="flex items-center gap-1 rounded-[0.9rem] bg-white/10 p-1 pointer-events-auto">
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
