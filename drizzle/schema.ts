@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+  customType,
   index,
   integer,
   jsonb,
@@ -9,6 +10,12 @@ import {
   unique,
   uuid,
 } from "drizzle-orm/pg-core";
+
+const tsvector = customType<{ data: string }>({
+  dataType() {
+    return "tsvector";
+  },
+});
 
 export const users = pgTable(
   "users",
@@ -41,9 +48,7 @@ export const demoEvents = pgTable(
     title: text(),
     body: text(),
     meta: jsonb(),
-    // TODO: failed to parse database type 'tsvector'
-    // @ts-expect-error jkj
-    tsv: unknown("tsv").generatedAlwaysAs(
+    tsv: tsvector("tsv").generatedAlwaysAs(
       sql`to_tsvector('simple'::regconfig, ((COALESCE(title, ''::text) || ' '::text) || COALESCE(body, ''::text)))`,
     ),
   },

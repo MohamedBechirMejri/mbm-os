@@ -3,8 +3,6 @@ import { NextResponse } from "next/server";
 import { demoEvents } from "@/drizzle/schema";
 import { db } from "@/lib/db";
 
-export const runtime = "edge";
-
 type Payload = {
   // demoEvents
   numberOfRows: number;
