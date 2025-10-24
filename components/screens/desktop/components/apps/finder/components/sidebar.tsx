@@ -201,7 +201,7 @@ export function Sidebar({ path, onNavigate }: SidebarProps) {
         saturation={1.45}
         brightness={52}
         opacity={0.88}
-        className="h-full w-full !overflow-hidden shadow-[0_32px_60px_rgba(4,6,18,0.38)]"
+        className="h-full w-full overflow-hidden! shadow-[0_32px_60px_rgba(4,6,18,0.38)]"
         containerClassName="!p-0 flex h-full w-full flex-col overflow-hidden"
       >
         <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-3 py-4 text-[0.8125rem] text-white/80">
@@ -293,7 +293,7 @@ function RenderIcon({
     return (
       <Icon
         className={cn(
-          "size-[1.125rem] transition-colors",
+          "size-4.5 transition-colors",
           active ? "text-[#0f1117]" : "text-white/75",
         )}
         strokeWidth={1.6}
