@@ -34,9 +34,9 @@ export function Toolbar({
 }: ToolbarProps) {
   return (
     <TitlebarPortal>
-      <div className="pointer-events-none w-full pl-46 pt-[1.1rem]">
-        <div className="w-full !overflow-visible flex border">
-          <div className="flex min-w-0 items-center gap-3">
+      <div className="flex pointer-events-none w-full pl-46 pt-[1.1rem]">
+        <div className="w-full flex border">
+          <div className="flex flex-1 items-center gap-3">
             <Navigation canGoBack={path.length > 0} onGoBack={onGoUp} />
             <Breadcrumb folder={folder} currentCrumb={currentCrumb} />
           </div>
