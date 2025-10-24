@@ -394,7 +394,7 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     tags: ["virtualization", "arrow", "wasm", "workers"],
     featured: true,
     available: false,
-    hidden: true,
+    hidden: false,
   },
   {
     id: "gpu-scatterplot",
@@ -407,7 +407,7 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     tags: ["webgpu", "dataviz", "instancing", "lod"],
     featured: true,
     available: false,
-    hidden: true,
+    hidden: false,
   },
   {
     id: "log-tail",
@@ -419,7 +419,7 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     category: "utilities",
     tags: ["streaming", "backpressure", "workers", "virtualization"],
     available: false,
-    hidden: true,
+    hidden: false,
   },
 ];
 
