@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { RendererStats, SimulationBounds, WaterConfig } from "./types";
 import { WaterRenderer } from "./water-renderer";
 
@@ -100,12 +100,17 @@ export function useWaterRenderer(
     }
   }, [bounds, initialized, canvasRef]);
 
+  const setMousePosition = useCallback(
+    (x: number, y: number, active: boolean) => {
+      rendererRef.current?.setMousePosition(x, y, active);
+    },
+    [],
+  );
+
   return {
     initialized,
     error,
     stats,
-    setMousePosition: (x: number, y: number, active: boolean) => {
-      rendererRef.current?.setMousePosition(x, y, active);
-    },
+    setMousePosition,
   };
 }
