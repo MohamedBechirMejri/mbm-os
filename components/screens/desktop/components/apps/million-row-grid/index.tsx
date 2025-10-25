@@ -144,7 +144,7 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
         accessorKey: "id",
         header: "ID",
         cell: (info) => (
-          <span className="font-mono text-xs text-slate-500">
+          <span className="font-mono text-xs text-white/40">
             #{String(info.getValue())}
           </span>
         ),
@@ -156,9 +156,9 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
         cell: (info) => {
           const value = info.getValue() as string | null;
           return value ? (
-            <span className="font-medium text-slate-100">{value}</span>
+            <span className="font-medium text-white/90">{value}</span>
           ) : (
-            <span className="text-slate-600">—</span>
+            <span className="text-white/30">—</span>
           );
         },
         size: 200,
@@ -169,9 +169,9 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
         cell: (info) => {
           const value = info.getValue() as string | null;
           return value ? (
-            <span className="text-slate-200">{value}</span>
+            <span className="text-white/80">{value}</span>
           ) : (
-            <span className="text-slate-600">—</span>
+            <span className="text-white/30">—</span>
           );
         },
         size: 360,
@@ -182,11 +182,11 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
         cell: (info) => {
           const value = info.getValue() as string | null;
           return value ? (
-            <div className="line-clamp-2 text-xs leading-relaxed text-slate-400">
+            <div className="line-clamp-2 text-xs leading-relaxed text-white/60">
               {value}
             </div>
           ) : (
-            <span className="text-slate-600">—</span>
+            <span className="text-white/30">—</span>
           );
         },
         size: 440,
@@ -197,9 +197,9 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
         cell: (info) => {
           const value = info.getValue() as string | null;
           return value ? (
-            <span className="text-xs text-slate-400">{formatDate(value)}</span>
+            <span className="text-xs text-white/50">{formatDate(value)}</span>
           ) : (
-            <span className="text-slate-600">—</span>
+            <span className="text-white/30">—</span>
           );
         },
         size: 160,
@@ -292,7 +292,7 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
   if (isPending && allRows.length === 0) {
     return (
       <div className="flex h-full w-full items-center justify-center text-white">
-        <div className="text-lg">Loading events…</div>
+        <div className="text-sm text-white/70">Loading events…</div>
       </div>
     );
   }
@@ -300,7 +300,7 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
   if (isError) {
     return (
       <div className="flex h-full w-full items-center justify-center text-white">
-        <div className="text-lg text-red-400">
+        <div className="text-sm text-red-400/90">
           {(error instanceof Error ? error.message : "Unexpected error.") ||
             "Unable to load data."}
         </div>
@@ -309,48 +309,46 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
   }
 
   return (
-    <div className="flex h-full w-full flex-col bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
-      <header className="flex items-center justify-between border-b border-slate-800/50 bg-slate-950/80 px-6 py-4 backdrop-blur-sm">
+    <div className="flex h-full w-full flex-col bg-white/5 text-white">
+      <header className="flex items-center justify-between border-b border-white/10 bg-black/20 px-4 py-2.5 backdrop-blur-xl">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">
-            <span className="bg-linear-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              Demo Events
-            </span>
+          <h1 className="text-sm font-medium tracking-tight text-white/90">
+            Demo Events
           </h1>
-          <p className="mt-1 text-sm text-slate-400">
-            <span className="font-semibold text-emerald-400">
+          <p className="mt-0.5 text-xs text-white/50">
+            <span className="font-medium text-white/70">
               {allRows.length.toLocaleString()}
             </span>{" "}
-            rows loaded
+            rows
             {hasNextPage && (
               <span className="ml-2 inline-flex items-center gap-1">
-                <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-blue-500" />
-                <span className="text-blue-400">streaming...</span>
+                <span className="inline-block h-1 w-1 animate-pulse rounded-full bg-white/60" />
+                <span className="text-white/60">streaming</span>
               </span>
             )}
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 rounded-lg bg-slate-900/60 px-3 py-1.5 text-xs">
-            <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50" />
-            <span className="font-medium text-slate-300">
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 rounded-md bg-white/5 px-2 py-1 text-xs backdrop-blur-sm">
+            <div className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            <span className="font-medium text-white/70">
               {isFetching ? "Syncing" : "Live"}
             </span>
           </div>
         </div>
       </header>
 
-      <div className="flex-1 overflow-hidden p-6">
-        <div className="h-full overflow-hidden rounded-2xl border border-slate-800/60 bg-slate-950/40 shadow-2xl shadow-black/40 backdrop-blur-sm">
+      <div className="flex-1 overflow-hidden">
+        <div className="h-full overflow-hidden">
           <div className="max-h-full overflow-hidden">
             <table className="min-w-full border-collapse">
-              <thead className="sticky top-0 z-10 bg-linear-to-b from-slate-900 to-slate-900/95 backdrop-blur-md">
+              <thead className="sticky top-0 z-10 bg-black/30 backdrop-blur-xl">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <tr key={headerGroup.id}>
                     {headerGroup.headers.map((header) => (
                       <th
                         key={header.id}
-                        className="border-b border-slate-700/50 px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400"
+                        className="border-b border-white/10 px-3 py-2 text-left text-xs font-medium tracking-wide text-white/50"
                         style={{ width: header.getSize() }}
                       >
                         {header.isPlaceholder
@@ -368,7 +366,7 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
           </div>
           <div
             ref={parentRef}
-            className="scrollbar-thin scrollbar-track-slate-900 scrollbar-thumb-slate-700 hover:scrollbar-thumb-slate-600 relative max-h-full overflow-y-auto"
+            className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/20 hover:scrollbar-thumb-white/30 relative max-h-full overflow-y-auto"
           >
             <div
               style={{
@@ -385,18 +383,18 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
                     <div
                       key={virtualRow.key}
                       ref={rowVirtualizer.measureElement}
-                      className="absolute left-0 right-0 flex items-center justify-center border-b border-slate-800/40 bg-slate-900/40 py-6 text-sm text-slate-400 backdrop-blur-sm"
+                      className="absolute left-0 right-0 flex items-center justify-center border-b border-white/10 bg-white/5 py-4 text-xs text-white/50 backdrop-blur-xl"
                       style={{ transform: `translateY(${virtualRow.start}px)` }}
                     >
                       {isFetchingNextPage ? (
                         <div className="flex items-center gap-2">
-                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-700 border-t-blue-500" />
-                          <span>Loading more rows...</span>
+                          <div className="h-3 w-3 animate-spin rounded-full border border-white/30 border-t-white/70" />
+                          <span>Loading more rows</span>
                         </div>
                       ) : (
-                        <div className="flex items-center gap-2 text-emerald-400">
+                        <div className="flex items-center gap-1.5 text-white/60">
                           <svg
-                            className="h-4 w-4"
+                            className="h-3 w-3"
                             fill="currentColor"
                             viewBox="0 0 20 20"
                             aria-label="Check"
@@ -423,11 +421,11 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
                     style={{ transform: `translateY(${virtualRow.start}px)` }}
                   >
                     <tbody>
-                      <tr className="group border-b border-slate-800/40 bg-slate-900/20 transition-all duration-150 hover:bg-slate-800/40 hover:shadow-lg hover:shadow-blue-900/10">
+                      <tr className="group border-b border-white/5 transition-colors duration-150 hover:bg-white/5">
                         {row.getVisibleCells().map((cell) => (
                           <td
                             key={cell.id}
-                            className="px-4 py-4"
+                            className="px-3 py-2.5"
                             style={{ width: cell.column.getSize() }}
                           >
                             {flexRender(
@@ -446,18 +444,18 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
         </div>
       </div>
 
-      <footer className="flex items-center justify-between border-t border-slate-800/50 bg-slate-950/80 px-6 py-3 text-xs backdrop-blur-sm">
-        <div className="flex items-center gap-4">
-          <span className="font-mono text-slate-500">
-            Cursor: <span className="text-slate-400">{startCursor ?? "—"}</span>{" "}
-            → <span className="text-slate-400">{lastRowId ?? "—"}</span>
+      <footer className="flex items-center justify-between border-t border-white/10 bg-black/20 px-4 py-2 text-xs backdrop-blur-xl">
+        <div className="flex items-center gap-3">
+          <span className="font-mono text-white/40">
+            Cursor: <span className="text-white/60">{startCursor ?? "—"}</span>{" "}
+            → <span className="text-white/60">{lastRowId ?? "—"}</span>
           </span>
-          <span className="text-slate-600">•</span>
-          <span className="text-slate-500">
-            Page size: <span className="text-slate-400">{limit}</span>
+          <span className="text-white/20">•</span>
+          <span className="text-white/40">
+            Page size: <span className="text-white/60">{limit}</span>
           </span>
         </div>
-        <div className="font-mono text-slate-500">
+        <div className="font-mono text-white/40">
           Virtualized • Cursor-based pagination
         </div>
       </footer>
