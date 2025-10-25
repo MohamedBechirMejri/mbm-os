@@ -309,7 +309,7 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
   }
 
   return (
-    <div className="flex h-full w-full flex-col bg-white/5 text-white">
+    <div className="flex h-full w-full flex-col bg-white/5 text-white backdrop-blur-[24rem]">
       <header className="flex items-center justify-between border-b border-white/10 bg-black/20 px-4 py-2.5 backdrop-blur-xl">
         <div>
           <h1 className="text-sm font-medium tracking-tight text-white/90">
