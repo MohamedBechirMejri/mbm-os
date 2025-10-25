@@ -6,48 +6,42 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
-type Person = {
+type DemoEvent = {
   id: number;
-  name: string;
-  email: string;
-  role: string;
+  orgId: number | null;
+  searchId: number | null;
+  companyId: number | null;
+  createdAt: string | null;
+  companyName: string | null;
+  title: string | null;
+  body: string | null;
+  meta: unknown;
 };
 
 export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
-  const data = useMemo<Person[]>(
-    () => [
-      {
-        id: 1,
-        name: "Alice Johnson",
-        email: "alice@example.com",
-        role: "Developer",
-      },
-      { id: 2, name: "Bob Smith", email: "bob@example.com", role: "Designer" },
-      {
-        id: 3,
-        name: "Carol Williams",
-        email: "carol@example.com",
-        role: "Manager",
-      },
-      {
-        id: 4,
-        name: "David Brown",
-        email: "david@example.com",
-        role: "Developer",
-      },
-      {
-        id: 5,
-        name: "Eve Davis",
-        email: "eve@example.com",
-        role: "QA Engineer",
-      },
-    ],
-    [],
-  );
+  const [data, setData] = useState<DemoEvent[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const columns = useMemo<ColumnDef<Person>[]>(
+  useMemo(() => {
+    fetch("/api/million-row-grid")
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch data");
+        return res.json();
+      })
+      .then((payload) => {
+        setData(payload.rows);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setIsLoading(false);
+      });
+  }, []);
+
+  const columns = useMemo<ColumnDef<DemoEvent>[]>(
     () => [
       {
         accessorKey: "id",
@@ -55,19 +49,30 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
         cell: (info) => info.getValue(),
       },
       {
-        accessorKey: "name",
-        header: "Name",
-        cell: (info) => info.getValue(),
+        accessorKey: "companyName",
+        header: "Company",
+        cell: (info) => info.getValue() || "—",
       },
       {
-        accessorKey: "email",
-        header: "Email",
-        cell: (info) => info.getValue(),
+        accessorKey: "title",
+        header: "Title",
+        cell: (info) => info.getValue() || "—",
       },
       {
-        accessorKey: "role",
-        header: "Role",
-        cell: (info) => info.getValue(),
+        accessorKey: "body",
+        header: "Body",
+        cell: (info) => {
+          const value = info.getValue() as string | null;
+          return value ? <div className="max-w-md truncate">{value}</div> : "—";
+        },
+      },
+      {
+        accessorKey: "createdAt",
+        header: "Created At",
+        cell: (info) => {
+          const value = info.getValue() as string | null;
+          return value ? new Date(value).toLocaleDateString() : "—";
+        },
       },
     ],
     [],
@@ -79,9 +84,27 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
     getCoreRowModel: getCoreRowModel(),
   });
 
+  if (isLoading) {
+    return (
+      <div className="flex h-full w-full items-center justify-center text-white">
+        <div className="text-lg">Loading data...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-full w-full items-center justify-center text-white">
+        <div className="text-lg text-red-400">Error: {error}</div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-full w-full flex-col p-6 text-white">
-      <h1 className="mb-6 text-2xl font-bold">Simple Table</h1>
+      <h1 className="mb-6 text-2xl font-bold">
+        Demo Events ({data.length} rows)
+      </h1>
       <div className="overflow-auto rounded-lg border border-gray-700">
         <table className="w-full">
           <thead className="bg-gray-800">
