@@ -1,12 +1,22 @@
 "use client";
 
+import type { InfiniteData } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import {
   type ColumnDef,
   flexRender,
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useMemo, useState } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef } from "react";
+
+const LIMIT_PARAM = "million-limit";
+const CURSOR_PARAM = "million-cursor";
+const DEFAULT_LIMIT = 50;
+const MIN_LIMIT = 10;
+const MAX_LIMIT = 200;
 
 type DemoEvent = {
   id: number;
@@ -17,29 +27,123 @@ type DemoEvent = {
   companyName: string | null;
   title: string | null;
   body: string | null;
-  meta: unknown;
+  meta: Record<string, unknown> | null;
+};
+
+type GridResponse = {
+  rows: DemoEvent[];
+  nextCursor: number | null;
+  hasMore: boolean;
+};
+
+const formatDate = (value: string | null) => {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  return date.toLocaleString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 };
 
 export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
-  const [data, setData] = useState<DemoEvent[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const searchParamsString = searchParams?.toString() ?? "";
 
-  useMemo(() => {
-    fetch("/api/million-row-grid")
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch data");
-        return res.json();
-      })
-      .then((payload) => {
-        setData(payload.rows);
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setIsLoading(false);
-      });
-  }, []);
+  const limit = useMemo(() => {
+    const params = new URLSearchParams(searchParamsString);
+    const raw = params.get(LIMIT_PARAM);
+    const value = raw ? Number.parseInt(raw, 10) : Number.NaN;
+    if (Number.isFinite(value)) {
+      return Math.min(Math.max(value, MIN_LIMIT), MAX_LIMIT);
+    }
+    return DEFAULT_LIMIT;
+  }, [searchParamsString]);
+
+  const initialCursor = useMemo(() => {
+    const params = new URLSearchParams(searchParamsString);
+    const raw = params.get(CURSOR_PARAM);
+    if (!raw) return null;
+    const parsed = Number.parseInt(raw, 10);
+    return Number.isFinite(parsed) ? parsed : null;
+  }, [searchParamsString]);
+
+  const query = useInfiniteQuery<
+    GridResponse,
+    Error,
+    GridResponse,
+    [string, { limit: number }],
+    number | null
+  >({
+    queryKey: ["million-row-grid", { limit }],
+    initialPageParam: initialCursor,
+    queryFn: async ({ pageParam }) => {
+      const params = new URLSearchParams();
+      params.set("limit", String(limit));
+      if (pageParam !== null && pageParam !== undefined) {
+        params.set("cursor", String(pageParam));
+      }
+
+      const response = await fetch(
+        `/api/million-row-grid?${params.toString()}`,
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch demo events.");
+      }
+
+      const payload = (await response.json()) as GridResponse;
+      return payload;
+    },
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
+    retry: false,
+  });
+
+  const {
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isError,
+    isFetching,
+    isFetchingNextPage,
+    isPending,
+  } = query;
+
+  const dataPages = useMemo(
+    () =>
+      ((query.data as InfiniteData<GridResponse> | undefined)?.pages ??
+        []) as GridResponse[],
+    [query.data],
+  );
+
+  const allRows = useMemo(
+    () => dataPages.flatMap((page) => page.rows),
+    [dataPages],
+  );
+
+  useEffect(() => {
+    if (!query.data) return;
+    const params = new URLSearchParams(searchParamsString);
+    params.set(LIMIT_PARAM, String(limit));
+
+    const lastLoadedRowId = allRows.at(-1)?.id ?? null;
+    if (lastLoadedRowId !== null) {
+      params.set(CURSOR_PARAM, String(lastLoadedRowId));
+    } else {
+      params.delete(CURSOR_PARAM);
+    }
+
+    const nextQuery = params.toString();
+    const currentQuery = searchParamsString;
+    if (nextQuery === currentQuery) return;
+
+    const target = nextQuery ? `${pathname}?${nextQuery}` : pathname;
+    router.replace(target, { scroll: false });
+  }, [allRows, limit, pathname, query.data, router, searchParamsString]);
 
   const columns = useMemo<ColumnDef<DemoEvent>[]>(
     () => [
@@ -47,104 +151,191 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
         accessorKey: "id",
         header: "ID",
         cell: (info) => info.getValue(),
+        size: 96,
       },
       {
         accessorKey: "companyName",
         header: "Company",
         cell: (info) => info.getValue() || "—",
+        size: 240,
       },
       {
         accessorKey: "title",
         header: "Title",
         cell: (info) => info.getValue() || "—",
+        size: 320,
       },
       {
         accessorKey: "body",
-        header: "Body",
+        header: "Summary",
         cell: (info) => {
           const value = info.getValue() as string | null;
-          return value ? <div className="max-w-md truncate">{value}</div> : "—";
+          return value ? (
+            <div className="line-clamp-2 text-sm text-slate-200/90">
+              {value}
+            </div>
+          ) : (
+            "—"
+          );
         },
+        size: 480,
       },
       {
         accessorKey: "createdAt",
-        header: "Created At",
-        cell: (info) => {
-          const value = info.getValue() as string | null;
-          return value ? new Date(value).toLocaleDateString() : "—";
-        },
+        header: "Created",
+        cell: (info) => formatDate(info.getValue() as string | null),
+        size: 200,
       },
     ],
     [],
   );
 
   const table = useReactTable({
-    data,
+    data: allRows,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    columnResizeMode: "onChange",
   });
 
-  if (isLoading) {
+  const parentRef = useRef<HTMLDivElement>(null);
+  const rowVirtualizer = useVirtualizer({
+    count: hasNextPage ? allRows.length + 1 : allRows.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 88,
+    overscan: 12,
+  });
+
+  const virtualRows = rowVirtualizer.getVirtualItems();
+  const lastVirtualRow = virtualRows[virtualRows.length - 1];
+
+  useEffect(() => {
+    if (!hasNextPage || isFetchingNextPage || !lastVirtualRow) return;
+    if (lastVirtualRow.index < allRows.length) return;
+    fetchNextPage();
+  }, [
+    allRows.length,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    lastVirtualRow,
+  ]);
+
+  if (isPending && allRows.length === 0) {
     return (
       <div className="flex h-full w-full items-center justify-center text-white">
-        <div className="text-lg">Loading data...</div>
+        <div className="text-lg">Loading events…</div>
       </div>
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
       <div className="flex h-full w-full items-center justify-center text-white">
-        <div className="text-lg text-red-400">Error: {error}</div>
+        <div className="text-lg text-red-400">
+          {(error instanceof Error ? error.message : "Unexpected error.") ||
+            "Unable to load data."}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-full w-full flex-col p-6 text-white">
-      <h1 className="mb-6 text-2xl font-bold">
-        Demo Events ({data.length} rows)
-      </h1>
-      <div className="overflow-auto rounded-lg border border-gray-700">
-        <table className="w-full">
-          <thead className="bg-gray-800">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <th
-                    key={header.id}
-                    className="border-b border-gray-700 px-4 py-3 text-left font-semibold"
+    <div className="flex h-full w-full flex-col gap-4 p-6 text-white">
+      <header className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold">Demo Events</h1>
+          <p className="text-sm text-slate-300/80">
+            Streaming {allRows.length.toLocaleString()} rows
+            {hasNextPage ? " (fetching more…)" : ""}
+          </p>
+        </div>
+      </header>
+
+      <div className="flex-1 overflow-hidden rounded-xl border border-slate-800/80 bg-slate-950/40 backdrop-blur">
+        <div className="max-h-full overflow-hidden">
+          <table className="min-w-full border-collapse">
+            <thead className="sticky top-0 z-10 bg-slate-900/80 backdrop-blur">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <th
+                      key={header.id}
+                      className="select-none border-b border-slate-800/80 px-4 py-3 text-left text-sm font-medium uppercase tracking-wide text-slate-300"
+                      style={{ width: header.getSize() }}
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+          </table>
+        </div>
+        <div ref={parentRef} className="relative max-h-full overflow-y-auto">
+          <div
+            style={{
+              height: rowVirtualizer.getTotalSize(),
+              position: "relative",
+            }}
+          >
+            {virtualRows.map((virtualRow) => {
+              const row = table.getRowModel().rows[virtualRow.index];
+              const isLoaderRow = virtualRow.index >= allRows.length;
+
+              if (isLoaderRow) {
+                return (
+                  <div
+                    key={virtualRow.key}
+                    ref={rowVirtualizer.measureElement}
+                    className="absolute left-0 right-0 flex items-center justify-center border-b border-slate-800/60 bg-slate-900/60 text-sm text-slate-300"
+                    style={{ transform: `translateY(${virtualRow.start}px)` }}
                   >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody>
-            {table.getRowModel().rows.map((row) => (
-              <tr
-                key={row.id}
-                className="transition-colors hover:bg-gray-800/50"
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <td
-                    key={cell.id}
-                    className="border-b border-gray-700/50 px-4 py-3"
-                  >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                    {isFetchingNextPage ? "Loading more…" : "All caught up"}
+                  </div>
+                );
+              }
+
+              return (
+                <table
+                  key={row.id}
+                  ref={rowVirtualizer.measureElement}
+                  className="absolute left-0 right-0"
+                  style={{ transform: `translateY(${virtualRow.start}px)` }}
+                >
+                  <tbody>
+                    <tr className="border-b border-slate-800/60 bg-slate-900/40 transition-colors hover:bg-slate-900/70">
+                      {row.getVisibleCells().map((cell) => (
+                        <td
+                          key={cell.id}
+                          className="px-4 py-4 text-sm text-slate-200"
+                          style={{ width: cell.column.getSize() }}
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  </tbody>
+                </table>
+              );
+            })}
+          </div>
+        </div>
       </div>
+
+      <footer className="flex items-center justify-between text-xs text-slate-400">
+        <span>{isFetching ? "Syncing…" : "Up to date"}</span>
+        <span>
+          Limit {limit} • Cursor {allRows.at(-1)?.id ?? "—"}
+        </span>
+      </footer>
     </div>
   );
 }
