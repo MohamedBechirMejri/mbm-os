@@ -1,6 +1,7 @@
 "use client";
 
-import { Minus, Plus, Settings } from "lucide-react";
+import { Info, Minus, Plus, Settings } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,23 +18,40 @@ import { generateSyntheticDataset } from "./dataset";
 import type { RendererConfig, ScatterDataset } from "./types";
 import { useScatterRenderer } from "./use-scatter-renderer";
 
-const INITIAL_DATASET = generateSyntheticDataset(100_000, {
-  name: "Demo Dataset",
-  clusters: 5,
-  noise: 0.4,
-});
-
 export function GpuScatterplot({ instanceId: _ }: { instanceId: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [dataset] = useState<ScatterDataset>(INITIAL_DATASET);
-  const [viewport, setViewport] = useState({
-    centerX: 50,
-    centerY: 50,
-    zoom: 8,
+  const [pointCount, setPointCount] = useState(100_000);
+  const [sliderValue, setSliderValue] = useState(100_000);
+  const regenerateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Generate initial dataset
+  const initialDataset = generateSyntheticDataset(100_000, {
+    name: "Demo Dataset",
+    clusters: 5,
+    noise: 0.4,
   });
+
+  const [dataset, setDataset] = useState<ScatterDataset>(initialDataset);
+  const [isRegenerating, setIsRegenerating] = useState(false);
+
+  // Calculate initial viewport from dataset bounds
+  const initialBounds = initialDataset.bounds;
+  const initialCenterX = (initialBounds.minX + initialBounds.maxX) / 2;
+  const initialCenterY = (initialBounds.minY + initialBounds.maxY) / 2;
+  const initialRangeX = initialBounds.maxX - initialBounds.minX;
+  const initialRangeY = initialBounds.maxY - initialBounds.minY;
+  const initialMaxRange = Math.max(initialRangeX, initialRangeY);
+
+  const [viewport, setViewport] = useState({
+    centerX: initialCenterX,
+    centerY: initialCenterY,
+    zoom: 400 / initialMaxRange,
+  });
+
   const [pointSize, setPointSize] = useState(2);
   const [colorRampId, setColorRampId] = useState("viridis");
   const [showSettings, setShowSettings] = useState(false);
+  const [showInfo, setShowInfo] = useState(true);
 
   const isDraggingRef = useRef(false);
   const lastPosRef = useRef({ x: 0, y: 0 });
@@ -58,6 +76,50 @@ export function GpuScatterplot({ instanceId: _ }: { instanceId: string }) {
     config,
     dataset,
   );
+
+  // Regenerate dataset when point count changes (debounced)
+  const handleSliderChange = (newCount: number) => {
+    setSliderValue(newCount);
+    setPointCount(newCount); // Update displayed count immediately
+
+    // Clear existing timeout
+    if (regenerateTimeoutRef.current) {
+      clearTimeout(regenerateTimeoutRef.current);
+    }
+
+    // Debounce regeneration
+    regenerateTimeoutRef.current = setTimeout(() => {
+      handleRegenerateDataset(newCount);
+    }, 300);
+  };
+
+  // Regenerate dataset when point count changes
+  const handleRegenerateDataset = (newCount: number) => {
+    setIsRegenerating(true);
+    setPointCount(newCount);
+    // Use setTimeout to allow UI to update before heavy computation
+    setTimeout(() => {
+      const newDataset = generateSyntheticDataset(newCount, {
+        name: `Dataset (${newCount.toLocaleString()} points)`,
+        clusters: 5,
+        noise: 0.4,
+      });
+      setDataset(newDataset);
+      // Reset viewport to show all points
+      const { bounds } = newDataset;
+      const centerX = (bounds.minX + bounds.maxX) / 2;
+      const centerY = (bounds.minY + bounds.maxY) / 2;
+      const rangeX = bounds.maxX - bounds.minX;
+      const rangeY = bounds.maxY - bounds.minY;
+      const maxRange = Math.max(rangeX, rangeY);
+      setViewport({
+        centerX,
+        centerY,
+        zoom: 400 / maxRange, // Fit to ~400px viewport
+      });
+      setTimeout(() => setIsRegenerating(false), 100);
+    }, 50);
+  };
 
   // Pan/zoom interaction
   useEffect(() => {
@@ -111,6 +173,47 @@ export function GpuScatterplot({ instanceId: _ }: { instanceId: string }) {
 
   return (
     <div className="flex h-full w-full flex-col overflow-hidden bg-[#0d0d0d]">
+      {/* Info Banner */}
+      <AnimatePresence>
+        {showInfo && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className="overflow-hidden border-b border-white/10 bg-linear-to-r from-purple-500/10 to-blue-500/10 backdrop-blur-xl"
+          >
+            <div className="flex items-start justify-between gap-4 px-4 py-3">
+              <div className="flex items-start gap-3">
+                <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/10">
+                  <Info className="size-4 text-white/80" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-sm font-semibold text-white">
+                    GPU-Accelerated Visualization
+                  </h3>
+                  <p className="text-xs leading-relaxed text-white/70">
+                    This app renders up to <strong>10 million points</strong> at
+                    60fps using WebGPU compute shaders. Drag to pan, scroll to
+                    zoom, and tweak settings to see real-time GPU performance.
+                    Perfect for exploring large datasets without melting your
+                    CPU.
+                  </p>
+                </div>
+              </div>
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => setShowInfo(false)}
+                className="size-7 shrink-0 text-white/60 hover:bg-white/10 hover:text-white"
+              >
+                <Plus className="size-4 rotate-45" />
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Toolbar */}
       <div className="flex items-center justify-between border-b border-white/10 bg-black/30 px-4 py-2 backdrop-blur-xl">
         <div className="flex items-center gap-3">
@@ -192,8 +295,42 @@ export function GpuScatterplot({ instanceId: _ }: { instanceId: string }) {
                 </SheetTitle>
               </SheetHeader>
               <div className="mt-6 space-y-6">
+                {/* Point count */}
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.05 }}
+                  className="space-y-2"
+                >
+                  <div className="text-sm font-medium text-white/80">
+                    Point Count
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Slider
+                      value={sliderValue}
+                      onChange={handleSliderChange}
+                      min={10_000}
+                      max={2_000_000}
+                      step={10_000}
+                      className="flex-1"
+                    />
+                    <span className="w-16 text-right font-mono text-sm text-white/60">
+                      {(sliderValue / 1_000).toFixed(0)}K
+                    </span>
+                  </div>
+                  <p className="text-xs text-white/50">
+                    Regenerates after you stop dragging. Max 2M points for
+                    smooth performance.
+                  </p>
+                </motion.div>
+
                 {/* Point size */}
-                <div className="space-y-2">
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="space-y-2"
+                >
                   <div className="text-sm font-medium text-white/80">
                     Point Size
                   </div>
@@ -210,23 +347,31 @@ export function GpuScatterplot({ instanceId: _ }: { instanceId: string }) {
                       {pointSize}
                     </span>
                   </div>
-                </div>
+                </motion.div>
 
                 {/* Color ramp */}
-                <div className="space-y-2">
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15 }}
+                  className="space-y-2"
+                >
                   <div className="text-sm font-medium text-white/80">
                     Color Ramp
                   </div>
                   <div className="space-y-2">
-                    {COLOR_RAMPS.map((ramp) => (
-                      <button
+                    {COLOR_RAMPS.map((ramp, idx) => (
+                      <motion.button
                         key={ramp.id}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.2 + idx * 0.05 }}
                         type="button"
                         onClick={() => setColorRampId(ramp.id)}
                         className={cn(
-                          "flex w-full items-center gap-3 rounded-lg p-2 transition-colors",
+                          "flex w-full items-center gap-3 rounded-lg p-2 transition-all",
                           colorRampId === ramp.id
-                            ? "bg-white/10"
+                            ? "scale-[1.02] bg-white/10 ring-1 ring-white/20"
                             : "hover:bg-white/5",
                         )}
                       >
@@ -239,10 +384,10 @@ export function GpuScatterplot({ instanceId: _ }: { instanceId: string }) {
                         <span className="text-sm text-white/70">
                           {ramp.name}
                         </span>
-                      </button>
+                      </motion.button>
                     ))}
                   </div>
-                </div>
+                </motion.div>
               </div>
             </SheetContent>
           </Sheet>
@@ -252,7 +397,12 @@ export function GpuScatterplot({ instanceId: _ }: { instanceId: string }) {
       {/* Canvas */}
       <div className="relative flex-1">
         {error ? (
-          <div className="flex h-full items-center justify-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: "spring", damping: 20 }}
+            className="flex h-full items-center justify-center"
+          >
             <div className="text-center">
               <div className="text-sm font-medium text-red-400">
                 WebGPU Error
@@ -262,7 +412,21 @@ export function GpuScatterplot({ instanceId: _ }: { instanceId: string }) {
                 WebGPU requires a compatible browser and GPU
               </div>
             </div>
-          </div>
+          </motion.div>
+        ) : isRegenerating ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="flex h-full items-center justify-center"
+          >
+            <div className="flex items-center gap-3">
+              <div className="size-4 animate-spin rounded-full border-2 border-white/20 border-t-white/70" />
+              <span className="text-sm text-white/60">
+                Regenerating dataset...
+              </span>
+            </div>
+          </motion.div>
         ) : (
           <canvas
             ref={canvasRef}

@@ -60,7 +60,9 @@ export function useScatterRenderer(
   useEffect(() => {
     if (!initialized || !rendererRef.current || !dataset) return;
     rendererRef.current.setDataset(dataset);
-  }, [initialized, dataset]);
+    // Re-apply config after dataset change to ensure viewport is correct
+    rendererRef.current.updateConfig(config);
+  }, [initialized, dataset, config]);
 
   // Update config
   useEffect(() => {
@@ -108,7 +110,7 @@ export function useScatterRenderer(
         rafRef.current = null;
       }
     };
-  }, [initialized, dataset?.pointCount]);
+  }, [initialized, dataset]); // Restart render loop when dataset changes
 
   // Handle canvas resize
   useEffect(() => {
