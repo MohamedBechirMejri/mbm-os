@@ -1,10 +1,11 @@
 "use client";
 
-import { ArrowLeft, Search, Sparkles } from "lucide-react";
+import { ArrowLeft, Search, Sparkles, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useMemo, useState } from "react";
 import {
   DesktopAPI,
+  unregisterApp,
   useDesktop,
 } from "@/components/screens/desktop/components/window-manager";
 import { Button } from "@/components/ui/button";
@@ -447,6 +448,40 @@ function AppDetailView({
     void handleInstall();
   }, [appId, handleInstall, resetProgress]);
 
+  const uninstallApp = useAppInstallationStore((state) => state.uninstallApp);
+  const [isUninstalling, setIsUninstalling] = useState(false);
+
+  // Prevent uninstalling preinstalled apps (App Store, Safari, Finder, Terminal, etc.)
+  const PREINSTALLED_IDS = new Set<string>([
+    "softwarecenter",
+    "safari",
+    "file-manager",
+    "game-center",
+    "terminal",
+  ]);
+  const canUninstall = isInstalled && !PREINSTALLED_IDS.has(appId);
+
+  const handleUninstall = useCallback(async () => {
+    if (!canUninstall) return;
+
+    setIsUninstalling(true);
+    setLocalError(null);
+
+    try {
+      // Unregister from window manager (closes all windows and removes from registry)
+      unregisterApp(appId);
+
+      // Remove from installation store and clear cache
+      await uninstallApp(appId);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Uninstallation failed.";
+      setLocalError(message);
+    } finally {
+      setIsUninstalling(false);
+    }
+  }, [appId, canUninstall, uninstallApp]);
+
   const primaryLabel = useMemo(() => {
     if (isInstalled) return "Open";
     if (!appAvailable) return "Coming Soon";
@@ -485,15 +520,29 @@ function AppDetailView({
           </div>
 
           <div className="flex flex-col gap-3">
-            <Button
-              disabled={(!appAvailable && !isInstalled) || isInstalling}
-              size="lg"
-              className="rounded-full px-8 text-[0.9375rem] font-semibold disabled:opacity-50"
-              onClick={handlePrimaryAction}
-              aria-busy={isInstalling}
-            >
-              {primaryLabel}
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                disabled={(!appAvailable && !isInstalled) || isInstalling}
+                size="lg"
+                className="flex-1 rounded-full px-8 text-[0.9375rem] font-semibold disabled:opacity-50"
+                onClick={handlePrimaryAction}
+                aria-busy={isInstalling}
+              >
+                {primaryLabel}
+              </Button>
+              {canUninstall && !isInstalling && (
+                <Button
+                  variant="outline"
+                  size="lg"
+                  disabled={isUninstalling}
+                  className="rounded-full px-4 text-[0.9375rem] font-semibold border-white/20 bg-white/5 text-white/80 hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-300 disabled:opacity-50 transition-colors"
+                  onClick={handleUninstall}
+                  aria-busy={isUninstalling}
+                >
+                  <Trash2 className="size-4" />
+                </Button>
+              )}
+            </div>
             {(isInstalling ||
               progressState?.status === "failed" ||
               localError) && (

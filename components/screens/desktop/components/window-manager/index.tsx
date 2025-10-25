@@ -12,6 +12,7 @@ export {
   setAnimationState,
   setWinState,
   snapTo,
+  unregisterApp,
   unsnap,
 } from "./api";
 export { __DevRegisterSampleApp, WindowManagerRoot } from "./components";

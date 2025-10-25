@@ -24,6 +24,28 @@ export function registerApps(apps: AppMeta[]) {
   }));
 }
 
+export function unregisterApp(appId: AppId) {
+  const s = store.get();
+
+  // Close all windows of this app
+  const windowsToClose = Object.entries(s.windows)
+    .filter(([_, win]) => win.appId === appId)
+    .map(([id]) => id);
+
+  for (const id of windowsToClose) {
+    closeWin(id);
+  }
+
+  // Remove app from registry
+  store.set((prev) => {
+    const { [appId]: _removed, ...restApps } = prev.apps;
+    return {
+      ...prev,
+      apps: restApps,
+    };
+  });
+}
+
 export function registerDockAppRect(appId: AppId, rect?: DOMRect) {
   store.set((s) => ({
     ...s,
@@ -306,6 +328,7 @@ export function unsnap(id: string) {
 export const DesktopAPI = {
   getState: getDesktop,
   registerApps,
+  unregisterApp,
   registerDockAppRect,
   launch,
   focus: focusWin,
