@@ -143,41 +143,66 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
       {
         accessorKey: "id",
         header: "ID",
-        cell: (info) => info.getValue(),
-        size: 96,
+        cell: (info) => (
+          <span className="font-mono text-xs text-slate-500">
+            #{String(info.getValue())}
+          </span>
+        ),
+        size: 80,
       },
       {
         accessorKey: "companyName",
         header: "Company",
-        cell: (info) => info.getValue() || "—",
-        size: 240,
+        cell: (info) => {
+          const value = info.getValue() as string | null;
+          return value ? (
+            <span className="font-medium text-slate-100">{value}</span>
+          ) : (
+            <span className="text-slate-600">—</span>
+          );
+        },
+        size: 200,
       },
       {
         accessorKey: "title",
         header: "Title",
-        cell: (info) => info.getValue() || "—",
-        size: 320,
-      },
-      {
-        accessorKey: "body",
-        header: "Summary",
         cell: (info) => {
           const value = info.getValue() as string | null;
           return value ? (
-            <div className="line-clamp-2 text-sm text-slate-200/90">
+            <span className="text-slate-200">{value}</span>
+          ) : (
+            <span className="text-slate-600">—</span>
+          );
+        },
+        size: 360,
+      },
+      {
+        accessorKey: "body",
+        header: "Description",
+        cell: (info) => {
+          const value = info.getValue() as string | null;
+          return value ? (
+            <div className="line-clamp-2 text-xs leading-relaxed text-slate-400">
               {value}
             </div>
           ) : (
-            "—"
+            <span className="text-slate-600">—</span>
           );
         },
-        size: 480,
+        size: 440,
       },
       {
         accessorKey: "createdAt",
         header: "Created",
-        cell: (info) => formatDate(info.getValue() as string | null),
-        size: 200,
+        cell: (info) => {
+          const value = info.getValue() as string | null;
+          return value ? (
+            <span className="text-xs text-slate-400">{formatDate(value)}</span>
+          ) : (
+            <span className="text-slate-600">—</span>
+          );
+        },
+        size: 160,
       },
     ],
     [],
@@ -284,101 +309,157 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
   }
 
   return (
-    <div className="flex h-full w-full flex-col gap-4 p-6 text-white">
-      <header className="flex items-center justify-between">
+    <div className="flex h-full w-full flex-col bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
+      <header className="flex items-center justify-between border-b border-slate-800/50 bg-slate-950/80 px-6 py-4 backdrop-blur-sm">
         <div>
-          <h1 className="text-2xl font-semibold">Demo Events</h1>
-          <p className="text-sm text-slate-300/80">
-            Streaming {allRows.length.toLocaleString()} rows
-            {hasNextPage ? " (fetching more…)" : ""}
+          <h1 className="text-2xl font-bold tracking-tight text-white">
+            <span className="bg-linear-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              Demo Events
+            </span>
+          </h1>
+          <p className="mt-1 text-sm text-slate-400">
+            <span className="font-semibold text-emerald-400">
+              {allRows.length.toLocaleString()}
+            </span>{" "}
+            rows loaded
+            {hasNextPage && (
+              <span className="ml-2 inline-flex items-center gap-1">
+                <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-blue-500" />
+                <span className="text-blue-400">streaming...</span>
+              </span>
+            )}
           </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 rounded-lg bg-slate-900/60 px-3 py-1.5 text-xs">
+            <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50" />
+            <span className="font-medium text-slate-300">
+              {isFetching ? "Syncing" : "Live"}
+            </span>
+          </div>
         </div>
       </header>
 
-      <div className="flex-1 overflow-hidden rounded-xl border border-slate-800/80 bg-slate-950/40 backdrop-blur">
-        <div className="max-h-full overflow-hidden">
-          <table className="min-w-full border-collapse">
-            <thead className="sticky top-0 z-10 bg-slate-900/80 backdrop-blur">
-              {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <th
-                      key={header.id}
-                      className="select-none border-b border-slate-800/80 px-4 py-3 text-left text-sm font-medium uppercase tracking-wide text-slate-300"
-                      style={{ width: header.getSize() }}
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
-          </table>
-        </div>
-        <div ref={parentRef} className="relative max-h-full overflow-y-auto">
+      <div className="flex-1 overflow-hidden p-6">
+        <div className="h-full overflow-hidden rounded-2xl border border-slate-800/60 bg-slate-950/40 shadow-2xl shadow-black/40 backdrop-blur-sm">
+          <div className="max-h-full overflow-hidden">
+            <table className="min-w-full border-collapse">
+              <thead className="sticky top-0 z-10 bg-linear-to-b from-slate-900 to-slate-900/95 backdrop-blur-md">
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <tr key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <th
+                        key={header.id}
+                        className="border-b border-slate-700/50 px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400"
+                        style={{ width: header.getSize() }}
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
+                      </th>
+                    ))}
+                  </tr>
+                ))}
+              </thead>
+            </table>
+          </div>
           <div
-            style={{
-              height: rowVirtualizer.getTotalSize(),
-              position: "relative",
-            }}
+            ref={parentRef}
+            className="scrollbar-thin scrollbar-track-slate-900 scrollbar-thumb-slate-700 hover:scrollbar-thumb-slate-600 relative max-h-full overflow-y-auto"
           >
-            {virtualRows.map((virtualRow) => {
-              const row = table.getRowModel().rows[virtualRow.index];
-              const isLoaderRow = virtualRow.index >= allRows.length;
+            <div
+              style={{
+                height: rowVirtualizer.getTotalSize(),
+                position: "relative",
+              }}
+            >
+              {virtualRows.map((virtualRow) => {
+                const row = table.getRowModel().rows[virtualRow.index];
+                const isLoaderRow = virtualRow.index >= allRows.length;
 
-              if (isLoaderRow) {
+                if (isLoaderRow) {
+                  return (
+                    <div
+                      key={virtualRow.key}
+                      ref={rowVirtualizer.measureElement}
+                      className="absolute left-0 right-0 flex items-center justify-center border-b border-slate-800/40 bg-slate-900/40 py-6 text-sm text-slate-400 backdrop-blur-sm"
+                      style={{ transform: `translateY(${virtualRow.start}px)` }}
+                    >
+                      {isFetchingNextPage ? (
+                        <div className="flex items-center gap-2">
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-700 border-t-blue-500" />
+                          <span>Loading more rows...</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 text-emerald-400">
+                          <svg
+                            className="h-4 w-4"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                            aria-label="Check"
+                          >
+                            <title>Check</title>
+                            <path
+                              fillRule="evenodd"
+                              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                          <span>All caught up</span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+
                 return (
-                  <div
-                    key={virtualRow.key}
+                  <table
+                    key={row.id}
                     ref={rowVirtualizer.measureElement}
-                    className="absolute left-0 right-0 flex items-center justify-center border-b border-slate-800/60 bg-slate-900/60 text-sm text-slate-300"
+                    className="absolute left-0 right-0"
                     style={{ transform: `translateY(${virtualRow.start}px)` }}
                   >
-                    {isFetchingNextPage ? "Loading more…" : "All caught up"}
-                  </div>
+                    <tbody>
+                      <tr className="group border-b border-slate-800/40 bg-slate-900/20 transition-all duration-150 hover:bg-slate-800/40 hover:shadow-lg hover:shadow-blue-900/10">
+                        {row.getVisibleCells().map((cell) => (
+                          <td
+                            key={cell.id}
+                            className="px-4 py-4"
+                            style={{ width: cell.column.getSize() }}
+                          >
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext(),
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+                    </tbody>
+                  </table>
                 );
-              }
-
-              return (
-                <table
-                  key={row.id}
-                  ref={rowVirtualizer.measureElement}
-                  className="absolute left-0 right-0"
-                  style={{ transform: `translateY(${virtualRow.start}px)` }}
-                >
-                  <tbody>
-                    <tr className="border-b border-slate-800/60 bg-slate-900/40 transition-colors hover:bg-slate-900/70">
-                      {row.getVisibleCells().map((cell) => (
-                        <td
-                          key={cell.id}
-                          className="px-4 py-4 text-sm text-slate-200"
-                          style={{ width: cell.column.getSize() }}
-                        >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
-                        </td>
-                      ))}
-                    </tr>
-                  </tbody>
-                </table>
-              );
-            })}
+              })}
+            </div>
           </div>
         </div>
       </div>
 
-      <footer className="flex items-center justify-between text-xs text-slate-400">
-        <span>{isFetching ? "Syncing…" : "Up to date"}</span>
-        <span>
-          Limit {limit} • Start {startCursor ?? "—"} • End {lastRowId ?? "—"}
-        </span>
+      <footer className="flex items-center justify-between border-t border-slate-800/50 bg-slate-950/80 px-6 py-3 text-xs backdrop-blur-sm">
+        <div className="flex items-center gap-4">
+          <span className="font-mono text-slate-500">
+            Cursor: <span className="text-slate-400">{startCursor ?? "—"}</span>{" "}
+            → <span className="text-slate-400">{lastRowId ?? "—"}</span>
+          </span>
+          <span className="text-slate-600">•</span>
+          <span className="text-slate-500">
+            Page size: <span className="text-slate-400">{limit}</span>
+          </span>
+        </div>
+        <div className="font-mono text-slate-500">
+          Virtualized • Cursor-based pagination
+        </div>
       </footer>
     </div>
   );
