@@ -57,6 +57,10 @@ export const demoEvents = pgTable(
       "btree",
       table.companyId.asc().nullsLast().op("int4_ops"),
     ),
+    index("demo_events_cursor_idx").using(
+      "btree",
+      table.id.asc().op("int4_ops"),
+    ),
     index("demo_events_meta_idx").using(
       "gin",
       table.meta.asc().nullsLast().op("jsonb_ops"),

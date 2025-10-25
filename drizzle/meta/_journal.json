@@ -15,6 +15,13 @@
       "when": 1761285325283,
       "tag": "0001_windy_celestials",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1761388800000,
+      "tag": "0002_cursor_index",
+      "breakpoints": false
     }
   ]
 }
