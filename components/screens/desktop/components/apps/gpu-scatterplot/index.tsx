@@ -14,7 +14,12 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 import { COLOR_RAMPS } from "./color-ramps";
-import { generateSyntheticDataset } from "./dataset";
+import {
+  DATASET_PRESETS,
+  DEFAULT_PRESET_ID,
+  formatPoints,
+  generatePresetDataset,
+} from "./dataset";
 import type { RendererConfig, ScatterDataset } from "./types";
 import { useScatterRenderer } from "./use-scatter-renderer";
 
@@ -46,13 +51,15 @@ export function GpuScatterplot({ instanceId: _ }: { instanceId: string }) {
   const activeGenerationRef = useRef(0);
   const datasetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const initialPreset =
+    DATASET_PRESETS.find((preset) => preset.id === DEFAULT_PRESET_ID) ??
+    DATASET_PRESETS[0];
+  const initialPresetId = initialPreset?.id ?? DEFAULT_PRESET_ID;
+
   const [dataset, setDataset] = useState<ScatterDataset>(() =>
-    generateSyntheticDataset(100_000, {
-      name: "Demo Dataset",
-      clusters: 5,
-      noise: 0.4,
-    }),
+    generatePresetDataset(initialPresetId, 100_000),
   );
+  const [presetId, setPresetId] = useState(initialPresetId);
   const [sliderValue, setSliderValue] = useState(() => dataset.pointCount);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [viewport, setViewport] = useState(() =>
@@ -60,12 +67,15 @@ export function GpuScatterplot({ instanceId: _ }: { instanceId: string }) {
   );
 
   const [pointSize, setPointSize] = useState(2);
-  const [colorRampId, setColorRampId] = useState("viridis");
+  const [colorRampId, setColorRampId] = useState(
+    initialPreset?.recommendedRamp ?? COLOR_RAMPS[0]?.id ?? "viridis",
+  );
   const [showSettings, setShowSettings] = useState(false);
   const [showInfo, setShowInfo] = useState(true);
 
   const isDraggingRef = useRef(false);
   const lastPosRef = useRef({ x: 0, y: 0 });
+  const activePresetRef = useRef(initialPresetId);
 
   const colorRamp =
     COLOR_RAMPS.find((r) => r.id === colorRampId) ?? COLOR_RAMPS[0];
@@ -114,9 +124,31 @@ export function GpuScatterplot({ instanceId: _ }: { instanceId: string }) {
     }, 300);
   };
 
+  const handlePresetChange = (nextPresetId: string) => {
+    if (!nextPresetId || nextPresetId === activePresetRef.current) {
+      return;
+    }
+
+    const nextPreset = DATASET_PRESETS.find(
+      (preset) => preset.id === nextPresetId,
+    );
+
+    setPresetId(nextPresetId);
+    if (nextPreset) {
+      setColorRampId(nextPreset.recommendedRamp);
+    }
+
+    handleRegenerateDataset(sliderValue, nextPresetId);
+  };
+
   // Regenerate dataset when point count changes
-  const handleRegenerateDataset = (newCount: number) => {
+  const handleRegenerateDataset = (
+    newCount: number,
+    presetOverride?: string,
+  ) => {
     setIsRegenerating(true);
+    const targetPresetId = presetOverride ?? activePresetRef.current;
+    activePresetRef.current = targetPresetId;
     const generationId = activeGenerationRef.current + 1;
     activeGenerationRef.current = generationId;
     if (datasetTimeoutRef.current) {
@@ -126,13 +158,10 @@ export function GpuScatterplot({ instanceId: _ }: { instanceId: string }) {
     // Use timeout to allow UI to update before heavy computation
     datasetTimeoutRef.current = setTimeout(() => {
       if (activeGenerationRef.current !== generationId) return;
-      const newDataset = generateSyntheticDataset(newCount, {
-        name: `Dataset (${newCount.toLocaleString()} points)`,
-        clusters: 5,
-        noise: 0.4,
-      });
+      const newDataset = generatePresetDataset(targetPresetId, newCount);
       if (activeGenerationRef.current !== generationId) return;
       setDataset(newDataset);
+      setSliderValue(newDataset.pointCount);
       // Reset viewport to show all points
       const fittedViewport = computeFittedViewport(
         newDataset.bounds,
@@ -207,7 +236,7 @@ export function GpuScatterplot({ instanceId: _ }: { instanceId: string }) {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="overflow-hidden border-b border-white/10 bg-linear-to-r from-purple-500/10 to-blue-500/10 backdrop-blur-xl"
+            className="overflow-hidden border-b border-white/10 bg-white/5 backdrop-blur-xl"
           >
             <div className="flex items-start justify-between gap-4 px-4 py-3">
               <div className="flex items-start gap-3">
@@ -219,11 +248,12 @@ export function GpuScatterplot({ instanceId: _ }: { instanceId: string }) {
                     GPU-Accelerated Visualization
                   </h3>
                   <p className="text-xs leading-relaxed text-white/70">
-                    This app renders up to <strong>10 million points</strong> at
-                    60fps using WebGPU compute shaders. Drag to pan, scroll to
-                    zoom, and tweak settings to see real-time GPU performance.
-                    Perfect for exploring large datasets without melting your
-                    CPU.
+                    This sandbox ships curated GPU data stories: a spiral
+                    galaxy, a neural telemetry field, and a liquidity stress
+                    cascade. Each scene streams through WebGPU at 60fps so you
+                    can pitch analytics that look as fast as they run. Drag to
+                    pan, scroll to zoom, and flex the renderer with real-time
+                    tuning.
                   </p>
                 </div>
               </div>
@@ -241,36 +271,67 @@ export function GpuScatterplot({ instanceId: _ }: { instanceId: string }) {
       </AnimatePresence>
 
       {/* Toolbar */}
-      <div className="flex items-center justify-between border-b border-white/10 bg-black/30 px-4 py-2 backdrop-blur-xl">
-        <div className="flex items-center gap-3">
-          <h1 className="text-sm font-medium text-white/90">{dataset.name}</h1>
-          <div className="flex items-center gap-1.5 text-xs text-white/50">
-            <span className="font-mono">
-              {dataset.pointCount.toLocaleString()}
-            </span>
-            <span>points</span>
+      <div className="flex flex-wrap items-center gap-3 border-b border-white/10 bg-black/30 px-4 py-3 backdrop-blur-xl">
+        <div className="flex min-w-60 flex-1 flex-col gap-1">
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-sm font-semibold text-white/90">
+              {dataset.name}
+            </h1>
+            <div className="flex items-center gap-1.5 text-xs text-white/50">
+              <span className="font-mono">
+                {dataset.pointCount.toLocaleString()}
+              </span>
+              <span>points</span>
+            </div>
           </div>
+          {dataset.meta?.headline ? (
+            <p className="text-xs text-white/45">{dataset.meta.headline}</p>
+          ) : null}
+        </div>
+
+        <div className="flex flex-1 flex-wrap items-center justify-center gap-1.5 md:justify-start">
+          {DATASET_PRESETS.map((preset) => {
+            const isActive = preset.id === presetId;
+            return (
+              <Button
+                key={preset.id}
+                type="button"
+                size="sm"
+                variant={isActive ? "secondary" : "ghost"}
+                className={cn(
+                  "rounded-full border border-white/10 bg-white/5 px-4 text-xs text-white/70 backdrop-blur-sm hover:bg-white/10",
+                  isActive && "border-white/20 bg-white/15 text-white",
+                )}
+                onClick={() => handlePresetChange(preset.id)}
+              >
+                {preset.name}
+              </Button>
+            );
+          })}
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Stats HUD */}
           {initialized && (
-            <div className="flex items-center gap-3 rounded-lg bg-white/5 px-3 py-1.5 font-mono text-xs backdrop-blur-sm">
+            <div className="flex items-center gap-3 rounded-lg bg-white/5 px-3 py-1.5 font-mono text-xs text-white/60 backdrop-blur-sm">
               <div className="flex items-center gap-1.5">
                 <div className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                <span className="text-white/60">
+                <span>
                   {stats.fps} <span className="text-white/40">fps</span>
                 </span>
               </div>
               <div className="h-3 w-px bg-white/10" />
-              <span className="text-white/60">
+              <span>
                 {stats.frameTime.toFixed(1)}{" "}
                 <span className="text-white/40">ms</span>
+              </span>
+              <div className="h-3 w-px bg-white/10" />
+              <span>
+                {dataset.pointCount.toLocaleString()}{" "}
+                <span className="text-white/40">pts</span>
               </span>
             </div>
           )}
 
-          {/* Zoom controls */}
           <div className="flex items-center gap-1 rounded-lg bg-white/5 p-1 backdrop-blur-sm">
             <Button
               size="icon"
@@ -303,7 +364,6 @@ export function GpuScatterplot({ instanceId: _ }: { instanceId: string }) {
             </Button>
           </div>
 
-          {/* Settings */}
           <Sheet open={showSettings} onOpenChange={setShowSettings}>
             <SheetTrigger asChild>
               <Button
@@ -341,7 +401,7 @@ export function GpuScatterplot({ instanceId: _ }: { instanceId: string }) {
                       className="flex-1"
                     />
                     <span className="w-16 text-right font-mono text-sm text-white/60">
-                      {(sliderValue / 1_000).toFixed(0)}K
+                      {formatPoints(sliderValue)}
                     </span>
                   </div>
                   <p className="text-xs text-white/50">
@@ -446,6 +506,52 @@ export function GpuScatterplot({ instanceId: _ }: { instanceId: string }) {
               className="h-full w-full cursor-move"
               style={{ imageRendering: "pixelated" }}
             />
+            <AnimatePresence mode="wait">
+              {dataset.meta && (
+                <motion.div
+                  key={dataset.meta.presetId}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 12 }}
+                  transition={{ type: "spring", damping: 24, stiffness: 260 }}
+                  className="pointer-events-none absolute bottom-6 left-6 max-w-xs"
+                >
+                  <div className="pointer-events-auto rounded-2xl border border-white/12 bg-black/55 p-4 backdrop-blur-2xl">
+                    <div className="flex flex-wrap gap-2">
+                      {dataset.meta?.tags.map((tag) => (
+                        <span
+                          key={`${dataset.meta?.presetId}-${tag}`}
+                          className="rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[0.65rem] uppercase tracking-[0.2em] text-white/60"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    <h2 className="mt-3 text-sm font-semibold text-white">
+                      {dataset.meta.headline}
+                    </h2>
+                    <p className="mt-2 text-xs leading-relaxed text-white/70">
+                      {dataset.meta.description}
+                    </p>
+                    <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs text-white/70">
+                      {dataset.meta?.stats.map((stat) => (
+                        <div
+                          key={`${dataset.meta?.presetId}-${stat.label}`}
+                          className="rounded-xl border border-white/10 bg-white/5 px-2 py-1 backdrop-blur-sm"
+                        >
+                          <div className="text-[0.6rem] uppercase tracking-[0.18em] text-white/40">
+                            {stat.label}
+                          </div>
+                          <div className="font-semibold text-white/90">
+                            {stat.value}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
             <AnimatePresence>
               {isRegenerating && (
                 <motion.div
@@ -456,7 +562,7 @@ export function GpuScatterplot({ instanceId: _ }: { instanceId: string }) {
                 >
                   <div className="flex items-center gap-3 text-white/70">
                     <div className="size-4 animate-spin rounded-full border-2 border-white/20 border-t-white/70" />
-                    <span className="text-sm">Regenerating dataset…</span>
+                    <span className="text-sm">Synthesizing scenario...</span>
                   </div>
                 </motion.div>
               )}

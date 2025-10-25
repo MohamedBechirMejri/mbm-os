@@ -1,7 +1,15 @@
 export interface ScatterPoint {
   x: number;
   y: number;
-  category?: number;
+  category: number;
+}
+
+export interface ScatterDatasetMeta {
+  presetId: string;
+  headline: string;
+  description: string;
+  tags: string[];
+  stats: Array<{ label: string; value: string }>;
 }
 
 export interface ScatterDataset {
@@ -14,6 +22,7 @@ export interface ScatterDataset {
   };
   name: string;
   pointCount: number;
+  meta?: ScatterDatasetMeta;
 }
 
 export interface Viewport {
