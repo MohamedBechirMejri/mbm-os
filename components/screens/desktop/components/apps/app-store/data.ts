@@ -417,8 +417,19 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     category: "webgpu",
     tags: ["webgpu", "dataviz", "instancing", "lod"],
     featured: true,
-    available: false,
+    available: true,
     hidden: false,
+    installManifest: {
+      sizeEstimate: 1_800_000,
+      assets: [
+        {
+          url: "/assets/icons/apps/preferences-desktop-display.ico",
+          kind: "icon",
+          bytes: 6_144,
+          cacheKey: "gpu-scatterplot/icon",
+        },
+      ],
+    },
   },
   {
     id: "log-tail",

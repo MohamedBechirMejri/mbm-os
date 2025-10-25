@@ -8,6 +8,7 @@ import type { AppMeta } from "../window-manager/types";
 import { AppStoreApp } from "./app-store";
 import { CalculatorApp } from "./calculator";
 import { FinderApp } from "./finder";
+import { GpuScatterplot } from "./gpu-scatterplot";
 import { MillionRowGrid } from "./million-row-grid";
 import { SafariApp } from "./safari";
 import { TerminalApp } from "./terminal";
@@ -76,6 +77,15 @@ export const catalogApps: AppMeta[] = [
     icon: "libreoffice-calc",
     Component: MillionRowGrid,
     minSize: { w: 600, h: 400 },
+    floatingActionBar: true,
+  },
+
+  {
+    id: "gpu-scatterplot",
+    title: "GPU Scatterplot",
+    icon: "preferences-desktop-display",
+    Component: GpuScatterplot,
+    minSize: { w: 700, h: 500 },
     floatingActionBar: true,
   },
 
