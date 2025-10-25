@@ -75,10 +75,13 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
     return Number.isFinite(parsed) ? parsed : null;
   }, [searchParamsString]);
 
+  const initialStartCursorRef = useRef(startCursor);
+  const initialStartCursor = initialStartCursorRef.current;
+
   const initialPageCursor = useMemo(() => {
-    if (startCursor === null) return null;
-    return Math.max(startCursor - 1, 0);
-  }, [startCursor]);
+    if (initialStartCursor === null) return null;
+    return Math.max(initialStartCursor - 1, 0);
+  }, [initialStartCursor]);
 
   const query = useInfiniteQuery<
     GridResponse,
@@ -87,7 +90,7 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
     [string, { limit: number; start: number | null }],
     number | null
   >({
-    queryKey: ["million-row-grid", { limit, start: startCursor }],
+    queryKey: ["million-row-grid", { limit, start: initialStartCursor }],
     initialPageParam: initialPageCursor,
     queryFn: async ({ pageParam }) => {
       const params = new URLSearchParams();
