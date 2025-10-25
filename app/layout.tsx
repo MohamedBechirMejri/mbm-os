@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Figtree } from "next/font/google";
 import "./globals.css";
 import { MotionConfig } from "motion/react";
+import { ReactQueryProvider } from "@/components/react-query-provider";
+
 // import LiquidGlassFilters from "@/components/screens/login/components/liquid-glass-filters";
 
 const figtree = Figtree({
@@ -29,7 +31,9 @@ export default function RootLayout({
       <body
         className={`${figtree.variable} antialiased font-[Figtree] overflow-hidden overscroll-none`}
       >
-        <MotionConfig reducedMotion="never">{children}</MotionConfig>
+        <MotionConfig reducedMotion="never">
+          <ReactQueryProvider>{children}</ReactQueryProvider>
+        </MotionConfig>
 
         {/* SVG Filters */}
         {/* <LiquidGlassFilters /> */}
