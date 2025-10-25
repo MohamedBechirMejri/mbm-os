@@ -16,6 +16,16 @@ export function useWaterRenderer(
     computeTime: 0,
     renderTime: 0,
   });
+  const initialConfigRef = useRef(config);
+  const initialBoundsRef = useRef(bounds);
+
+  useEffect(() => {
+    initialConfigRef.current = config;
+  }, [config]);
+
+  useEffect(() => {
+    initialBoundsRef.current = bounds;
+  }, [bounds]);
 
   // Initialize renderer
   useEffect(() => {
@@ -27,7 +37,10 @@ export function useWaterRenderer(
 
     const init = async () => {
       try {
-        const renderer = new WaterRenderer(config, bounds);
+        const renderer = new WaterRenderer(
+          initialConfigRef.current,
+          initialBoundsRef.current,
+        );
         await renderer.init(canvas);
 
         if (!mounted) {
@@ -66,7 +79,7 @@ export function useWaterRenderer(
         rendererRef.current = null;
       }
     };
-  }, [canvasRef, config, bounds]);
+  }, [canvasRef]);
 
   // Update config
   useEffect(() => {
@@ -78,9 +91,14 @@ export function useWaterRenderer(
   // Update bounds
   useEffect(() => {
     if (rendererRef.current && initialized) {
+      const canvas = canvasRef.current;
+      if (canvas) {
+        canvas.width = bounds.width;
+        canvas.height = bounds.height;
+      }
       rendererRef.current.updateBounds(bounds);
     }
-  }, [bounds, initialized]);
+  }, [bounds, initialized, canvasRef]);
 
   return {
     initialized,

@@ -37,7 +37,6 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3u) {
   var particle = particles[index];
   var force = vec2f(0.0, params.gravity);
 
-  // Mouse interaction
   if (params.mouseActive > 0.5) {
     let mousePos = vec2f(params.mouseX, params.mouseY);
     let toMouse = mousePos - particle.position;
@@ -49,8 +48,6 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3u) {
     }
   }
 
-  // Particle-particle interaction (spatial hashing would be better for performance)
-  // For now, we'll sample a subset to keep it real-time
   let sampleStep = max(1u, u32(params.particleCount) / 1024u);
 
   for (var i = 0u; i < u32(params.particleCount); i += sampleStep) {
@@ -64,7 +61,6 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3u) {
 
     if (dist < INTERACTION_RADIUS && dist > 0.1) {
       let dir = normalize(delta);
-      // Repulsion at close range, slight attraction at medium range
       if (dist < INTERACTION_RADIUS * 0.5) {
         force -= dir * REPULSION_FORCE * (1.0 - dist / (INTERACTION_RADIUS * 0.5));
       } else {
@@ -73,15 +69,12 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3u) {
     }
   }
 
-  // Update velocity with forces and viscosity
   particle.velocity += force * params.deltaTime;
   particle.velocity *= (1.0 - params.viscosity * params.deltaTime);
   particle.velocity *= DAMPING;
 
-  // Update position
   particle.position += particle.velocity * params.deltaTime;
 
-  // Boundary collision
   if (particle.position.x < 0.0) {
     particle.position.x = 0.0;
     particle.velocity.x *= -BOUNDARY_DAMPING;
@@ -103,7 +96,7 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3u) {
 }
 `;
 
-export const VERTEX_SHADER = /* wgsl */ `
+export const RENDER_SHADER = /* wgsl */ `
 struct Particle {
   position: vec2f,
   velocity: vec2f,
@@ -119,7 +112,8 @@ struct Uniforms {
 struct VertexOutput {
   @builtin(position) position: vec4f,
   @location(0) velocity: f32,
-  @location(1) particlePos: vec2f,
+  @location(1) localCoord: vec2f,
+  @location(2) normalizedPos: vec2f,
 }
 
 @group(0) @binding(0) var<storage, read> particles: array<Particle>;
@@ -132,8 +126,7 @@ fn vs_main(
 ) -> VertexOutput {
   let particle = particles[instanceIndex];
 
-  // Create a quad for each particle
-  var positions = array<vec2f, 6>(
+  var corners = array<vec2f, 6>(
     vec2f(-1.0, -1.0),
     vec2f( 1.0, -1.0),
     vec2f(-1.0,  1.0),
@@ -142,53 +135,53 @@ fn vs_main(
     vec2f( 1.0,  1.0),
   );
 
-  let offset = positions[vertexIndex] * uniforms.particleSize;
-  let screenPos = particle.position + offset;
+  let radius = uniforms.particleSize * 0.5;
+  let offset = corners[vertexIndex] * radius;
+  let worldPos = particle.position + offset;
 
-  // Convert to clip space
-  let clipPos = (screenPos / uniforms.resolution) * 2.0 - 1.0;
+  let resolution = max(uniforms.resolution, vec2f(1.0, 1.0));
+  let clipPos = vec2f(
+    (worldPos.x / resolution.x) * 2.0 - 1.0,
+    (worldPos.y / resolution.y) * 2.0 - 1.0,
+  );
 
   var output: VertexOutput;
   output.position = vec4f(clipPos.x, -clipPos.y, 0.0, 1.0);
   output.velocity = length(particle.velocity);
-  output.particlePos = particle.position;
+  output.localCoord = corners[vertexIndex];
+  output.normalizedPos = clamp(particle.position / resolution, vec2f(0.0, 0.0), vec2f(1.0, 1.0));
 
   return output;
 }
-`;
-
-export const FRAGMENT_SHADER = /* wgsl */ `
-struct Uniforms {
-  resolution: vec2f,
-  particleSize: f32,
-  colorMode: f32,
-}
-
-@group(0) @binding(1) var<uniform> uniforms: Uniforms;
 
 @fragment
 fn fs_main(
-  @builtin(position) fragCoord: vec4f,
   @location(0) velocity: f32,
-  @location(1) particlePos: vec2f,
+  @location(1) localCoord: vec2f,
+  @location(2) normalizedPos: vec2f,
 ) -> @location(0) vec4f {
-  // Color based on mode
+  let dist = length(localCoord);
+  if (dist > 1.0) {
+    discard;
+  }
+
+  let rim = smoothstep(0.0, 1.0, dist);
+  let alpha = (1.0 - rim) * 0.85;
+
   var color: vec3f;
 
   if (uniforms.colorMode < 0.5) {
-    // Depth mode - blue gradient based on y position
-    let depth = particlePos.y / uniforms.resolution.y;
-    color = mix(vec3f(0.4, 0.7, 1.0), vec3f(0.1, 0.2, 0.5), depth);
+    let depth = normalizedPos.y;
+    color = mix(vec3f(0.35, 0.7, 1.0), vec3f(0.05, 0.2, 0.45), depth);
   } else if (uniforms.colorMode < 1.5) {
-    // Velocity mode - color based on speed
-    let speed = clamp(velocity / 500.0, 0.0, 1.0);
-    color = mix(vec3f(0.2, 0.4, 0.8), vec3f(0.9, 0.3, 0.5), speed);
+    let speed = clamp(velocity / 350.0, 0.0, 1.0);
+    color = mix(vec3f(0.1, 0.35, 0.9), vec3f(0.95, 0.4, 0.6), speed);
   } else {
-    // Pressure mode - based on position
-    let pressure = sin(particlePos.x * 0.01) * 0.5 + 0.5;
-    color = mix(vec3f(0.1, 0.5, 0.8), vec3f(0.8, 0.9, 1.0), pressure);
+    let pressure = sin((normalizedPos.x + normalizedPos.y) * 6.28318) * 0.5 + 0.5;
+    color = mix(vec3f(0.15, 0.55, 0.9), vec3f(0.75, 0.9, 1.0), pressure);
   }
 
-  return vec4f(color, 0.7);
+  let shading = 0.65 + 0.35 * (1.0 - dist * dist);
+  return vec4f(color * shading, alpha);
 }
 `;

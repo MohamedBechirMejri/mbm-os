@@ -1,4 +1,4 @@
-import { COMPUTE_SHADER, FRAGMENT_SHADER, VERTEX_SHADER } from "./shaders";
+import { COMPUTE_SHADER, RENDER_SHADER } from "./shaders";
 import type { RendererStats, SimulationBounds, WaterConfig } from "./types";
 
 interface Particle {
@@ -17,6 +17,7 @@ export class WaterRenderer {
   private renderUniformsBuffer!: GPUBuffer;
   private computeBindGroup!: GPUBindGroup;
   private renderBindGroup!: GPUBindGroup;
+  private canvasFormat!: GPUTextureFormat;
 
   private config: WaterConfig;
   private bounds: SimulationBounds;
@@ -54,6 +55,7 @@ export class WaterRenderer {
 
     this.context = context;
     const format = navigator.gpu.getPreferredCanvasFormat();
+    this.canvasFormat = format;
     this.context.configure({
       device: this.device,
       format,
@@ -131,7 +133,7 @@ export class WaterRenderer {
 
     // Render pipeline
     const renderModule = this.device.createShaderModule({
-      code: VERTEX_SHADER + "\n" + FRAGMENT_SHADER,
+      code: RENDER_SHADER,
     });
 
     const renderBindGroupLayout = this.device.createBindGroupLayout({
@@ -258,6 +260,11 @@ export class WaterRenderer {
 
   updateBounds(bounds: SimulationBounds): void {
     this.bounds = bounds;
+    this.context.configure({
+      device: this.device,
+      format: this.canvasFormat,
+      alphaMode: "premultiplied",
+    });
   }
 
   start(): void {

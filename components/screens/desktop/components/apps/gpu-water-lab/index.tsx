@@ -65,8 +65,19 @@ export function GpuWaterLab({ instanceId: _ }: { instanceId: string }) {
   useEffect(() => {
     const updateSize = () => {
       if (!containerRef.current) return;
-      const { width, height } = containerRef.current.getBoundingClientRect();
-      setCanvasSize({ width, height });
+      const rect = containerRef.current.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const next = {
+        width: Math.max(1, Math.floor(rect.width * dpr)),
+        height: Math.max(1, Math.floor(rect.height * dpr)),
+      };
+
+      setCanvasSize((prev) => {
+        if (prev.width === next.width && prev.height === next.height) {
+          return prev;
+        }
+        return next;
+      });
     };
 
     updateSize();
@@ -97,14 +108,24 @@ export function GpuWaterLab({ instanceId: _ }: { instanceId: string }) {
       setMousePosition(0, 0, false);
     };
 
-    const onMouseDown = (e: MouseEvent) => {
+    const toDeviceCoords = (clientX: number, clientY: number) => {
       const rect = canvas.getBoundingClientRect();
-      handleStart(e.clientX - rect.left, e.clientY - rect.top);
+      const scaleX = rect.width > 0 ? canvas.width / rect.width : 1;
+      const scaleY = rect.height > 0 ? canvas.height / rect.height : 1;
+      return {
+        x: (clientX - rect.left) * scaleX,
+        y: (clientY - rect.top) * scaleY,
+      };
+    };
+
+    const onMouseDown = (e: MouseEvent) => {
+      const { x, y } = toDeviceCoords(e.clientX, e.clientY);
+      handleStart(x, y);
     };
 
     const onMouseMove = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      handleMove(e.clientX - rect.left, e.clientY - rect.top);
+      const { x, y } = toDeviceCoords(e.clientX, e.clientY);
+      handleMove(x, y);
     };
 
     const onMouseUp = () => handleEnd();
@@ -113,16 +134,16 @@ export function GpuWaterLab({ instanceId: _ }: { instanceId: string }) {
       e.preventDefault();
       const touch = e.touches[0];
       if (!touch) return;
-      const rect = canvas.getBoundingClientRect();
-      handleStart(touch.clientX - rect.left, touch.clientY - rect.top);
+      const { x, y } = toDeviceCoords(touch.clientX, touch.clientY);
+      handleStart(x, y);
     };
 
     const onTouchMove = (e: TouchEvent) => {
       e.preventDefault();
       const touch = e.touches[0];
       if (!touch) return;
-      const rect = canvas.getBoundingClientRect();
-      handleMove(touch.clientX - rect.left, touch.clientY - rect.top);
+      const { x, y } = toDeviceCoords(touch.clientX, touch.clientY);
+      handleMove(x, y);
     };
 
     const onTouchEnd = () => handleEnd();
