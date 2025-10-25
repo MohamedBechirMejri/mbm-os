@@ -13,10 +13,12 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef } from "react";
 
 const LIMIT_PARAM = "million-limit";
-const CURSOR_PARAM = "million-cursor";
+const START_CURSOR_PARAM = "million-start";
+const END_CURSOR_PARAM = "million-end";
 const DEFAULT_LIMIT = 50;
 const MIN_LIMIT = 10;
 const MAX_LIMIT = 200;
+const START_SYNC_STEP = 20;
 
 type DemoEvent = {
   id: number;
@@ -65,23 +67,28 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
     return DEFAULT_LIMIT;
   }, [searchParamsString]);
 
-  const initialCursor = useMemo(() => {
+  const startCursor = useMemo(() => {
     const params = new URLSearchParams(searchParamsString);
-    const raw = params.get(CURSOR_PARAM);
+    const raw = params.get(START_CURSOR_PARAM);
     if (!raw) return null;
     const parsed = Number.parseInt(raw, 10);
     return Number.isFinite(parsed) ? parsed : null;
   }, [searchParamsString]);
 
+  const initialPageCursor = useMemo(() => {
+    if (startCursor === null) return null;
+    return Math.max(startCursor - 1, 0);
+  }, [startCursor]);
+
   const query = useInfiniteQuery<
     GridResponse,
     Error,
     GridResponse,
-    [string, { limit: number }],
+    [string, { limit: number; start: number | null }],
     number | null
   >({
-    queryKey: ["million-row-grid", { limit }],
-    initialPageParam: initialCursor,
+    queryKey: ["million-row-grid", { limit, start: startCursor }],
+    initialPageParam: initialPageCursor,
     queryFn: async ({ pageParam }) => {
       const params = new URLSearchParams();
       params.set("limit", String(limit));
@@ -125,25 +132,8 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
     [dataPages],
   );
 
-  useEffect(() => {
-    if (!query.data) return;
-    const params = new URLSearchParams(searchParamsString);
-    params.set(LIMIT_PARAM, String(limit));
-
-    const lastLoadedRowId = allRows.at(-1)?.id ?? null;
-    if (lastLoadedRowId !== null) {
-      params.set(CURSOR_PARAM, String(lastLoadedRowId));
-    } else {
-      params.delete(CURSOR_PARAM);
-    }
-
-    const nextQuery = params.toString();
-    const currentQuery = searchParamsString;
-    if (nextQuery === currentQuery) return;
-
-    const target = nextQuery ? `${pathname}?${nextQuery}` : pathname;
-    router.replace(target, { scroll: false });
-  }, [allRows, limit, pathname, query.data, router, searchParamsString]);
+  const lastRowId =
+    allRows.length > 0 ? (allRows[allRows.length - 1]?.id ?? null) : null;
 
   const columns = useMemo<ColumnDef<DemoEvent>[]>(
     () => [
@@ -198,6 +188,7 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
   });
 
   const parentRef = useRef<HTMLDivElement>(null);
+  const lastSyncedStartIndexRef = useRef<number | null>(null);
   const rowVirtualizer = useVirtualizer({
     count: hasNextPage ? allRows.length + 1 : allRows.length,
     getScrollElement: () => parentRef.current,
@@ -207,6 +198,56 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
 
   const virtualRows = rowVirtualizer.getVirtualItems();
   const lastVirtualRow = virtualRows[virtualRows.length - 1];
+
+  useEffect(() => {
+    if (!query.data) return;
+
+    const params = new URLSearchParams(searchParamsString);
+    params.set(LIMIT_PARAM, String(limit));
+
+    const firstVirtualRow = virtualRows.find(
+      (virtualRow) => virtualRow.index < allRows.length,
+    );
+    const candidateIndex = firstVirtualRow?.index ?? null;
+    const candidateStartId =
+      candidateIndex !== null ? (allRows[candidateIndex]?.id ?? null) : null;
+
+    if (candidateStartId !== null && candidateIndex !== null) {
+      const lastSyncedIndex = lastSyncedStartIndexRef.current;
+      if (
+        lastSyncedIndex === null ||
+        Math.abs(candidateIndex - lastSyncedIndex) >= START_SYNC_STEP ||
+        !params.has(START_CURSOR_PARAM)
+      ) {
+        params.set(START_CURSOR_PARAM, String(candidateStartId));
+        lastSyncedStartIndexRef.current = candidateIndex;
+      }
+    } else if (allRows.length === 0) {
+      params.delete(START_CURSOR_PARAM);
+      lastSyncedStartIndexRef.current = null;
+    }
+
+    if (lastRowId !== null) {
+      params.set(END_CURSOR_PARAM, String(lastRowId));
+    } else {
+      params.delete(END_CURSOR_PARAM);
+    }
+
+    const nextQuery = params.toString();
+    if (nextQuery === searchParamsString) return;
+
+    const target = nextQuery ? `${pathname}?${nextQuery}` : pathname;
+    router.replace(target, { scroll: false });
+  }, [
+    allRows,
+    lastRowId,
+    limit,
+    pathname,
+    query.data,
+    router,
+    searchParamsString,
+    virtualRows,
+  ]);
 
   useEffect(() => {
     if (!hasNextPage || isFetchingNextPage || !lastVirtualRow) return;
@@ -333,7 +374,7 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
       <footer className="flex items-center justify-between text-xs text-slate-400">
         <span>{isFetching ? "Syncing…" : "Up to date"}</span>
         <span>
-          Limit {limit} • Cursor {allRows.at(-1)?.id ?? "—"}
+          Limit {limit} • Start {startCursor ?? "—"} • End {lastRowId ?? "—"}
         </span>
       </footer>
     </div>
