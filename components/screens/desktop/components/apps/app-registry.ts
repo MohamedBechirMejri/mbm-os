@@ -8,7 +8,7 @@ import type { AppMeta } from "../window-manager/types";
 import { AppStoreApp } from "./app-store";
 import { CalculatorApp } from "./calculator";
 import { FinderApp } from "./finder";
-import { GpuScatterplot } from "./gpu-scatterplot";
+import { GpuWaterLab } from "./gpu-water-lab";
 import { MillionRowGrid } from "./million-row-grid";
 import { SafariApp } from "./safari";
 import { TerminalApp } from "./terminal";
@@ -81,10 +81,10 @@ export const catalogApps: AppMeta[] = [
   },
 
   {
-    id: "gpu-scatterplot",
-    title: "GPU Scatterplot",
+    id: "gpu-water-lab",
+    title: "GPU Water Lab",
     icon: "preferences-desktop-display",
-    Component: GpuScatterplot,
+    Component: GpuWaterLab,
     minSize: { w: 700, h: 500 },
     floatingActionBar: true,
   },
