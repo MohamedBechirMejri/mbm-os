@@ -18,35 +18,46 @@ import { generateSyntheticDataset } from "./dataset";
 import type { RendererConfig, ScatterDataset } from "./types";
 import { useScatterRenderer } from "./use-scatter-renderer";
 
+function computeFittedViewport(
+  bounds: ScatterDataset["bounds"],
+  canvas: HTMLCanvasElement | null,
+) {
+  const width = canvas?.clientWidth ?? 800;
+  const height = canvas?.clientHeight ?? 600;
+  const rangeX = Math.max(bounds.maxX - bounds.minX, 1);
+  const rangeY = Math.max(bounds.maxY - bounds.minY, 1);
+  const centerX = (bounds.minX + bounds.maxX) / 2;
+  const centerY = (bounds.minY + bounds.maxY) / 2;
+  const scaleX = width / rangeX;
+  const scaleY = height / rangeY;
+  const fittedZoom = Math.max(
+    0.1,
+    Math.min(100, Math.min(scaleX, scaleY) * 0.9),
+  );
+
+  return { centerX, centerY, zoom: fittedZoom };
+}
+
 export function GpuScatterplot({ instanceId: _ }: { instanceId: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [pointCount, setPointCount] = useState(100_000);
-  const [sliderValue, setSliderValue] = useState(100_000);
-  const regenerateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const regenerateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+  const activeGenerationRef = useRef(0);
+  const datasetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Generate initial dataset
-  const initialDataset = generateSyntheticDataset(100_000, {
-    name: "Demo Dataset",
-    clusters: 5,
-    noise: 0.4,
-  });
-
-  const [dataset, setDataset] = useState<ScatterDataset>(initialDataset);
+  const [dataset, setDataset] = useState<ScatterDataset>(() =>
+    generateSyntheticDataset(100_000, {
+      name: "Demo Dataset",
+      clusters: 5,
+      noise: 0.4,
+    }),
+  );
+  const [sliderValue, setSliderValue] = useState(() => dataset.pointCount);
   const [isRegenerating, setIsRegenerating] = useState(false);
-
-  // Calculate initial viewport from dataset bounds
-  const initialBounds = initialDataset.bounds;
-  const initialCenterX = (initialBounds.minX + initialBounds.maxX) / 2;
-  const initialCenterY = (initialBounds.minY + initialBounds.maxY) / 2;
-  const initialRangeX = initialBounds.maxX - initialBounds.minX;
-  const initialRangeY = initialBounds.maxY - initialBounds.minY;
-  const initialMaxRange = Math.max(initialRangeX, initialRangeY);
-
-  const [viewport, setViewport] = useState({
-    centerX: initialCenterX,
-    centerY: initialCenterY,
-    zoom: 400 / initialMaxRange,
-  });
+  const [viewport, setViewport] = useState(() =>
+    computeFittedViewport(dataset.bounds, canvasRef.current ?? null),
+  );
 
   const [pointSize, setPointSize] = useState(2);
   const [colorRampId, setColorRampId] = useState("viridis");
@@ -77,10 +88,20 @@ export function GpuScatterplot({ instanceId: _ }: { instanceId: string }) {
     dataset,
   );
 
+  useEffect(() => {
+    return () => {
+      if (regenerateTimeoutRef.current) {
+        clearTimeout(regenerateTimeoutRef.current);
+      }
+      if (datasetTimeoutRef.current) {
+        clearTimeout(datasetTimeoutRef.current);
+      }
+    };
+  }, []);
+
   // Regenerate dataset when point count changes (debounced)
   const handleSliderChange = (newCount: number) => {
     setSliderValue(newCount);
-    setPointCount(newCount); // Update displayed count immediately
 
     // Clear existing timeout
     if (regenerateTimeoutRef.current) {
@@ -96,28 +117,33 @@ export function GpuScatterplot({ instanceId: _ }: { instanceId: string }) {
   // Regenerate dataset when point count changes
   const handleRegenerateDataset = (newCount: number) => {
     setIsRegenerating(true);
-    setPointCount(newCount);
-    // Use setTimeout to allow UI to update before heavy computation
-    setTimeout(() => {
+    const generationId = activeGenerationRef.current + 1;
+    activeGenerationRef.current = generationId;
+    if (datasetTimeoutRef.current) {
+      clearTimeout(datasetTimeoutRef.current);
+    }
+
+    // Use timeout to allow UI to update before heavy computation
+    datasetTimeoutRef.current = setTimeout(() => {
+      if (activeGenerationRef.current !== generationId) return;
       const newDataset = generateSyntheticDataset(newCount, {
         name: `Dataset (${newCount.toLocaleString()} points)`,
         clusters: 5,
         noise: 0.4,
       });
+      if (activeGenerationRef.current !== generationId) return;
       setDataset(newDataset);
       // Reset viewport to show all points
-      const { bounds } = newDataset;
-      const centerX = (bounds.minX + bounds.maxX) / 2;
-      const centerY = (bounds.minY + bounds.maxY) / 2;
-      const rangeX = bounds.maxX - bounds.minX;
-      const rangeY = bounds.maxY - bounds.minY;
-      const maxRange = Math.max(rangeX, rangeY);
-      setViewport({
-        centerX,
-        centerY,
-        zoom: 400 / maxRange, // Fit to ~400px viewport
+      const fittedViewport = computeFittedViewport(
+        newDataset.bounds,
+        canvasRef.current,
+      );
+      setViewport(fittedViewport);
+      requestAnimationFrame(() => {
+        if (activeGenerationRef.current === generationId) {
+          setIsRegenerating(false);
+        }
       });
-      setTimeout(() => setIsRegenerating(false), 100);
     }, 50);
   };
 
@@ -413,26 +439,29 @@ export function GpuScatterplot({ instanceId: _ }: { instanceId: string }) {
               </div>
             </div>
           </motion.div>
-        ) : isRegenerating ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="flex h-full items-center justify-center"
-          >
-            <div className="flex items-center gap-3">
-              <div className="size-4 animate-spin rounded-full border-2 border-white/20 border-t-white/70" />
-              <span className="text-sm text-white/60">
-                Regenerating dataset...
-              </span>
-            </div>
-          </motion.div>
         ) : (
-          <canvas
-            ref={canvasRef}
-            className="h-full w-full cursor-move"
-            style={{ imageRendering: "pixelated" }}
-          />
+          <>
+            <canvas
+              ref={canvasRef}
+              className="h-full w-full cursor-move"
+              style={{ imageRendering: "pixelated" }}
+            />
+            <AnimatePresence>
+              {isRegenerating && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+                >
+                  <div className="flex items-center gap-3 text-white/70">
+                    <div className="size-4 animate-spin rounded-full border-2 border-white/20 border-t-white/70" />
+                    <span className="text-sm">Regenerating dataset…</span>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </>
         )}
       </div>
     </div>
