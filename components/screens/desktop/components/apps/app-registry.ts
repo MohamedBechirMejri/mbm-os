@@ -12,9 +12,18 @@ import { GpuWaterLab } from "./gpu-water-lab";
 import { MillionRowGrid } from "./million-row-grid";
 import { SafariApp } from "./safari";
 import { TerminalApp } from "./terminal";
+import { ImageConverterApp } from "./image-converter";
 
 // Full catalog known to the system (used by the App Store to install)
 export const catalogApps: AppMeta[] = [
+  {
+    id: "image-converter",
+    title: "Image Converter",
+    icon: "imagefan-reloaded",
+    Component: ImageConverterApp,
+    minSize: { w: 800, h: 600 },
+    floatingActionBar: true,
+  },
   {
     id: "file-manager",
     title: "Finder",

@@ -443,6 +443,29 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
     available: false,
     hidden: false,
   },
+  {
+    id: "image-converter",
+    name: "Image Converter",
+    tagline: "Convert, Resize, and Generate Favicons",
+    description:
+      "A powerful client-side image tool. Convert between formats (PNG, JPG, WEBP), resize images with high quality, and generate complete favicon packages for your websites. All processing happens locally on your device.",
+    icon: "imagefan-reloaded",
+    category: "utilities",
+    tags: ["image", "converter", "resize", "favicon", "tool"],
+    available: true,
+    hidden: false,
+    installManifest: {
+      sizeEstimate: 1_500_000,
+      assets: [
+        {
+          url: "/assets/icons/apps/imagefan-reloaded.ico",
+          kind: "icon",
+          bytes: 12_000,
+          cacheKey: "image-converter/icon",
+        },
+      ],
+    },
+  },
 ];
 
 export const getFeaturedApps = () =>
