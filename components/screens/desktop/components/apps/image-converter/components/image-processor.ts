@@ -1,15 +1,9 @@
-export interface ImageAdjustments {
-  brightness: number; // -100 to 100
-  contrast: number; // -100 to 100
-  saturation: number; // -100 to 100
-  blur: number; // 0 to 20
-}
-
-export interface ResizeOptions {
-  width: number;
-  height: number;
-  maintainAspect: boolean;
-}
+import type {
+  FilterOptions,
+  ResizeOptions,
+  TransformOptions,
+  CropOptions,
+} from "../types";
 
 export class ImageProcessor {
   private canvas: HTMLCanvasElement;
@@ -39,11 +33,11 @@ export class ImageProcessor {
         this.canvas.width = img.width;
         this.canvas.height = img.height;
         this.ctx.drawImage(img, 0, 0);
-        URL.revokeObjectURL(url); // Clean up memory
+        URL.revokeObjectURL(url);
         resolve(img);
       };
 
-      img.onerror = (e) => {
+      img.onerror = () => {
         URL.revokeObjectURL(url);
         reject(new Error("Failed to load image"));
       };
@@ -53,73 +47,217 @@ export class ImageProcessor {
   }
 
   /**
-   * Applies adjustments and resizing to the image, returning a data URL.
+   * Applies all transformations and adjustments to the image, returning a data URL.
    */
   process(
-    adjustments: ImageAdjustments,
-    resize?: ResizeOptions
+    adjustments: FilterOptions,
+    resize?: ResizeOptions,
+    transform?: TransformOptions,
+    crop?: CropOptions | null
   ): string {
     if (!this.originalImage) return "";
 
-    // 1. Determine Target Dimensions
-    let targetWidth = this.originalImage.width;
-    let targetHeight = this.originalImage.height;
+    // Start with original dimensions
+    let srcWidth = this.originalImage.width;
+    let srcHeight = this.originalImage.height;
+    let srcX = 0;
+    let srcY = 0;
 
-    if (resize && resize.width > 0 && resize.height > 0) {
-      targetWidth = resize.width;
-      targetHeight = resize.height;
+    // Apply crop to source if specified
+    if (crop) {
+      srcX = crop.x;
+      srcY = crop.y;
+      srcWidth = crop.width;
+      srcHeight = crop.height;
     }
 
-    // 2. Update Canvas Size
-    // Only update if changed to avoid flicker/reflow if possible, but for canvas it's usually fine
+    // Determine target dimensions (accounting for rotation)
+    let targetWidth = resize?.width || srcWidth;
+    let targetHeight = resize?.height || srcHeight;
+
+    // Swap dimensions if rotated 90 or 270 degrees
+    const rotation = transform?.rotation || 0;
+    if (rotation === 90 || rotation === 270) {
+      [targetWidth, targetHeight] = [targetHeight, targetWidth];
+    }
+
+    // Update canvas size
     if (this.canvas.width !== targetWidth || this.canvas.height !== targetHeight) {
-        this.canvas.width = targetWidth;
-        this.canvas.height = targetHeight;
+      this.canvas.width = targetWidth;
+      this.canvas.height = targetHeight;
     }
 
-    // 3. Prepare Context
+    // Prepare context
     this.ctx.clearRect(0, 0, targetWidth, targetHeight);
+    this.ctx.save();
+
+    // Apply transformations
+    const centerX = targetWidth / 2;
+    const centerY = targetHeight / 2;
+
+    this.ctx.translate(centerX, centerY);
+
+    // Apply rotation
+    if (rotation) {
+      this.ctx.rotate((rotation * Math.PI) / 180);
+    }
+
+    // Apply flips
+    const flipH = transform?.flipH || false;
+    const flipV = transform?.flipV || false;
+    this.ctx.scale(flipH ? -1 : 1, flipV ? -1 : 1);
+
+    // Set smoothing
     this.ctx.imageSmoothingEnabled = true;
     this.ctx.imageSmoothingQuality = "high";
 
-    // 4. Construct Filter String
-    // Note: Order matters. Usually Brightness -> Contrast -> Saturation -> Blur is a good chain.
-    const filters: string[] = [];
-    if (adjustments.brightness !== 0) filters.push(`brightness(${100 + adjustments.brightness}%)`);
-    if (adjustments.contrast !== 0) filters.push(`contrast(${100 + adjustments.contrast}%)`);
-    if (adjustments.saturation !== 0) filters.push(`saturate(${100 + adjustments.saturation}%)`);
-    if (adjustments.blur > 0) filters.push(`blur(${adjustments.blur}px)`);
+    // Build filter string
+    const filters = this.buildFilterString(adjustments);
+    this.ctx.filter = filters;
 
-    this.ctx.filter = filters.length > 0 ? filters.join(" ") : "none";
+    // Draw the image (centered due to translation)
+    const drawWidth = rotation === 90 || rotation === 270 ? targetHeight : targetWidth;
+    const drawHeight = rotation === 90 || rotation === 270 ? targetWidth : targetHeight;
 
-    // 5. Draw Image
-    this.ctx.drawImage(this.originalImage, 0, 0, targetWidth, targetHeight);
+    this.ctx.drawImage(
+      this.originalImage,
+      srcX,
+      srcY,
+      srcWidth,
+      srcHeight,
+      -drawWidth / 2,
+      -drawHeight / 2,
+      drawWidth,
+      drawHeight
+    );
 
-    // 6. Reset Filter
-    this.ctx.filter = "none";
+    this.ctx.restore();
+
+    // Apply canvas-based effects that can't be done with CSS filters
+    if (adjustments.vignette > 0) {
+      this.applyVignette(adjustments.vignette);
+    }
+
+    if (adjustments.grain > 0) {
+      this.applyGrain(adjustments.grain);
+    }
 
     return this.canvas.toDataURL("image/png");
   }
 
   /**
-   * Returns the current canvas content as a Blob.
+   * Build CSS filter string from adjustments
    */
-  async getBlob(format: "png" | "jpeg" | "webp", quality = 0.9): Promise<Blob | null> {
+  private buildFilterString(adjustments: FilterOptions): string {
+    const filters: string[] = [];
+
+    // Basic adjustments
+    if (adjustments.brightness !== 0) {
+      filters.push(`brightness(${100 + adjustments.brightness}%)`);
+    }
+    if (adjustments.contrast !== 0) {
+      filters.push(`contrast(${100 + adjustments.contrast}%)`);
+    }
+    if (adjustments.saturation !== 0) {
+      filters.push(`saturate(${100 + adjustments.saturation}%)`);
+    }
+    if (adjustments.blur > 0) {
+      filters.push(`blur(${adjustments.blur}px)`);
+    }
+
+    // Advanced filters
+    if (adjustments.exposure !== 0) {
+      // Exposure is similar to brightness but more subtle
+      filters.push(`brightness(${100 + adjustments.exposure * 0.5}%)`);
+    }
+
+    // Temperature (warm/cool) - use sepia + hue-rotate approximation
+    if (adjustments.temperature !== 0) {
+      if (adjustments.temperature > 0) {
+        // Warm: add sepia tone
+        filters.push(`sepia(${adjustments.temperature * 0.3}%)`);
+      } else {
+        // Cool: shift hue toward blue
+        filters.push(`hue-rotate(${adjustments.temperature * 0.5}deg)`);
+      }
+    }
+
+    // Tint (green/magenta)
+    if (adjustments.tint !== 0) {
+      filters.push(`hue-rotate(${adjustments.tint}deg)`);
+    }
+
+    return filters.length > 0 ? filters.join(" ") : "none";
+  }
+
+  /**
+   * Apply vignette effect (darkened edges)
+   */
+  private applyVignette(intensity: number): void {
+    const { width, height } = this.canvas;
+    const gradient = this.ctx.createRadialGradient(
+      width / 2,
+      height / 2,
+      0,
+      width / 2,
+      height / 2,
+      Math.max(width, height) * 0.7
+    );
+
+    const alpha = intensity / 100;
+    gradient.addColorStop(0, `rgba(0, 0, 0, 0)`);
+    gradient.addColorStop(1, `rgba(0, 0, 0, ${alpha})`);
+
+    this.ctx.fillStyle = gradient;
+    this.ctx.fillRect(0, 0, width, height);
+  }
+
+  /**
+   * Apply grain/noise effect
+   */
+  private applyGrain(intensity: number): void {
+    const imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+    const data = imageData.data;
+    const amount = intensity * 2.55; // Convert 0-100 to 0-255
+
+    for (let i = 0; i < data.length; i += 4) {
+      const noise = (Math.random() - 0.5) * amount;
+      data[i] += noise; // R
+      data[i + 1] += noise; // G
+      data[i + 2] += noise; // B
+    }
+
+    this.ctx.putImageData(imageData, 0, 0);
+  }
+
+  /**
+   * Returns the current canvas content as a Blob with quality control
+   */
+  async getBlob(
+    format: "png" | "jpeg" | "webp" | "avif",
+    quality = 0.9
+  ): Promise<Blob | null> {
     return new Promise((resolve) => {
+      const mimeType = `image/${format}`;
+
+      // PNG doesn't support quality, others do
+      const qualityParam = format === "png" ? undefined : quality;
+
       this.canvas.toBlob(
         (blob) => resolve(blob),
-        `image/${format}`,
-        quality
+        mimeType,
+        qualityParam
       );
     });
   }
 
   /**
    * Generates a standard .ico file containing a 32x32 version of the current image.
-   * Note: This assumes the caller has NOT already resized the canvas to 32x32.
-   * We will create a temporary 32x32 version for the ICO.
    */
-  async generateIco(adjustments: ImageAdjustments): Promise<Blob | null> {
+  async generateIco(
+    adjustments: FilterOptions,
+    transform?: TransformOptions
+  ): Promise<Blob | null> {
     if (!this.originalImage) return null;
 
     // Create a temp canvas for the 32x32 icon
@@ -129,22 +267,34 @@ export class ImageProcessor {
     const ctx = icoCanvas.getContext("2d", { willReadFrequently: true });
     if (!ctx) return null;
 
-    // Apply same filters
-    const filters: string[] = [];
-    if (adjustments.brightness !== 0) filters.push(`brightness(${100 + adjustments.brightness}%)`);
-    if (adjustments.contrast !== 0) filters.push(`contrast(${100 + adjustments.contrast}%)`);
-    if (adjustments.saturation !== 0) filters.push(`saturate(${100 + adjustments.saturation}%)`);
-    if (adjustments.blur > 0) filters.push(`blur(${adjustments.blur}px)`); // Blur on 32x32 might be too much, but keeping for consistency
-
-    ctx.filter = filters.length > 0 ? filters.join(" ") : "none";
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
 
+    // Apply transformations
+    ctx.save();
+    ctx.translate(16, 16);
+
+    const rotation = transform?.rotation || 0;
+    if (rotation) {
+      ctx.rotate((rotation * Math.PI) / 180);
+    }
+
+    const flipH = transform?.flipH || false;
+    const flipV = transform?.flipV || false;
+    ctx.scale(flipH ? -1 : 1, flipV ? -1 : 1);
+
+    // Apply filters
+    const filters = this.buildFilterString(adjustments);
+    ctx.filter = filters;
+
     // Draw resized
-    ctx.drawImage(this.originalImage, 0, 0, 32, 32);
+    ctx.drawImage(this.originalImage, -16, -16, 32, 32);
+    ctx.restore();
 
     // Get PNG data
-    const pngBlob = await new Promise<Blob | null>(r => icoCanvas.toBlob(r, "image/png"));
+    const pngBlob = await new Promise<Blob | null>((r) =>
+      icoCanvas.toBlob(r, "image/png")
+    );
     if (!pngBlob) return null;
 
     const pngData = await pngBlob.arrayBuffer();
@@ -160,19 +310,19 @@ export class ImageProcessor {
 
     // ICO Header (6 bytes)
     const header = new Uint8Array([
-        0, 0,             // Reserved
-        1, 0,             // Type (1 = ICO)
-        1, 0              // Count (1 image)
+      0, 0,       // Reserved
+      1, 0,       // Type (1 = ICO)
+      1, 0,       // Count (1 image)
     ]);
 
     // Directory Entry (16 bytes)
     const entry = new Uint8Array(16);
     const view = new DataView(entry.buffer);
 
-    view.setUint8(0, 32);     // Width
-    view.setUint8(1, 32);     // Height
-    view.setUint8(2, 0);      // Colors (0 = no palette)
-    view.setUint8(3, 0);      // Reserved
+    view.setUint8(0, 32); // Width
+    view.setUint8(1, 32); // Height
+    view.setUint8(2, 0); // Colors (0 = no palette)
+    view.setUint8(3, 0); // Reserved
     view.setUint16(4, 1, true); // Planes
     view.setUint16(6, 32, true); // BPP
     view.setUint32(8, len, true); // Size
@@ -185,5 +335,16 @@ export class ImageProcessor {
     icoBytes.set(pngBytes, 22);
 
     return new Blob([icoBytes], { type: "image/x-icon" });
+  }
+
+  /**
+   * Get original image dimensions
+   */
+  getOriginalDimensions(): { width: number; height: number } {
+    if (!this.originalImage) return { width: 0, height: 0 };
+    return {
+      width: this.originalImage.width,
+      height: this.originalImage.height,
+    };
   }
 }
