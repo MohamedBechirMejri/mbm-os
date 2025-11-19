@@ -14,6 +14,9 @@ import {
   FlipHorizontal2,
   FlipVertical2,
   Sparkles,
+  Crop,
+  ScanEye,
+  BarChart3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -24,6 +27,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useImageEditor } from "../hooks/use-image-editor";
 import type { FilterOptions, ResizeOptions, ExportFormat, PresetName } from "../types";
 import { PRESETS } from "../lib/presets";
+import { CropTool } from "./tools/crop-tool";
+import { ComparisonSlider } from "./tools/comparison-slider";
+import { Histogram } from "./tools/histogram";
 import { cn } from "@/lib/utils";
 import { saveAs } from "file-saver";
 
@@ -34,11 +40,14 @@ interface EditorProps {
 
 export function Editor({ file, onClose }: EditorProps) {
   const editor = useImageEditor(file);
-  const [activeTool, setActiveTool] = useState<"adjust" | "resize" | "export" | "presets" | null>(null);
+  const [activeTool, setActiveTool] = useState<"adjust" | "resize" | "export" | "presets" | "crop" | "compare" | "histogram" | null>(null);
   const [zoom, setZoom] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
   const [exportFormat, setExportFormat] = useState<ExportFormat>("png");
   const [exportQuality, setExportQuality] = useState(0.9);
+  const [comparisonMode, setComparisonMode] = useState<"overlay" | "sideBySide">("overlay");
+  const [originalImageUrl, setOriginalImageUrl] = useState("");
+  const [showCropTool, setShowCropTool] = useState(false);
 
   const handleResizeWidth = (val: number) => {
     if (editor.resize.maintainAspect) {
@@ -184,6 +193,18 @@ export function Editor({ file, onClose }: EditorProps) {
         </motion.div>
       </div>
 
+      {/* Crop Tool Overlay */}
+      {showCropTool && editor.isLoaded && (
+        <CropTool
+          imageDimensions={editor.resize}
+          onApply={(crop) => {
+            editor.setCrop(crop);
+            setShowCropTool(false);
+          }}
+          onCancel={() => setShowCropTool(false)}
+        />
+      )}
+
       {/* Floating Dock */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-50">
         <div className="flex items-center gap-2 p-2 bg-black/60 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl shadow-black/50">
@@ -204,6 +225,30 @@ export function Editor({ file, onClose }: EditorProps) {
                 label="Resize"
                 isActive={activeTool === "resize"}
                 onClick={() => setActiveTool(activeTool === "resize" ? null : "resize")}
+            />
+            <DockButton
+                icon={Crop}
+                label="Crop"
+                isActive={showCropTool}
+                onClick={() => setShowCropTool(!showCropTool)}
+            />
+            <DockButton
+                icon={ScanEye}
+                label="Compare"
+                isActive={activeTool === "compare"}
+                onClick={() => {
+                  if (!originalImageUrl) {
+                    // Capture original image once
+                    setOriginalImageUrl(editor.previewUrl);
+                  }
+                  setActiveTool(activeTool === "compare" ? null : "compare");
+                }}
+            />
+            <DockButton
+                icon={BarChart3}
+                label="Histogram"
+                isActive={activeTool === "histogram"}
+                onClick={() => setActiveTool(activeTool === "histogram" ? null : "histogram")}
             />
             <div className="w-px h-8 bg-white/10 mx-1" />
             <DockButton
@@ -361,6 +406,44 @@ export function Editor({ file, onClose }: EditorProps) {
                         <Package className="h-4 w-4 mr-2" /> Generate Favicons
                     </Button>
                 </div>
+            </FloatingPanel>
+        )}
+
+        {activeTool === "compare" && originalImageUrl && (
+            <FloatingPanel title="Compare" onClose={() => setActiveTool(null)}>
+                <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                        <Button
+                            size="sm"
+                            variant={comparisonMode === "overlay" ? "default" : "outline"}
+                            onClick={() => setComparisonMode("overlay")}
+                            className="flex-1"
+                        >
+                            Overlay
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant={comparisonMode === "sideBySide" ? "default" : "outline"}
+                            onClick={() => setComparisonMode("sideBySide")}
+                            className="flex-1"
+                        >
+                            Side-by-Side
+                        </Button>
+                    </div>
+                    <div className="w-full h-64 rounded-lg overflow-hidden">
+                        <ComparisonSlider
+                            beforeUrl={originalImageUrl}
+                            afterUrl={editor.previewUrl}
+                            mode={comparisonMode}
+                        />
+                    </div>
+                </div>
+            </FloatingPanel>
+        )}
+
+        {activeTool === "histogram" && (
+            <FloatingPanel title="Histogram" onClose={() => setActiveTool(null)}>
+                <Histogram imageUrl={editor.previewUrl} width={300} height={150} />
             </FloatingPanel>
         )}
       </AnimatePresence>
