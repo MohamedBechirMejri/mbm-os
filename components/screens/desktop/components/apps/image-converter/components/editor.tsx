@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Download,
@@ -30,9 +30,11 @@ import { PRESETS } from "../lib/presets";
 import { CropTool } from "./tools/crop-tool";
 import { ComparisonSlider } from "./tools/comparison-slider";
 import { Histogram } from "./tools/histogram";
+import { ShortcutsHelp } from "./tools/shortcuts-help";
 import { useKeyboardShortcuts } from "../hooks/use-keyboard-shortcuts";
 import { cn } from "@/lib/utils";
 import { saveAs } from "file-saver";
+import { toast } from "sonner";
 
 interface EditorProps {
   file: File;
@@ -49,20 +51,58 @@ export function Editor({ file, onClose }: EditorProps) {
   const [comparisonMode, setComparisonMode] = useState<"overlay" | "sideBySide">("overlay");
   const [originalImageUrl, setOriginalImageUrl] = useState("");
   const [showCropTool, setShowCropTool] = useState(false);
+  const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
+  const [iconProgress, setIconProgress] = useState<{ current: number; total: number; name: string } | null>(null);
 
   // Keyboard shortcuts
   useKeyboardShortcuts({
-    onUndo: editor.undo,
-    onRedo: editor.redo,
-    onRotate: () => editor.rotate("cw"),
-    onRotateCounter: () => editor.rotate("ccw"),
-    onFlipH: () => editor.flip("h"),
-    onFlipV: () => editor.flip("v"),
-    onCrop: () => setShowCropTool(true),
+    onUndo: () => {
+      editor.undo();
+      toast.success("Undone");
+    },
+    onRedo: () => {
+      editor.redo();
+      toast.success("Redone");
+    },
+    onRotate: () => {
+      editor.rotate("cw");
+      toast.success("Rotated clockwise");
+    },
+    onRotateCounter: () => {
+      editor.rotate("ccw");
+      toast.success("Rotated counter-clockwise");
+    },
+    onFlipH: () => {
+      editor.flip("h");
+      toast.success("Flipped horizontally");
+    },
+    onFlipV: () => {
+      editor.flip("v");
+      toast.success("Flipped vertically");
+    },
+    onCrop: () => {
+      setShowCropTool(true);
+      toast.info("Crop tool opened");
+    },
     onExport: () => setActiveTool("export"),
-    onReset: editor.reset,
-    enabled: !showCropTool, // Disable shortcuts when crop tool is active
+    onReset: () => {
+      editor.reset();
+      toast.success("Reset all adjustments");
+    },
+    enabled: !showCropTool && !showShortcutsHelp,
   });
+
+  // Toggle shortcuts help with ? key
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === "?" && !showCropTool) {
+        e.preventDefault();
+        setShowShortcutsHelp((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, [showCropTool]);
 
   const handleResizeWidth = (val: number) => {
     if (editor.resize.maintainAspect) {
@@ -84,28 +124,55 @@ export function Editor({ file, onClose }: EditorProps) {
 
   const handleExport = async () => {
     setIsProcessing(true);
-    const blob = await editor.exportImage(exportFormat, exportQuality);
-    if (blob) {
-      saveAs(blob, `${file.name.split(".")[0]}_edited.${exportFormat}`);
+    try {
+      const blob = await editor.exportImage(exportFormat, exportQuality);
+      if (blob) {
+        saveAs(blob, `${file.name.split(".")[0]}_edited.${exportFormat}`);
+        toast.success(`Image exported as ${exportFormat.toUpperCase()}`);
+      } else {
+        toast.error("Failed to export image");
+      }
+    } catch (error) {
+      toast.error("Export failed: " + (error instanceof Error ? error.message : "Unknown error"));
     }
     setIsProcessing(false);
   };
 
   const handleFaviconExport = async () => {
     setIsProcessing(true);
-    const blob = await editor.exportFavicons();
-    if (blob) {
-      saveAs(blob, "favicons.zip");
+    try {
+      const blob = await editor.exportFavicons();
+      if (blob) {
+        saveAs(blob, "favicons.zip");
+        toast.success("Favicons generated successfully!");
+      } else {
+        toast.error("Failed to generate favicons");
+      }
+    } catch (error) {
+      toast.error("Favicon generation failed: " + (error instanceof Error ? error.message : "Unknown error"));
     }
     setIsProcessing(false);
   };
 
   const handleAppIconsExport = async () => {
     setIsProcessing(true);
-    const blob = await editor.exportAppIcons();
-    if (blob) {
-      saveAs(blob, "app-icons.zip");
+    setIconProgress({ current: 0, total: 28, name: "Starting..." });
+    try {
+      const blob = await editor.exportAppIcons((current, total, name) => {
+        setIconProgress({ current, total, name });
+      });
+      if (blob) {
+        saveAs(blob, "app-icons.zip");
+        toast.success("App icons generated! 🎨", {
+          description: "28 icons for iOS, Android, PWA, and web",
+        });
+      } else {
+        toast.error("Failed to generate app icons");
+      }
+    } catch (error) {
+      toast.error("App icon generation failed: " + (error instanceof Error ? error.message : "Unknown error"));
     }
+    setIconProgress(null);
     setIsProcessing(false);
   };
 
@@ -477,6 +544,37 @@ export function Editor({ file, onClose }: EditorProps) {
             </FloatingPanel>
         )}
       </AnimatePresence>
+
+      {/* Shortcuts Help Modal */}
+      <ShortcutsHelp isOpen={showShortcutsHelp} onClose={() => setShowShortcutsHelp(false)} />
+
+      {/* Icon Generation Progress */}
+      {iconProgress && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 20 }}
+          className="fixed bottom-24 right-8 w-80 bg-[#1a1a1a]/95 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl z-50"
+        >
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-white">Generating App Icons</span>
+              <span className="text-xs text-white/50 font-mono">
+                {iconProgress.current}/{iconProgress.total}
+              </span>
+            </div>
+            <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
+              <motion.div
+                className="h-full bg-gradient-to-r from-green-500 to-emerald-500"
+                initial={{ width: 0 }}
+                animate={{ width: `${(iconProgress.current / iconProgress.total) * 100}%` }}
+                transition={{ duration: 0.3 }}
+              />
+            </div>
+            <p className="text-xs text-white/40 truncate">{iconProgress.name}</p>
+          </div>
+        </motion.div>
+      )}
 
     </div>
   );

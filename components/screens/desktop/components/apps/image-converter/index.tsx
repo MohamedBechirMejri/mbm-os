@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Dropzone } from "./components/dropzone";
 import { Editor } from "./components/editor";
+import { Toaster } from "sonner";
 
 export function ImageConverterApp({ instanceId }: { instanceId: string }) {
   const [file, setFile] = useState<File | null>(null);
@@ -49,6 +50,15 @@ export function ImageConverterApp({ instanceId }: { instanceId: string }) {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Toast Notifications */}
+      <Toaster position="top-right" theme="dark" toastOptions={{
+        style: {
+          background: 'rgba(26, 26, 26, 0.95)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          backdropFilter: 'blur(20px)',
+        },
+      }} />
     </div>
   );
 }
