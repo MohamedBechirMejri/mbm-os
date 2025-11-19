@@ -1,7 +1,8 @@
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { ImageProcessor } from "../components/image-processor";
 import { HistoryManager } from "../lib/history-manager";
 import { PRESETS, DEFAULT_ADJUSTMENTS } from "../lib/presets";
+import { debounce } from "../lib/debounce";
 import type {
   FilterOptions,
   ResizeOptions,
@@ -42,6 +43,7 @@ interface UseImageEditorResult {
   // Export
   exportImage: (format: ExportFormat, quality: number) => Promise<Blob | null>;
   exportFavicons: () => Promise<Blob | null>;
+  exportAppIcons: (onProgress?: (current: number, total: number, name: string) => void) => Promise<Blob | null>;
 }
 
 const DEFAULT_TRANSFORM: TransformOptions = {
@@ -86,6 +88,12 @@ export function useImageEditor(file: File): UseImageEditorResult {
     setCanRedo(history.canRedo());
   }, [adjustments, resize, transform, crop, history]);
 
+  // Debounced version for slider adjustments (reduces lag)
+  const debouncedPushToHistory = useMemo(
+    () => debounce(pushToHistory, 150),
+    [pushToHistory]
+  );
+
   // Load image when file changes - useEffect is appropriate here
   useEffect(() => {
     let cancelled = false;
@@ -124,9 +132,9 @@ export function useImageEditor(file: File): UseImageEditorResult {
   // Actions with history
   const setAdjustments = useCallback((newAdjustments: Partial<FilterOptions>) => {
     setAdjustmentsState((prev) => ({ ...prev, ...newAdjustments }));
-    // Push to history after state updates
-    setTimeout(() => pushToHistory(), 0);
-  }, [pushToHistory]);
+    // Use debounced version for performance (sliders move frequently)
+    setTimeout(() => debouncedPushToHistory(), 0);
+  }, [debouncedPushToHistory]);
 
   const setResize = useCallback((newResize: Partial<ResizeOptions>) => {
     setResizeState((prev) => ({ ...prev, ...newResize }));
@@ -256,6 +264,13 @@ export function useImageEditor(file: File): UseImageEditorResult {
     return await zip.generateAsync({ type: "blob" });
   }, [processor, adjustments, resize, transform, crop]);
 
+  const exportAppIcons = useCallback(async (
+    onProgress?: (current: number, total: number, name: string) => void
+  ): Promise<Blob | null> => {
+    const { generateAppIcons } = await import("../lib/icon-generator");
+    return await generateAppIcons(processor, adjustments, transform, onProgress);
+  }, [processor, adjustments, transform]);
+
   return {
     processor,
     previewUrl,
@@ -279,5 +294,6 @@ export function useImageEditor(file: File): UseImageEditorResult {
     applyPreset,
     exportImage,
     exportFavicons,
+    exportAppIcons,
   };
 }

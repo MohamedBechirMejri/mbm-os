@@ -30,6 +30,7 @@ import { PRESETS } from "../lib/presets";
 import { CropTool } from "./tools/crop-tool";
 import { ComparisonSlider } from "./tools/comparison-slider";
 import { Histogram } from "./tools/histogram";
+import { useKeyboardShortcuts } from "../hooks/use-keyboard-shortcuts";
 import { cn } from "@/lib/utils";
 import { saveAs } from "file-saver";
 
@@ -48,6 +49,20 @@ export function Editor({ file, onClose }: EditorProps) {
   const [comparisonMode, setComparisonMode] = useState<"overlay" | "sideBySide">("overlay");
   const [originalImageUrl, setOriginalImageUrl] = useState("");
   const [showCropTool, setShowCropTool] = useState(false);
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    onUndo: editor.undo,
+    onRedo: editor.redo,
+    onRotate: () => editor.rotate("cw"),
+    onRotateCounter: () => editor.rotate("ccw"),
+    onFlipH: () => editor.flip("h"),
+    onFlipV: () => editor.flip("v"),
+    onCrop: () => setShowCropTool(true),
+    onExport: () => setActiveTool("export"),
+    onReset: editor.reset,
+    enabled: !showCropTool, // Disable shortcuts when crop tool is active
+  });
 
   const handleResizeWidth = (val: number) => {
     if (editor.resize.maintainAspect) {
@@ -81,6 +96,15 @@ export function Editor({ file, onClose }: EditorProps) {
     const blob = await editor.exportFavicons();
     if (blob) {
       saveAs(blob, "favicons.zip");
+    }
+    setIsProcessing(false);
+  };
+
+  const handleAppIconsExport = async () => {
+    setIsProcessing(true);
+    const blob = await editor.exportAppIcons();
+    if (blob) {
+      saveAs(blob, "app-icons.zip");
     }
     setIsProcessing(false);
   };
@@ -304,6 +328,8 @@ export function Editor({ file, onClose }: EditorProps) {
                             <AdjustmentSlider label="Temperature" value={editor.adjustments.temperature} onChange={(v) => editor.setAdjustments({ temperature: v })} min={-100} max={100} />
                             <AdjustmentSlider label="Tint" value={editor.adjustments.tint} onChange={(v) => editor.setAdjustments({ tint: v })} min={-100} max={100} />
                             <AdjustmentSlider label="Exposure" value={editor.adjustments.exposure} onChange={(v) => editor.setAdjustments({ exposure: v })} min={-100} max={100} />
+                            <AdjustmentSlider label="Highlights" value={editor.adjustments.highlights} onChange={(v) => editor.setAdjustments({ highlights: v })} min={-100} max={100} />
+                            <AdjustmentSlider label="Shadows" value={editor.adjustments.shadows} onChange={(v) => editor.setAdjustments({ shadows: v })} min={-100} max={100} />
                             <AdjustmentSlider label="Vignette" value={editor.adjustments.vignette} onChange={(v) => editor.setAdjustments({ vignette: v })} min={0} max={100} />
                             <AdjustmentSlider label="Grain" value={editor.adjustments.grain} onChange={(v) => editor.setAdjustments({ grain: v })} min={0} max={100} />
                         </div>
@@ -399,11 +425,15 @@ export function Editor({ file, onClose }: EditorProps) {
 
                     <div className="relative py-2">
                         <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-white/10"></span></div>
-                        <div className="relative flex justify-center text-xs uppercase"><span className="bg-[#1a1a1a] px-2 text-white/30">Or</span></div>
+                        <div className="relative flex justify-center text-xs uppercase"><span className="bg-[#1a1a1a] px-2 text-white/30">Generate Sets</span></div>
                     </div>
 
                     <Button variant="secondary" onClick={handleFaviconExport} disabled={isProcessing} className="w-full bg-gradient-to-r from-purple-500/20 to-blue-500/20 hover:from-purple-500/30 hover:to-blue-500/30 text-white border border-white/10">
-                        <Package className="h-4 w-4 mr-2" /> Generate Favicons
+                        <Package className="h-4 w-4 mr-2" /> Favicons
+                    </Button>
+
+                    <Button variant="secondary" onClick={handleAppIconsExport} disabled={isProcessing} className="w-full bg-gradient-to-r from-green-500/20 to-emerald-500/20 hover:from-green-500/30 hover:to-emerald-500/30 text-white border border-white/10">
+                        <Package className="h-4 w-4 mr-2" /> App Icons (iOS + Android + PWA)
                     </Button>
                 </div>
             </FloatingPanel>

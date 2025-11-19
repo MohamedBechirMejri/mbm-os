@@ -142,6 +142,10 @@ export class ImageProcessor {
       this.applyGrain(adjustments.grain);
     }
 
+    if (adjustments.highlights !== 0 || adjustments.shadows !== 0) {
+      this.applyHighlightsShadows(adjustments.highlights, adjustments.shadows);
+    }
+
     return this.canvas.toDataURL("image/png");
   }
 
@@ -225,6 +229,49 @@ export class ImageProcessor {
       data[i] += noise; // R
       data[i + 1] += noise; // G
       data[i + 2] += noise; // B
+    }
+
+    this.ctx.putImageData(imageData, 0, 0);
+  }
+
+  /**
+   * Apply highlights and shadows adjustment
+   * Highlights affect bright pixels, shadows affect dark pixels
+   */
+  private applyHighlightsShadows(highlights: number, shadows: number): void {
+    const imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+    const data = imageData.data;
+
+    // Convert -100 to 100 range to adjustment factors
+    const highlightFactor = 1 + (highlights / 100);
+    const shadowFactor = 1 + (shadows / 100);
+
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+
+      // Calculate luminance (perceived brightness)
+      const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+
+      // Determine if pixel is highlight or shadow
+      // Values > 128 are highlights, < 128 are shadows
+      const isHighlight = luminance > 128;
+      const weight = Math.abs(luminance - 128) / 128; // 0 to 1
+
+      if (isHighlight && highlights !== 0) {
+        // Apply highlight adjustment to bright pixels
+        const factor = 1 + ((highlightFactor - 1) * weight);
+        data[i] = Math.min(255, r * factor);
+        data[i + 1] = Math.min(255, g * factor);
+        data[i + 2] = Math.min(255, b * factor);
+      } else if (!isHighlight && shadows !== 0) {
+        // Apply shadow adjustment to dark pixels
+        const factor = 1 + ((shadowFactor - 1) * weight);
+        data[i] = Math.min(255, Math.max(0, r * factor));
+        data[i + 1] = Math.min(255, Math.max(0, g * factor));
+        data[i + 2] = Math.min(255, Math.max(0, b * factor));
+      }
     }
 
     this.ctx.putImageData(imageData, 0, 0);
