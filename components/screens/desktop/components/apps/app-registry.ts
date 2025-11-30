@@ -22,7 +22,7 @@ export const catalogApps: AppMeta[] = [
     title: "Shadow Lab",
     icon: "preferences-desktop-plasma-theme",
     Component: ShadowPlaygroundApp,
-    minSize: { w: 800, h: 600 },
+    minSize: { w: 1280, h: 960 },
     floatingActionBar: true,
   },
   {
@@ -30,7 +30,7 @@ export const catalogApps: AppMeta[] = [
     title: "Image Converter",
     icon: "imagefan-reloaded",
     Component: ImageConverterApp,
-    minSize: { w: 800, h: 600 },
+    minSize: { w: 1280, h: 960 },
     floatingActionBar: true,
   },
   {
