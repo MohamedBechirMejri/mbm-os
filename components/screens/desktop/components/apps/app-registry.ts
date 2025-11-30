@@ -38,7 +38,7 @@ export const catalogApps: AppMeta[] = [
     title: "Finder",
     icon: "file-manager",
     Component: FinderApp,
-    minSize: { w: 520, h: 380 },
+    minSize: { w: 1280, h: 960 },
     floatingActionBar: true,
     titlebarHeight: 46,
     actionButtonsStyle: {
@@ -52,7 +52,7 @@ export const catalogApps: AppMeta[] = [
     title: "Safari",
     icon: "safari",
     Component: SafariApp,
-    minSize: { w: 320, h: 240 },
+    minSize: { w: 1280, h: 960 },
     floatingActionBar: false,
     titlebarHeight: 46,
   },
@@ -74,7 +74,7 @@ export const catalogApps: AppMeta[] = [
     title: "Terminal",
     icon: "terminal",
     Component: TerminalApp,
-    minSize: { w: 320, h: 240 },
+    minSize: { w: 1280, h: 720 },
     floatingActionBar: true,
   },
 
@@ -94,7 +94,7 @@ export const catalogApps: AppMeta[] = [
     title: "Million Row Grid",
     icon: "libreoffice-calc",
     Component: MillionRowGrid,
-    minSize: { w: 600, h: 400 },
+    minSize: { w: 1280, h: 960 },
     floatingActionBar: true,
   },
 
@@ -103,7 +103,7 @@ export const catalogApps: AppMeta[] = [
     title: "GPU Water Lab",
     icon: "preferences-desktop-display",
     Component: GpuWaterLab,
-    minSize: { w: 700, h: 500 },
+    minSize: { w: 1280, h: 960 },
     floatingActionBar: true,
   },
 
