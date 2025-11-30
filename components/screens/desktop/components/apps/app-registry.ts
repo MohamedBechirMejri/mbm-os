@@ -13,9 +13,18 @@ import { MillionRowGrid } from "./million-row-grid";
 import { SafariApp } from "./safari";
 import { TerminalApp } from "./terminal";
 import { ImageConverterApp } from "./image-converter";
+import { ShadowPlaygroundApp } from "./shadow-playground";
 
 // Full catalog known to the system (used by the App Store to install)
 export const catalogApps: AppMeta[] = [
+  {
+    id: "shadow-playground",
+    title: "Shadow Lab",
+    icon: "preferences-desktop-plasma-theme",
+    Component: ShadowPlaygroundApp,
+    minSize: { w: 800, h: 600 },
+    floatingActionBar: true,
+  },
   {
     id: "image-converter",
     title: "Image Converter",
@@ -109,15 +118,15 @@ const PREINSTALLED_IDS = new Set<string>([
   "game-center",
   "terminal",
 ]);
-export const preinstalledApps = catalogApps.filter((a) =>
-  PREINSTALLED_IDS.has(a.id),
+export const preinstalledApps = catalogApps.filter(a =>
+  PREINSTALLED_IDS.has(a.id)
 );
 
 export function AppRegistry() {
-  const installedRecords = useAppInstallationStore((state) => state.installed);
+  const installedRecords = useAppInstallationStore(state => state.installed);
   const installedIds = useMemo(
     () => Object.keys(installedRecords),
-    [installedRecords],
+    [installedRecords]
   );
 
   useEffect(() => {
@@ -129,7 +138,7 @@ export function AppRegistry() {
     if (installedIds.length === 0) return;
     const { apps: registered } = getDesktop();
     const metas = catalogApps.filter(
-      (app) => installedIds.includes(app.id) && !registered[app.id],
+      app => installedIds.includes(app.id) && !registered[app.id]
     );
     if (metas.length > 0) {
       registerApps(metas);

@@ -466,11 +466,34 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
       ],
     },
   },
+  {
+    id: "shadow-playground",
+    name: "Shadow Lab",
+    tagline: "CSS Box Shadow Generator",
+    description:
+      "Visually design CSS box shadows with real-time preview. Adjust offsets, blur, spread, and color, then copy the generated CSS or Tailwind code.",
+    icon: "preferences-desktop-plasma-theme",
+    category: "creative",
+    tags: ["css", "design", "shadow", "generator", "tool"],
+    available: true,
+    hidden: false,
+    installManifest: {
+      sizeEstimate: 850_000,
+      assets: [
+        {
+          url: "/assets/icons/apps/preferences-desktop-plasma-theme.ico",
+          kind: "icon",
+          bytes: 4_096,
+          cacheKey: "shadow-playground/icon",
+        },
+      ],
+    },
+  },
 ];
 
 export const getFeaturedApps = () =>
-  EXPERIMENT_APPS.filter((app) => app.featured && !app.hidden);
+  EXPERIMENT_APPS.filter(app => app.featured && !app.hidden);
 export const getAppsByCategory = (categoryId: string) =>
-  EXPERIMENT_APPS.filter((app) => app.category === categoryId && !app.hidden);
+  EXPERIMENT_APPS.filter(app => app.category === categoryId && !app.hidden);
 export const getCategoryInfo = (categoryId: string) =>
-  CATEGORIES.find((cat) => cat.id === categoryId);
+  CATEGORIES.find(cat => cat.id === categoryId);
