@@ -6,7 +6,10 @@ interface PreviewCanvasProps {
   cssValue: string;
 }
 
-export function PreviewCanvas({ cssValue }: PreviewCanvasProps) {
+export function PreviewCanvas({
+  cssValue,
+  backgroundColor = "#121212",
+}: PreviewCanvasProps & { backgroundColor?: string }) {
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   const scale = useMotionValue(1);
@@ -34,7 +37,8 @@ export function PreviewCanvas({ cssValue }: PreviewCanvasProps) {
   return (
     <div
       ref={containerRef}
-      className="absolute inset-0 overflow-hidden cursor-grab active:cursor-grabbing bg-[#121212]"
+      className="absolute inset-0 overflow-hidden cursor-grab active:cursor-grabbing transition-colors duration-300"
+      style={{ backgroundColor }}
     >
       {/* Dot Pattern Background */}
       <div

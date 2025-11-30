@@ -22,10 +22,11 @@ export function LayerList({
   onRemoveLayer,
   onSelectLayer,
   onApplyPreset,
-}: LayerListProps) {
+  className,
+}: LayerListProps & { className?: string }) {
   return (
-    <div className="flex w-full flex-col border-r border-white/10 bg-[#252525] md:w-64 h-full">
-      <div className="flex items-center justify-between p-4 border-b border-white/10">
+    <div className={cn("flex flex-col w-full h-full", className)}>
+      <div className="flex items-center justify-between p-4 border-b border-white/10 shrink-0">
         <div className="flex items-center gap-2 text-sm font-medium text-white/90">
           <Layers className="h-4 w-4" />
           <span>Layers</span>

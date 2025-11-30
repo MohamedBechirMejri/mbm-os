@@ -15,7 +15,7 @@ export function ControlPanel({
   onUpdateLayer,
 }: ControlPanelProps) {
   return (
-    <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+    <div className="flex flex-col gap-6">
       {/* Position */}
       <div className="space-y-4">
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-white/40">

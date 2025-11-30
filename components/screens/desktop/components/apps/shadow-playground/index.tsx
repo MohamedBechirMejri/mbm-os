@@ -12,12 +12,14 @@ import { PreviewCanvas } from "./components/preview-canvas";
 import { LayerList } from "./components/layer-list";
 import { ControlPanel } from "./components/control-panel";
 import { CodeBlock } from "./components/code-block";
+import { FloatingPanel } from "./components/floating-panel";
 
 export function ShadowPlaygroundApp({ instanceId: _ }: { instanceId: string }) {
   const [layers, setLayers] = useState<ShadowLayer[]>([
     { id: "1", ...DEFAULT_LAYER },
   ]);
   const [activeId, setActiveId] = useState<string>("1");
+  const [bgColor, setBgColor] = useState("#121212");
 
   const activeLayer = layers.find(l => l.id === activeId) || layers[0];
 
@@ -27,10 +29,7 @@ export function ShadowPlaygroundApp({ instanceId: _ }: { instanceId: string }) {
 
   const addLayer = () => {
     const newId = Math.random().toString(36).substr(2, 9);
-    setLayers(prev => [
-      ...prev,
-      { id: newId, ...DEFAULT_LAYER, x: 5, y: 5 }, // slightly offset so it's visible
-    ]);
+    setLayers(prev => [...prev, { id: newId, ...DEFAULT_LAYER, x: 5, y: 5 }]);
     setActiveId(newId);
   };
 
@@ -53,54 +52,102 @@ export function ShadowPlaygroundApp({ instanceId: _ }: { instanceId: string }) {
 
   return (
     <div
-      className="flex h-full w-full flex-col bg-[#1E1E1E] text-white md:flex-row overflow-hidden"
+      className="relative h-full w-full overflow-hidden bg-[#1E1E1E] text-white"
       role="application"
     >
-      {/* Left Sidebar: Layers */}
-      <LayerList
-        layers={layers}
-        activeId={activeId}
-        onAddLayer={addLayer}
-        onRemoveLayer={removeLayer}
-        onSelectLayer={setActiveId}
-        onApplyPreset={newLayers => {
-          setLayers(newLayers);
-          setActiveId(newLayers[0].id);
-        }}
-      />
+      {/* Full Screen Preview Background */}
+      <PreviewCanvas cssValue={cssValue} backgroundColor={bgColor} />
 
-      {/* Main Content */}
-      <div className="flex flex-1 flex-col min-w-0">
-        {/* Preview Area */}
-        <div className="flex-1 relative bg-[#121212] overflow-hidden">
-          <PreviewCanvas cssValue={cssValue} />
+      {/* UI Overlay Grid */}
+      <div className="absolute inset-0 grid grid-cols-[320px_1fr_360px] p-6 gap-6 pointer-events-none">
+        {/* Left Column: Layers & Code */}
+        <div className="pointer-events-auto flex flex-col gap-6 min-h-0">
+          <FloatingPanel
+            title="Layers"
+            className="flex-1 min-h-0 overflow-y-auto"
+            contentClassName="p-0"
+          >
+            <LayerList
+              layers={layers}
+              activeId={activeId}
+              onAddLayer={addLayer}
+              onRemoveLayer={removeLayer}
+              onSelectLayer={setActiveId}
+              onApplyPreset={newLayers => {
+                setLayers(newLayers);
+                setActiveId(newLayers[0].id);
+              }}
+            />
+          </FloatingPanel>
+
+          <FloatingPanel
+            title="Code"
+            className="shrink-0 h-[300px]"
+            contentClassName="p-4"
+          >
+            <div className="space-y-4 h-full overflow-y-auto pr-2">
+              <CodeBlock
+                label="CSS"
+                code={`box-shadow: ${cssValue};`}
+                onCopy={() => copyToClipboard(`box-shadow: ${cssValue};`)}
+              />
+              <CodeBlock
+                label="Tailwind"
+                code={tailwindValue}
+                onCopy={() => copyToClipboard(tailwindValue)}
+              />
+              <CodeBlock
+                label="React / JS"
+                code={jsValue}
+                onCopy={() => copyToClipboard(jsValue)}
+              />
+            </div>
+          </FloatingPanel>
         </div>
 
-        {/* Bottom Controls */}
-        <div className="border-t border-white/10 bg-[#1E1E1E] p-6">
-          <ControlPanel
-            activeLayer={activeLayer}
-            onUpdateLayer={updates => updateLayer(activeId, updates)}
-          />
+        {/* Center Column: Empty for Canvas Interaction */}
+        <div />
 
-          {/* Code Output */}
-          <div className="mt-8 grid grid-cols-1 gap-4 border-t border-white/10 pt-6 md:grid-cols-3">
-            <CodeBlock
-              label="CSS"
-              code={`box-shadow: ${cssValue};`}
-              onCopy={() => copyToClipboard(`box-shadow: ${cssValue};`)}
-            />
-            <CodeBlock
-              label="Tailwind"
-              code={tailwindValue}
-              onCopy={() => copyToClipboard(tailwindValue)}
-            />
-            <CodeBlock
-              label="React / JS"
-              code={jsValue}
-              onCopy={() => copyToClipboard(jsValue)}
-            />
-          </div>
+        {/* Right Column: Controls */}
+        <div className="pointer-events-auto flex flex-col min-h-0">
+          <FloatingPanel
+            title="Controls"
+            className="h-full"
+            contentClassName="overflow-y-auto p-4"
+          >
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <div className="text-xs font-semibold uppercase tracking-wider text-white/40 border-b border-white/10 pb-2">
+                  Canvas
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-white/80">Background</span>
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="h-6 w-6 rounded-full border border-white/20"
+                      style={{ backgroundColor: bgColor }}
+                    />
+                    <input
+                      type="color"
+                      value={bgColor}
+                      onChange={e => setBgColor(e.target.value)}
+                      className="w-8 h-8 opacity-0 absolute cursor-pointer"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="text-xs font-semibold uppercase tracking-wider text-white/40 border-b border-white/10 pb-2">
+                  Layer Settings
+                </div>
+                <ControlPanel
+                  activeLayer={activeLayer}
+                  onUpdateLayer={updates => updateLayer(activeId, updates)}
+                />
+              </div>
+            </div>
+          </FloatingPanel>
         </div>
       </div>
     </div>
