@@ -489,6 +489,29 @@ export const EXPERIMENT_APPS: ExperimentApp[] = [
       ],
     },
   },
+  {
+    id: "sketch-pad",
+    name: "Sketch Pad",
+    tagline: "Digital Drawing Canvas",
+    description:
+      "A feature-rich drawing app with brush and eraser tools, adjustable brush size, color picker, up to 10 layers with visibility controls, undo/redo history, and PNG export. Perfect for quick sketches and digital art.",
+    icon: "imagefan-reloaded",
+    category: "creative",
+    tags: ["drawing", "art", "canvas", "sketch", "layers"],
+    available: true,
+    hidden: false,
+    installManifest: {
+      sizeEstimate: 650_000,
+      assets: [
+        {
+          url: "/assets/icons/apps/imagefan-reloaded.ico",
+          kind: "icon",
+          bytes: 4_096,
+          cacheKey: "sketch-pad/icon",
+        },
+      ],
+    },
+  },
 ];
 
 export const getFeaturedApps = () =>

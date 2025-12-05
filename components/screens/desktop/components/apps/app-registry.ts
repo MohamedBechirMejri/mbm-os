@@ -14,9 +14,18 @@ import { SafariApp } from "./safari";
 import { TerminalApp } from "./terminal";
 import { ImageConverterApp } from "./image-converter";
 import { ShadowPlaygroundApp } from "./shadow-playground";
+import { SketchPadApp } from "./sketch-pad";
 
 // Full catalog known to the system (used by the App Store to install)
 export const catalogApps: AppMeta[] = [
+  {
+    id: "sketch-pad",
+    title: "Sketch Pad",
+    icon: "imagefan-reloaded",
+    Component: SketchPadApp,
+    minSize: { w: 1280, h: 960 },
+    floatingActionBar: true,
+  },
   {
     id: "shadow-playground",
     title: "Shadow Lab",
