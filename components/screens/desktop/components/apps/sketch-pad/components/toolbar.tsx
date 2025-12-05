@@ -1,11 +1,4 @@
-import {
-  Paintbrush,
-  Eraser,
-  Undo2,
-  Redo2,
-  Trash2,
-  Download,
-} from "lucide-react";
+import { Paintbrush, Eraser, Hand, Undo2, Redo2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -26,10 +19,9 @@ interface ToolbarProps {
   onBrushChange: (settings: Partial<BrushSettings>) => void;
   onUndo: () => void;
   onRedo: () => void;
-  onClear: () => void;
-  onExport: () => void;
 }
 
+// Compact horizontal toolbar - Excalidraw style
 export function Toolbar({
   tool,
   brush,
@@ -39,86 +31,92 @@ export function Toolbar({
   onBrushChange,
   onUndo,
   onRedo,
-  onClear,
-  onExport,
 }: ToolbarProps) {
   return (
-    <div className="flex flex-col gap-6 p-4 h-full overflow-y-auto">
-      {/* Tools Section */}
-      <section>
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-white/40 mb-3">
-          Tools
-        </h3>
-        <div className="flex gap-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant={tool === "brush" ? "secondary" : "ghost"}
-                size="icon"
-                onClick={() => onToolChange("brush")}
-                className="h-10 w-10"
-              >
-                <Paintbrush className="w-5 h-5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Brush (B)</TooltipContent>
-          </Tooltip>
+    <div className="flex items-center gap-1 bg-[#232329]/90 backdrop-blur-md rounded-lg border border-white/10 p-1.5 shadow-xl">
+      {/* Tools */}
+      <div className="flex items-center gap-0.5">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onToolChange("brush")}
+              className={cn("h-8 w-8", tool === "brush" && "bg-white/15")}
+            >
+              <Paintbrush className="w-4 h-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">Brush (B)</TooltipContent>
+        </Tooltip>
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant={tool === "eraser" ? "secondary" : "ghost"}
-                size="icon"
-                onClick={() => onToolChange("eraser")}
-                className="h-10 w-10"
-              >
-                <Eraser className="w-5 h-5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Eraser (E)</TooltipContent>
-          </Tooltip>
-        </div>
-      </section>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onToolChange("eraser")}
+              className={cn("h-8 w-8", tool === "eraser" && "bg-white/15")}
+            >
+              <Eraser className="w-4 h-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">Eraser (E)</TooltipContent>
+        </Tooltip>
 
-      {/* Brush Size Section */}
-      <section>
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-white/40 mb-3">
-          Size
-        </h3>
-        <div className="flex items-center gap-3">
-          <Slider
-            value={brush.size}
-            min={BRUSH_SIZE.min}
-            max={BRUSH_SIZE.max}
-            step={BRUSH_SIZE.step}
-            onChange={value => onBrushChange({ size: value })}
-            className="flex-1"
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onToolChange("pan")}
+              className={cn("h-8 w-8", tool === "pan" && "bg-white/15")}
+            >
+              <Hand className="w-4 h-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">Pan (Space)</TooltipContent>
+        </Tooltip>
+      </div>
+
+      {/* Divider */}
+      <div className="w-px h-6 bg-white/10 mx-1" />
+
+      {/* Brush Size */}
+      <div className="flex items-center gap-2 px-2">
+        <Slider
+          value={brush.size}
+          min={BRUSH_SIZE.min}
+          max={BRUSH_SIZE.max}
+          step={BRUSH_SIZE.step}
+          onChange={value => onBrushChange({ size: value })}
+          className="w-20"
+        />
+        <span className="text-xs text-white/60 w-6 tabular-nums">
+          {brush.size}
+        </span>
+      </div>
+
+      {/* Divider */}
+      <div className="w-px h-6 bg-white/10 mx-1" />
+
+      {/* Color swatches */}
+      <div className="flex items-center gap-0.5">
+        {COLOR_PALETTE.slice(0, 6).map(color => (
+          <button
+            key={color}
+            onClick={() => onBrushChange({ color })}
+            className={cn(
+              "w-6 h-6 rounded border-2 transition-transform hover:scale-110",
+              brush.color === color ? "border-white" : "border-transparent"
+            )}
+            style={{ backgroundColor: color }}
           />
-          <span className="text-sm text-white/60 w-8 text-right tabular-nums">
-            {brush.size}
-          </span>
-        </div>
-        {/* Size preview */}
-        <div className="mt-3 flex justify-center">
+        ))}
+        {/* Custom color picker */}
+        <div className="relative">
           <div
-            className="rounded-full bg-white"
-            style={{
-              width: Math.min(brush.size, 50),
-              height: Math.min(brush.size, 50),
-            }}
-          />
-        </div>
-      </section>
-
-      {/* Color Section */}
-      <section>
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-white/40 mb-3">
-          Color
-        </h3>
-        {/* Current color display with picker */}
-        <div className="relative mb-3">
-          <div
-            className="w-full h-10 rounded-lg border border-white/20 cursor-pointer"
+            className="w-6 h-6 rounded border-2 border-white/20"
             style={{ backgroundColor: brush.color }}
           />
           <input
@@ -128,90 +126,43 @@ export function Toolbar({
             className="absolute inset-0 opacity-0 cursor-pointer"
           />
         </div>
-        {/* Color palette */}
-        <div className="grid grid-cols-5 gap-2">
-          {COLOR_PALETTE.map(color => (
-            <button
-              key={color}
-              onClick={() => onBrushChange({ color })}
-              className={cn(
-                "w-8 h-8 rounded-lg border-2 transition-transform hover:scale-110",
-                brush.color === color
-                  ? "border-white scale-110"
-                  : "border-white/20"
-              )}
-              style={{ backgroundColor: color }}
-            />
-          ))}
-        </div>
-      </section>
+      </div>
 
-      {/* History Section */}
-      <section>
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-white/40 mb-3">
-          History
-        </h3>
-        <div className="flex gap-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onUndo}
-                disabled={!canUndo}
-                className="h-10 w-10"
-              >
-                <Undo2 className="w-5 h-5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Undo (⌘Z)</TooltipContent>
-          </Tooltip>
+      {/* Divider */}
+      <div className="w-px h-6 bg-white/10 mx-1" />
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onRedo}
-                disabled={!canRedo}
-                className="h-10 w-10"
-              >
-                <Redo2 className="w-5 h-5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Redo (⌘⇧Z)</TooltipContent>
-          </Tooltip>
-        </div>
-      </section>
+      {/* Undo/Redo */}
+      <div className="flex items-center gap-0.5">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onUndo}
+              disabled={!canUndo}
+              className="h-8 w-8"
+            >
+              <Undo2 className="w-4 h-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">Undo (⌘Z)</TooltipContent>
+        </Tooltip>
 
-      {/* Spacer */}
-      <div className="flex-1" />
-
-      {/* Actions Section */}
-      <section>
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-white/40 mb-3">
-          Actions
-        </h3>
-        <div className="flex flex-col gap-2">
-          <Button
-            variant="ghost"
-            onClick={onClear}
-            className="justify-start gap-2"
-          >
-            <Trash2 className="w-4 h-4" />
-            Clear Canvas
-          </Button>
-
-          <Button
-            variant="secondary"
-            onClick={onExport}
-            className="justify-start gap-2"
-          >
-            <Download className="w-4 h-4" />
-            Export PNG
-          </Button>
-        </div>
-      </section>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onRedo}
+              disabled={!canRedo}
+              className="h-8 w-8"
+            >
+              <Redo2 className="w-4 h-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">Redo (⌘⇧Z)</TooltipContent>
+        </Tooltip>
+      </div>
     </div>
   );
 }

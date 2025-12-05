@@ -6,14 +6,16 @@ import type { Tool, Layer, BrushSettings } from "./types";
 import { DEFAULT_BRUSH, createDefaultLayer } from "./constants";
 import { generateLayerId, exportToPng, clearCanvas } from "./utils";
 import { useHistory } from "./hooks/use-history";
-import { FloatingPanel } from "./components/floating-panel";
+import { useViewport } from "./hooks/use-viewport";
 import { CanvasLayer } from "./components/canvas-layer";
-import { LayerPanel } from "./components/layer-panel";
 import { Toolbar } from "./components/toolbar";
+import { ZoomControls } from "./components/zoom-controls";
+import { LayerDropdown } from "./components/layer-dropdown";
+import { ActionBar } from "./components/action-bar";
 
-// Canvas dimensions
-const CANVAS_WIDTH = 1920;
-const CANVAS_HEIGHT = 1080;
+// Large canvas for "infinite" feel
+const CANVAS_WIDTH = 4000;
+const CANVAS_HEIGHT = 4000;
 
 export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
   // Layer state
@@ -25,13 +27,31 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
   // Tool state
   const [tool, setTool] = useState<Tool>("brush");
   const [brush, setBrush] = useState<BrushSettings>(DEFAULT_BRUSH);
+  const [bgColor, setBgColor] = useState("#1a1a1a");
 
-  // Canvas refs - stores reference to each layer's canvas element
+  // Track if space is held for temporary pan mode
+  const [isSpaceHeld, setIsSpaceHeld] = useState(false);
+  const previousToolRef = useRef<Tool>("brush");
+
+  // Canvas refs
   const canvasRefs = useRef(new Map<string, HTMLCanvasElement>());
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Viewport for pan/zoom
+  const {
+    viewport,
+    handleWheel,
+    handlePanStart,
+    handlePanMove,
+    handlePanEnd,
+    isPanning,
+    zoomIn,
+    zoomOut,
+    resetView,
+  } = useViewport();
 
   // History for undo/redo
-  const { canUndo, canRedo, pushHistory, undo, redo, clearHistory } =
-    useHistory();
+  const { canUndo, canRedo, pushHistory, undo, redo } = useHistory();
 
   // Get active layer
   const activeLayer = layers.find(l => l.id === activeLayerId) ?? layers[0];
@@ -64,13 +84,11 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
 
       setLayers(prev => prev.filter(l => l.id !== id));
 
-      // If removing active layer, switch to another
       if (activeLayerId === id) {
         const remaining = layers.filter(l => l.id !== id);
         setActiveLayerId(remaining[0].id);
       }
 
-      // Remove canvas ref
       canvasRefs.current.delete(id);
     },
     [layers, activeLayerId]
@@ -95,9 +113,7 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
     }
   }, [activeLayerId, pushHistory]);
 
-  const handleStrokeEnd = useCallback(() => {
-    // Could add additional logic here if needed
-  }, []);
+  const handleStrokeEnd = useCallback(() => {}, []);
 
   // History actions
   const handleUndo = useCallback(() => {
@@ -116,7 +132,6 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Save before clearing for undo
     pushHistory(activeLayerId, canvas);
     clearCanvas(ctx);
   }, [activeLayerId, pushHistory]);
@@ -129,6 +144,15 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
   // Keyboard shortcuts
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
+      // Space for temporary pan mode
+      if (e.code === "Space" && !isSpaceHeld) {
+        e.preventDefault();
+        setIsSpaceHeld(true);
+        previousToolRef.current = tool;
+        setTool("pan");
+        return;
+      }
+
       // Tool switching
       if (e.key === "b" || e.key === "B") {
         setTool("brush");
@@ -136,6 +160,10 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
       }
       if (e.key === "e" || e.key === "E") {
         setTool("eraser");
+        return;
+      }
+      if (e.key === "h" || e.key === "H") {
+        setTool("pan");
         return;
       }
 
@@ -148,41 +176,107 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
           handleUndo();
         }
       }
+
+      // Zoom shortcuts
+      if ((e.metaKey || e.ctrlKey) && (e.key === "=" || e.key === "+")) {
+        e.preventDefault();
+        zoomIn();
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === "-") {
+        e.preventDefault();
+        zoomOut();
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === "0") {
+        e.preventDefault();
+        resetView();
+      }
     },
-    [handleUndo, handleRedo]
+    [tool, isSpaceHeld, handleUndo, handleRedo, zoomIn, zoomOut, resetView]
   );
+
+  const handleKeyUp = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.code === "Space" && isSpaceHeld) {
+        setIsSpaceHeld(false);
+        setTool(previousToolRef.current);
+      }
+    },
+    [isSpaceHeld]
+  );
+
+  // Pointer handlers for canvas area (panning when in pan mode)
+  const handleCanvasPointerDown = useCallback(
+    (e: React.PointerEvent) => {
+      if (tool === "pan" || e.button === 1) {
+        handlePanStart(e);
+      }
+    },
+    [tool, handlePanStart]
+  );
+
+  const handleCanvasPointerMove = useCallback(
+    (e: React.PointerEvent) => {
+      if (isPanning) {
+        handlePanMove(e);
+      }
+    },
+    [isPanning, handlePanMove]
+  );
+
+  // Current tool for cursor
+  const activeTool = isSpaceHeld ? "pan" : tool;
 
   return (
     <TooltipProvider delayDuration={200}>
       <div
-        className="relative h-full w-full overflow-hidden bg-[#1E1E1E] text-white"
+        ref={containerRef}
+        className="relative h-full w-full overflow-hidden text-white outline-none"
+        style={{ backgroundColor: bgColor }}
         role="application"
         tabIndex={0}
         onKeyDown={handleKeyDown}
+        onKeyUp={handleKeyUp}
       >
-        {/* Checkerboard background for transparent preview */}
+        {/* Checkerboard pattern to indicate transparency */}
         <div
-          className="absolute inset-0"
+          className="absolute inset-0 pointer-events-none opacity-20"
           style={{
             backgroundImage: `
-              linear-gradient(45deg, #2a2a2a 25%, transparent 25%),
-              linear-gradient(-45deg, #2a2a2a 25%, transparent 25%),
-              linear-gradient(45deg, transparent 75%, #2a2a2a 75%),
-              linear-gradient(-45deg, transparent 75%, #2a2a2a 75%)
+              linear-gradient(45deg, #333 25%, transparent 25%),
+              linear-gradient(-45deg, #333 25%, transparent 25%),
+              linear-gradient(45deg, transparent 75%, #333 75%),
+              linear-gradient(-45deg, transparent 75%, #333 75%)
             `,
             backgroundSize: "20px 20px",
             backgroundPosition: "0 0, 0 10px, 10px -10px, -10px 0px",
           }}
         />
 
-        {/* Canvas layers container - centered */}
-        <div className="absolute inset-0 flex items-center justify-center">
+        {/* Canvas container with pan/zoom */}
+        <div
+          className="absolute inset-0"
+          style={{
+            cursor:
+              activeTool === "pan"
+                ? isPanning
+                  ? "grabbing"
+                  : "grab"
+                : "crosshair",
+          }}
+          onWheel={handleWheel}
+          onPointerDown={handleCanvasPointerDown}
+          onPointerMove={handleCanvasPointerMove}
+          onPointerUp={handlePanEnd}
+          onPointerLeave={handlePanEnd}
+        >
+          {/* Transformed canvas layers */}
           <div
-            className="relative bg-white/5 rounded-lg overflow-hidden shadow-2xl"
+            className="absolute"
             style={{
-              width: "80%",
-              maxWidth: CANVAS_WIDTH,
-              aspectRatio: `${CANVAS_WIDTH} / ${CANVAS_HEIGHT}`,
+              transform: `translate(${viewport.offsetX}px, ${viewport.offsetY}px) scale(${viewport.zoom})`,
+              transformOrigin: "0 0",
+              width: CANVAS_WIDTH,
+              height: CANVAS_HEIGHT,
             }}
           >
             {/* Render layers bottom-to-top */}
@@ -195,8 +289,9 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
                 isActive={layer.id === activeLayerId}
                 isVisible={layer.visible}
                 opacity={layer.opacity}
-                tool={tool}
+                tool={activeTool}
                 brush={brush}
+                viewport={viewport}
                 onStrokeStart={handleStrokeStart}
                 onStrokeEnd={handleStrokeEnd}
               />
@@ -204,50 +299,50 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
           </div>
         </div>
 
-        {/* UI Overlay Grid */}
-        <div className="absolute inset-0 grid grid-cols-[280px_1fr_320px] p-6 gap-6 pointer-events-none">
-          {/* Left Column: Layers */}
-          <div className="pointer-events-auto flex flex-col min-h-0">
-            <FloatingPanel
-              title="Layers"
-              className="flex-1 min-h-0"
-              contentClassName="p-0"
-            >
-              <LayerPanel
-                layers={layers}
-                activeLayerId={activeLayerId}
-                onSelectLayer={setActiveLayerId}
-                onAddLayer={addLayer}
-                onRemoveLayer={removeLayer}
-                onToggleVisibility={toggleLayerVisibility}
-              />
-            </FloatingPanel>
-          </div>
+        {/* Top toolbar */}
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10">
+          <Toolbar
+            tool={activeTool}
+            brush={brush}
+            canUndo={canUndo}
+            canRedo={canRedo}
+            onToolChange={setTool}
+            onBrushChange={updateBrush}
+            onUndo={handleUndo}
+            onRedo={handleRedo}
+          />
+        </div>
 
-          {/* Center Column: Empty for canvas interaction */}
-          <div />
+        {/* Top-left: Layers dropdown */}
+        <div className="absolute top-4 left-4 z-10">
+          <LayerDropdown
+            layers={layers}
+            activeLayerId={activeLayerId}
+            onSelectLayer={setActiveLayerId}
+            onAddLayer={addLayer}
+            onRemoveLayer={removeLayer}
+            onToggleVisibility={toggleLayerVisibility}
+          />
+        </div>
 
-          {/* Right Column: Controls */}
-          <div className="pointer-events-auto flex flex-col min-h-0">
-            <FloatingPanel
-              title="Toolbar"
-              className="h-full"
-              contentClassName="p-0"
-            >
-              <Toolbar
-                tool={tool}
-                brush={brush}
-                canUndo={canUndo}
-                canRedo={canRedo}
-                onToolChange={setTool}
-                onBrushChange={updateBrush}
-                onUndo={handleUndo}
-                onRedo={handleRedo}
-                onClear={handleClear}
-                onExport={handleExport}
-              />
-            </FloatingPanel>
-          </div>
+        {/* Bottom-left: Actions */}
+        <div className="absolute bottom-4 left-4 z-10">
+          <ActionBar
+            bgColor={bgColor}
+            onBgColorChange={setBgColor}
+            onClear={handleClear}
+            onExport={handleExport}
+          />
+        </div>
+
+        {/* Bottom-right: Zoom controls */}
+        <div className="absolute bottom-4 right-4 z-10">
+          <ZoomControls
+            zoom={viewport.zoom}
+            onZoomIn={zoomIn}
+            onZoomOut={zoomOut}
+            onReset={resetView}
+          />
         </div>
       </div>
     </TooltipProvider>

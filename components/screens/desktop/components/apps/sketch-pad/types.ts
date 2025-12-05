@@ -1,5 +1,5 @@
 // Tool types for the sketch pad
-export type Tool = "brush" | "eraser";
+export type Tool = "brush" | "eraser" | "pan";
 
 // Layer data structure
 export interface Layer {
@@ -19,6 +19,13 @@ export interface BrushSettings {
 export interface Point {
   x: number;
   y: number;
+}
+
+// Viewport for pan/zoom (infinite canvas)
+export interface Viewport {
+  offsetX: number;
+  offsetY: number;
+  zoom: number;
 }
 
 // History entry for undo/redo

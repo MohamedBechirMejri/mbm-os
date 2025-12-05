@@ -1,10 +1,11 @@
 import { useCallback, useRef } from "react";
-import type { Point, Tool, BrushSettings } from "../types";
+import type { Point, Tool, BrushSettings, Viewport } from "../types";
 import { drawLine, drawDot } from "../utils";
 
 interface UseCanvasOptions {
   tool: Tool;
   brush: BrushSettings;
+  viewport: Viewport;
   onStrokeStart?: () => void;
   onStrokeEnd?: () => void;
 }
@@ -19,6 +20,7 @@ interface UseCanvasReturn {
 export const useCanvas = ({
   tool,
   brush,
+  viewport,
   onStrokeStart,
   onStrokeEnd,
 }: UseCanvasOptions): UseCanvasReturn => {
@@ -27,26 +29,30 @@ export const useCanvas = ({
   // Last point for line drawing
   const lastPointRef = useRef<Point | null>(null);
 
-  // Get point from pointer event relative to canvas
+  // Get point from pointer event relative to canvas, accounting for viewport
   const getPoint = useCallback(
     (e: React.PointerEvent<HTMLCanvasElement>): Point => {
       const canvas = e.currentTarget;
       const rect = canvas.getBoundingClientRect();
 
-      // Scale coordinates if canvas is CSS-resized
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
+      // Get screen position relative to canvas element
+      const screenX = e.clientX - rect.left;
+      const screenY = e.clientY - rect.top;
 
+      // Transform from screen to canvas coordinates using viewport
+      // Account for zoom and offset
       return {
-        x: (e.clientX - rect.left) * scaleX,
-        y: (e.clientY - rect.top) * scaleY,
+        x: (screenX - viewport.offsetX) / viewport.zoom,
+        y: (screenY - viewport.offsetY) / viewport.zoom,
       };
     },
-    []
+    [viewport]
   );
 
   const handlePointerDown = useCallback(
     (e: React.PointerEvent<HTMLCanvasElement>) => {
+      if (tool === "pan") return;
+
       const canvas = e.currentTarget;
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
@@ -69,7 +75,8 @@ export const useCanvas = ({
 
   const handlePointerMove = useCallback(
     (e: React.PointerEvent<HTMLCanvasElement>) => {
-      if (!isDrawingRef.current || !lastPointRef.current) return;
+      if (!isDrawingRef.current || !lastPointRef.current || tool === "pan")
+        return;
 
       const canvas = e.currentTarget;
       const ctx = canvas.getContext("2d");
@@ -102,7 +109,6 @@ export const useCanvas = ({
 
   const handlePointerLeave = useCallback(() => {
     // Don't stop drawing on leave - pointer capture handles this
-    // Only reset if not drawing (prevents accidental stroke ends)
   }, []);
 
   return {

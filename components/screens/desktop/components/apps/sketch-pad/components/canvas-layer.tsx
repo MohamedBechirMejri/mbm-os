@@ -1,6 +1,6 @@
 import { forwardRef, useCallback } from "react";
 import { useCanvas } from "../hooks/use-canvas";
-import type { Tool, BrushSettings } from "../types";
+import type { Tool, BrushSettings, Viewport } from "../types";
 
 interface CanvasLayerProps {
   width: number;
@@ -10,6 +10,7 @@ interface CanvasLayerProps {
   opacity: number;
   tool: Tool;
   brush: BrushSettings;
+  viewport: Viewport;
   onStrokeStart: () => void;
   onStrokeEnd: () => void;
 }
@@ -25,6 +26,7 @@ export const CanvasLayer = forwardRef<HTMLCanvasElement, CanvasLayerProps>(
       opacity,
       tool,
       brush,
+      viewport,
       onStrokeStart,
       onStrokeEnd,
     },
@@ -38,25 +40,26 @@ export const CanvasLayer = forwardRef<HTMLCanvasElement, CanvasLayerProps>(
     } = useCanvas({
       tool,
       brush,
+      viewport,
       onStrokeStart,
       onStrokeEnd,
     });
 
-    // Wrapped handlers that only fire when layer is active
+    // Wrapped handlers that only fire when layer is active and not in pan mode
     const onPointerDown = useCallback(
       (e: React.PointerEvent<HTMLCanvasElement>) => {
-        if (!isActive) return;
+        if (!isActive || tool === "pan") return;
         handlePointerDown(e);
       },
-      [isActive, handlePointerDown]
+      [isActive, tool, handlePointerDown]
     );
 
     const onPointerMove = useCallback(
       (e: React.PointerEvent<HTMLCanvasElement>) => {
-        if (!isActive) return;
+        if (!isActive || tool === "pan") return;
         handlePointerMove(e);
       },
-      [isActive, handlePointerMove]
+      [isActive, tool, handlePointerMove]
     );
 
     return (
@@ -64,10 +67,12 @@ export const CanvasLayer = forwardRef<HTMLCanvasElement, CanvasLayerProps>(
         ref={ref}
         width={width}
         height={height}
-        className="absolute inset-0 touch-none"
+        className="absolute top-0 left-0 touch-none"
         style={{
           opacity: isVisible ? opacity : 0,
-          pointerEvents: isActive ? "auto" : "none",
+          pointerEvents: isActive && tool !== "pan" ? "auto" : "none",
+          // These are handled at the container level now
+          transformOrigin: "0 0",
         }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
