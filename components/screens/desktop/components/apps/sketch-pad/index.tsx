@@ -33,6 +33,9 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
   const [isSpaceHeld, setIsSpaceHeld] = useState(false);
   const previousToolRef = useRef<Tool>("brush");
 
+  // Track the "base" tool for pen button toggle (excludes pan)
+  const baseToolRef = useRef<"brush" | "eraser">("brush");
+
   // Canvas refs
   const canvasRefs = useRef(new Map<string, HTMLCanvasElement>());
   const containerRef = useRef<HTMLDivElement>(null);
@@ -204,9 +207,31 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
     [isSpaceHeld]
   );
 
+  // Handle pen tablet top barrel button (fires as right-click/context menu)
+  // Toggle between brush and eraser
+  const handleContextMenu = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    // Toggle between brush and eraser
+    const newTool = baseToolRef.current === "brush" ? "eraser" : "brush";
+    baseToolRef.current = newTool;
+    setTool(newTool);
+  }, []);
+
+  // Handle pen tablet bottom barrel button (fires as aux click, usually button 1)
+  // Trigger undo
+  const handleAuxClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      // Middle click or other aux button = undo
+      handleUndo();
+    },
+    [handleUndo]
+  );
+
   // Pointer handlers for canvas area (panning when in pan mode)
   const handleCanvasPointerDown = useCallback(
     (e: React.PointerEvent) => {
+      // Middle mouse button for pan
       if (tool === "pan" || e.button === 1) {
         handlePanStart(e);
       }
@@ -237,21 +262,6 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
         onKeyDown={handleKeyDown}
         onKeyUp={handleKeyUp}
       >
-        {/* Checkerboard pattern to indicate transparency */}
-        <div
-          className="absolute inset-0 pointer-events-none opacity-20"
-          style={{
-            backgroundImage: `
-              linear-gradient(45deg, #333 25%, transparent 25%),
-              linear-gradient(-45deg, #333 25%, transparent 25%),
-              linear-gradient(45deg, transparent 75%, #333 75%),
-              linear-gradient(-45deg, transparent 75%, #333 75%)
-            `,
-            backgroundSize: "20px 20px",
-            backgroundPosition: "0 0, 0 10px, 10px -10px, -10px 0px",
-          }}
-        />
-
         {/* Canvas container with pan/zoom */}
         <div
           className="absolute inset-0"
@@ -268,6 +278,8 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
           onPointerMove={handleCanvasPointerMove}
           onPointerUp={handlePanEnd}
           onPointerLeave={handlePanEnd}
+          onContextMenu={handleContextMenu}
+          onAuxClick={handleAuxClick}
         >
           {/* Transformed canvas layers */}
           <div
