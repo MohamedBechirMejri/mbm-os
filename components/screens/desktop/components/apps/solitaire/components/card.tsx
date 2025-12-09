@@ -29,14 +29,16 @@ interface CardProps {
   stackIndex?: number;
   isSpread?: boolean;
   isTop?: boolean;
+  isDropTarget?: boolean;
+  canDrop?: boolean;
   className?: string;
 }
 
 // Dimensions
-const CARD_WIDTH = 80; // Slightly wider for better proportions
+const CARD_WIDTH = 80;
 const CARD_HEIGHT = 112;
-const STACK_OFFSET_FACEDOWN = 4;
-const STACK_OFFSET_FACEUP = 22; // More visible space for indices
+const STACK_OFFSET_FACEDOWN = 6; // Slightly increased for better stack visibility
+const STACK_OFFSET_FACEUP = 22;
 
 export function Card({
   card,
@@ -47,6 +49,8 @@ export function Card({
   stackIndex = 0,
   isSpread = false,
   isTop = false,
+  isDropTarget = false,
+  canDrop = false,
   className,
 }: CardProps) {
   const [{ isDragging }, dragRef] = useDrag(
@@ -114,7 +118,14 @@ export function Card({
             "w-full h-full rounded-xl overflow-hidden transition-all duration-200",
             // Clean simple border
             "border border-black/20 shadow-sm",
-            card.faceUp ? "bg-white" : "bg-[#1E293B]"
+            card.faceUp ? "bg-white" : "bg-[#1E293B]",
+            // Drop target visual feedback
+            isDropTarget &&
+              canDrop &&
+              "ring-2 ring-emerald-400 ring-offset-2 ring-offset-transparent",
+            isDropTarget &&
+              !canDrop &&
+              "ring-2 ring-red-400 ring-offset-2 ring-offset-transparent"
           )}
         >
           {card.faceUp ? <CardFace card={card} /> : <CardBack />}
@@ -188,29 +199,127 @@ function CenterArt({ rank, suit }: { rank: Rank; suit: Suit }) {
   if (rank >= 11) {
     const label = RANK_LABELS[rank];
     return (
-      <div className="w-full h-full flex items-center justify-center relative overflow-hidden rounded-lg bg-current opacity-5">
-        <span className="text-6xl font-black opacity-40">{label}</span>
-        <div className="absolute inset-0 flex items-center justify-center opacity-20 scale-150">
+      <div className="w-full h-full flex items-center justify-center relative overflow-hidden rounded-lg bg-current/5">
+        <span className="text-6xl font-black opacity-30">{label}</span>
+        <div className="absolute inset-0 flex items-center justify-center opacity-15 scale-150">
           <SuitIcon suit={suit} />
         </div>
       </div>
     );
   }
 
-  // Aces
+  // Aces - single large pip
   if (rank === 1) {
     return (
-      <div className="w-16 h-16 transform scale-125">
+      <div className="w-14 h-14">
         <SuitIcon suit={suit} />
       </div>
     );
   }
 
-  // Number Cards (simplified geometric pip representation for cleanliness)
+  // Number cards (2-10) - proper pip layouts
+  return <PipLayout rank={rank} suit={suit} />;
+}
+
+/**
+ * Traditional pip layouts for playing cards 2-10.
+ * Positions are relative to a 100x100 grid, scaled to the card center area.
+ */
+const PIP_POSITIONS: Record<
+  number,
+  Array<{ x: number; y: number; flip?: boolean }>
+> = {
+  2: [
+    { x: 50, y: 18 },
+    { x: 50, y: 82, flip: true },
+  ],
+  3: [
+    { x: 50, y: 18 },
+    { x: 50, y: 50 },
+    { x: 50, y: 82, flip: true },
+  ],
+  4: [
+    { x: 30, y: 18 },
+    { x: 70, y: 18 },
+    { x: 30, y: 82, flip: true },
+    { x: 70, y: 82, flip: true },
+  ],
+  5: [
+    { x: 30, y: 18 },
+    { x: 70, y: 18 },
+    { x: 50, y: 50 },
+    { x: 30, y: 82, flip: true },
+    { x: 70, y: 82, flip: true },
+  ],
+  6: [
+    { x: 30, y: 18 },
+    { x: 70, y: 18 },
+    { x: 30, y: 50 },
+    { x: 70, y: 50 },
+    { x: 30, y: 82, flip: true },
+    { x: 70, y: 82, flip: true },
+  ],
+  7: [
+    { x: 30, y: 18 },
+    { x: 70, y: 18 },
+    { x: 50, y: 34 },
+    { x: 30, y: 50 },
+    { x: 70, y: 50 },
+    { x: 30, y: 82, flip: true },
+    { x: 70, y: 82, flip: true },
+  ],
+  8: [
+    { x: 30, y: 18 },
+    { x: 70, y: 18 },
+    { x: 50, y: 34 },
+    { x: 30, y: 50 },
+    { x: 70, y: 50 },
+    { x: 50, y: 66, flip: true },
+    { x: 30, y: 82, flip: true },
+    { x: 70, y: 82, flip: true },
+  ],
+  9: [
+    { x: 30, y: 15 },
+    { x: 70, y: 15 },
+    { x: 30, y: 38 },
+    { x: 70, y: 38 },
+    { x: 50, y: 50 },
+    { x: 30, y: 62, flip: true },
+    { x: 70, y: 62, flip: true },
+    { x: 30, y: 85, flip: true },
+    { x: 70, y: 85, flip: true },
+  ],
+  10: [
+    { x: 30, y: 15 },
+    { x: 70, y: 15 },
+    { x: 50, y: 28 },
+    { x: 30, y: 38 },
+    { x: 70, y: 38 },
+    { x: 30, y: 62, flip: true },
+    { x: 70, y: 62, flip: true },
+    { x: 50, y: 72, flip: true },
+    { x: 30, y: 85, flip: true },
+    { x: 70, y: 85, flip: true },
+  ],
+};
+
+function PipLayout({ rank, suit }: { rank: Rank; suit: Suit }) {
+  const positions = PIP_POSITIONS[rank] || [];
+
   return (
-    <div className="grid grid-cols-2 gap-1 opacity-20 transform scale-75">
-      {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="w-4 h-4">
+    <div className="relative w-full h-full">
+      {positions.map((pos, index) => (
+        <div
+          key={index}
+          className="absolute w-3.5 h-3.5"
+          style={{
+            left: `${pos.x}%`,
+            top: `${pos.y}%`,
+            transform: `translate(-50%, -50%) ${
+              pos.flip ? "rotate(180deg)" : ""
+            }`,
+          }}
+        >
           <SuitIcon suit={suit} />
         </div>
       ))}

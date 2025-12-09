@@ -152,33 +152,26 @@ export function Pile({
         </div>
       )}
 
-      {/* Drop highlight for valid drops */}
-      {cards.length > 0 && isOver && (
-        <div
-          className={cn(
-            "absolute inset-0 rounded-lg pointer-events-none z-50",
-            canDrop ? "ring-2 ring-green-400" : "ring-2 ring-red-400"
-          )}
-          style={{
-            width: CARD_WIDTH,
-            height: pileHeight,
-          }}
-        />
-      )}
+      {/* Drop zone indicator (empty piles handled above) */}
 
       {/* Cards */}
-      {cards.map((card, index) => (
-        <Card
-          key={card.id}
-          card={card}
-          pileId={pileId}
-          dragCardIds={getDragCardIds(index)}
-          stackIndex={index}
-          isSpread={spread}
-          isTop={index === cards.length - 1}
-          onDoubleClick={() => handleDoubleClick(index)}
-        />
-      ))}
+      {cards.map((card, index) => {
+        const isTopCard = index === cards.length - 1;
+        return (
+          <Card
+            key={card.id}
+            card={card}
+            pileId={pileId}
+            dragCardIds={getDragCardIds(index)}
+            stackIndex={index}
+            isSpread={spread}
+            isTop={isTopCard}
+            isDropTarget={isTopCard && isOver}
+            canDrop={canDrop}
+            onDoubleClick={() => handleDoubleClick(index)}
+          />
+        );
+      })}
     </div>
   );
 }
@@ -234,28 +227,61 @@ export function StockPile({ cards }: { cards: CardType[] }) {
 }
 
 /**
- * Waste pile - shows the top drawn card
+ * Waste pile - shows the top drawn card (draggable)
  */
 export function WastePile({ cards }: { cards: CardType[] }) {
   if (cards.length === 0) {
     return (
       <div
-        className="rounded-lg border-2 border-dashed border-white/10 bg-white/5"
+        className="rounded-xl border-2 border-dashed border-white/10 bg-white/5"
         style={{ width: CARD_WIDTH, height: CARD_HEIGHT }}
       />
     );
   }
 
-  // Only show top card for now
-  // TODO: Implement draw-3 mode showing last 3 cards
+  // Only show top card - it's draggable
   const topCard = cards[cards.length - 1];
 
   return (
-    <Pile
-      pileId="waste"
-      pileType="waste"
-      cards={[topCard]}
-      showPlaceholder={false}
-    />
+    <div
+      className="relative"
+      style={{ width: CARD_WIDTH, height: CARD_HEIGHT }}
+    >
+      {/* Depth indicator if multiple cards */}
+      {cards.length > 1 && (
+        <div
+          className="absolute rounded-xl bg-white/80 border border-black/10"
+          style={{
+            width: CARD_WIDTH,
+            height: CARD_HEIGHT,
+            top: -2,
+            left: 2,
+            zIndex: 0,
+          }}
+        />
+      )}
+      {cards.length > 2 && (
+        <div
+          className="absolute rounded-xl bg-white/60 border border-black/10"
+          style={{
+            width: CARD_WIDTH,
+            height: CARD_HEIGHT,
+            top: -4,
+            left: 4,
+            zIndex: -1,
+          }}
+        />
+      )}
+
+      {/* Top card - draggable */}
+      <div className="absolute" style={{ top: 0, left: 0, zIndex: 1 }}>
+        <Pile
+          pileId="waste"
+          pileType="waste"
+          cards={[topCard]}
+          showPlaceholder={false}
+        />
+      </div>
+    </div>
   );
 }
