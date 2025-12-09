@@ -129,11 +129,11 @@ export function Pile({
             "absolute inset-0 rounded-lg border-2 border-dashed",
             "transition-colors duration-150",
             isOver && canDrop
-              ? "border-green-400 bg-green-400/20"
+              ? "border-green-400/50 bg-green-400/20 shadow-inner"
               : isOver
-              ? "border-red-400 bg-red-400/10"
-              : "border-white/20 bg-white/5",
-            onClick && "cursor-pointer hover:border-white/40"
+              ? "border-red-400/50 bg-red-400/10"
+              : "border-black/10 bg-black/20 shadow-inner",
+            onClick && "cursor-pointer hover:bg-black/30"
           )}
           style={{ width: CARD_WIDTH, height: CARD_HEIGHT }}
         >

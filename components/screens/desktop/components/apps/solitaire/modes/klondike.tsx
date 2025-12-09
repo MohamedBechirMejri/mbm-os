@@ -25,7 +25,7 @@ export function KlondikeLayout() {
   const tableaus = [0, 1, 2, 3, 4, 5, 6].map(i => piles[`tableau-${i}`]);
 
   return (
-    <div className="flex flex-col gap-6 p-4 select-none">
+    <div className="flex flex-col items-center gap-6 p-4 select-none h-full">
       {/* Top row: Stock, Waste, and Foundations */}
       <div className="flex items-start gap-4">
         {/* Stock pile */}

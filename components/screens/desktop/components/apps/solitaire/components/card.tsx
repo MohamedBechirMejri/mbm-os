@@ -1,43 +1,42 @@
 "use client";
 
 /**
- * Playing card component with Windows-inspired design.
- * Handles rendering, drag source, and click events.
+ * Modern Playing Card Component
+ *
+ * Design: Minimalist, Geometric, High-DPI
+ * Tech: SVG Assets, Framer Motion, Tailwind V4
  */
 
+import * as React from "react";
 import { useDrag } from "react-dnd";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import {
   DND_ITEM_TYPES,
   RANK_LABELS,
-  SUIT_SYMBOLS,
   type Card as CardType,
   type CardDragItem,
-  type CardId,
+  type Suit,
+  type Rank,
 } from "../types";
 
 interface CardProps {
   card: CardType;
   pileId: string;
-  /** Cards that will be dragged along with this one (for tableau stacks) */
-  dragCardIds: CardId[];
+  dragCardIds: string[];
   onClick?: () => void;
   onDoubleClick?: () => void;
-  /** Index in stack for offset calculation */
   stackIndex?: number;
-  /** Whether this card is in a spread pile (like tableau) */
   isSpread?: boolean;
-  /** Whether this is the top card of the pile */
   isTop?: boolean;
   className?: string;
 }
 
-// Card dimensions matching Windows Solitaire feel
-const CARD_WIDTH = 72;
-const CARD_HEIGHT = 100;
+// Dimensions
+const CARD_WIDTH = 80; // Slightly wider for better proportions
+const CARD_HEIGHT = 112;
 const STACK_OFFSET_FACEDOWN = 4;
-const STACK_OFFSET_FACEUP = 20;
+const STACK_OFFSET_FACEUP = 22; // More visible space for indices
 
 export function Card({
   card,
@@ -50,12 +49,7 @@ export function Card({
   isTop = false,
   className,
 }: CardProps) {
-  // Set up drag source for react-dnd
-  const [{ isDragging }, dragRef] = useDrag<
-    CardDragItem,
-    unknown,
-    { isDragging: boolean }
-  >(
+  const [{ isDragging }, dragRef] = useDrag(
     () => ({
       type: DND_ITEM_TYPES.CARD,
       item: {
@@ -71,7 +65,6 @@ export function Card({
     [card.faceUp, dragCardIds, pileId]
   );
 
-  // Calculate vertical offset for stacked cards
   const yOffset = isSpread
     ? stackIndex * (card.faceUp ? STACK_OFFSET_FACEUP : STACK_OFFSET_FACEDOWN)
     : 0;
@@ -79,13 +72,20 @@ export function Card({
   return (
     <div
       ref={dragRef as unknown as React.RefObject<HTMLDivElement>}
-      className="absolute"
-      style={{ top: yOffset, zIndex: stackIndex }}
+      className="absolute perspective-1000"
+      style={{
+        top: yOffset,
+        zIndex: stackIndex,
+        // If dragging, we want the placeholder to be invisible but present layout-wise
+        // But since this is absolute positioned, layout shift isn't an issue.
+        // We hide it to show the "ghost" effectively.
+      }}
     >
       <motion.div
         className={cn(
-          "cursor-pointer select-none",
-          isDragging && "opacity-50",
+          "relative select-none",
+          isDragging ? "opacity-0" : "opacity-100",
+          card.faceUp ? "cursor-grab active:cursor-grabbing" : "cursor-default",
           className
         )}
         style={{
@@ -94,91 +94,192 @@ export function Card({
         }}
         onClick={onClick}
         onDoubleClick={onDoubleClick}
-        initial={false}
-        animate={{ opacity: isDragging ? 0.5 : 1 }}
-        whileHover={card.faceUp ? { scale: 1.02, y: -2 } : undefined}
-        transition={{ duration: 0.1 }}
+        /*
+         * Removed layout prop to fix lag when moving OS window.
+         * Now uses simple CSS transitions for hover interactions.
+         */
+        whileHover={
+          card.faceUp && !isDragging
+            ? {
+                y: -8,
+                scale: 1.05,
+                zIndex: 100,
+                transition: { duration: 0.15 },
+              }
+            : undefined
+        }
       >
-        {card.faceUp ? <CardFace card={card} /> : <CardBack />}
+        <div
+          className={cn(
+            "w-full h-full rounded-xl overflow-hidden transition-all duration-200",
+            // Clean simple border
+            "border border-black/20 shadow-sm",
+            card.faceUp ? "bg-white" : "bg-[#1E293B]"
+          )}
+        >
+          {card.faceUp ? <CardFace card={card} /> : <CardBack />}
+
+          {/* Lighting overlay -- subtle */}
+          <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-black/5 pointer-events-none" />
+        </div>
       </motion.div>
     </div>
   );
 }
 
-/**
- * Face-up card rendering with suit and rank
- */
+// -----------------------------------------------------------------------------
+// Card Face
+// -----------------------------------------------------------------------------
+
 function CardFace({ card }: { card: CardType }) {
-  const symbol = SUIT_SYMBOLS[card.suit];
-  const label = RANK_LABELS[card.rank];
-  const colorClass = card.color === "red" ? "text-red-600" : "text-gray-900";
+  const isRed = card.suit === "hearts" || card.suit === "diamonds";
+  const colorClass = isRed ? "text-[#E11D48]" : "text-[#0F172A]"; // Rose-600 vs Slate-900
 
   return (
     <div
       className={cn(
-        "w-full h-full rounded-lg bg-white border border-gray-300 shadow-md",
-        "flex flex-col p-1.5 overflow-hidden",
+        "w-full h-full flex flex-col relative bg-white",
         colorClass
       )}
     >
-      {/* Top-left corner */}
-      <div className="flex flex-col items-center leading-none text-sm font-bold">
-        <span>{label}</span>
-        <span className="text-base -mt-0.5">{symbol}</span>
+      {/* Top Left Index */}
+      <CornerIndex rank={card.rank} suit={card.suit} />
+
+      {/* Center Art */}
+      <div className="flex-1 flex items-center justify-center p-2">
+        <CenterArt rank={card.rank} suit={card.suit} />
       </div>
 
-      {/* Center suit symbol */}
-      <div className="flex-1 flex items-center justify-center">
-        <span className="text-3xl">{symbol}</span>
-      </div>
+      {/* Bottom Right Index (Rotated) */}
+      <CornerIndex rank={card.rank} suit={card.suit} rotated />
+    </div>
+  );
+}
 
-      {/* Bottom-right corner (rotated) */}
-      <div className="flex flex-col items-center leading-none text-sm font-bold rotate-180">
-        <span>{label}</span>
-        <span className="text-base -mt-0.5">{symbol}</span>
+function CornerIndex({
+  rank,
+  suit,
+  rotated = false,
+}: {
+  rank: Rank;
+  suit: Suit;
+  rotated?: boolean;
+}) {
+  const label = RANK_LABELS[rank];
+  return (
+    <div
+      className={cn(
+        "absolute flex flex-col items-center gap-0.5 p-1.5 leading-none",
+        rotated ? "bottom-0 right-0 rotate-180" : "top-0 left-0"
+      )}
+    >
+      <span className="font-bold text-sm tracking-tighter font-mono">
+        {label}
+      </span>
+      <div className="w-2.5 h-2.5">
+        <SuitIcon suit={suit} />
       </div>
     </div>
   );
 }
 
-/**
- * Card back design - Windows-inspired blue pattern
- */
+function CenterArt({ rank, suit }: { rank: Rank; suit: Suit }) {
+  // Face Cards (J, Q, K)
+  if (rank >= 11) {
+    const label = RANK_LABELS[rank];
+    return (
+      <div className="w-full h-full flex items-center justify-center relative overflow-hidden rounded-lg bg-current opacity-5">
+        <span className="text-6xl font-black opacity-40">{label}</span>
+        <div className="absolute inset-0 flex items-center justify-center opacity-20 scale-150">
+          <SuitIcon suit={suit} />
+        </div>
+      </div>
+    );
+  }
+
+  // Aces
+  if (rank === 1) {
+    return (
+      <div className="w-16 h-16 transform scale-125">
+        <SuitIcon suit={suit} />
+      </div>
+    );
+  }
+
+  // Number Cards (simplified geometric pip representation for cleanliness)
+  return (
+    <div className="grid grid-cols-2 gap-1 opacity-20 transform scale-75">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div key={i} className="w-4 h-4">
+          <SuitIcon suit={suit} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// -----------------------------------------------------------------------------
+// Card Back
+// -----------------------------------------------------------------------------
+
 function CardBack() {
   return (
-    <div
-      className={cn(
-        "w-full h-full rounded-lg border-2 border-blue-900/50 shadow-md",
-        "bg-linear-to-br from-blue-700 via-blue-600 to-blue-800",
-        "overflow-hidden"
-      )}
-    >
-      {/* Decorative pattern */}
-      <div className="w-full h-full relative">
-        {/* Diamond pattern overlay */}
-        <div
-          className="absolute inset-2 rounded border-2 border-blue-400/30"
-          style={{
-            backgroundImage: `
-              linear-gradient(45deg, rgba(255,255,255,0.05) 25%, transparent 25%),
-              linear-gradient(-45deg, rgba(255,255,255,0.05) 25%, transparent 25%),
-              linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.05) 75%),
-              linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.05) 75%)
-            `,
-            backgroundSize: "10px 10px",
-            backgroundPosition: "0 0, 0 5px, 5px -5px, -5px 0px",
-          }}
-        />
-        {/* Center emblem */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-8 h-8 rounded-full bg-blue-400/20 border border-blue-300/30 flex items-center justify-center">
-            <span className="text-blue-200/50 text-lg">♠</span>
-          </div>
+    <div className="w-full h-full bg-[#1b2538] relative overflow-hidden flex items-center justify-center group">
+      {/* Pattern */}
+      <div
+        className="absolute inset-0 opacity-20"
+        style={{
+          backgroundImage: `radial-gradient(circle, #3b82f6 1px, transparent 1px)`,
+          backgroundSize: "12px 12px",
+        }}
+      />
+      {/* Central Logo */}
+      <div className="w-12 h-12 rounded-full border-2 border-blue-500/30 flex items-center justify-center bg-[#0f172a] shadow-lg">
+        <div className="w-6 h-6 text-blue-500/50">
+          <SuitIcon suit="spades" />
         </div>
       </div>
     </div>
   );
 }
 
-// Export dimensions for layout calculations
+// -----------------------------------------------------------------------------
+// Assets (SVGs)
+// -----------------------------------------------------------------------------
+
+function SuitIcon({ suit }: { suit: Suit }) {
+  switch (suit) {
+    case "spades":
+      return (
+        <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
+          <path d="M12,2 C9,2 2.5,9 2.5,14 C2.5,17.3 4.5,19.5 7,19.5 C8.5,19.5 9.8,18.7 10.5,17.5 C11.2,18.7 12.5,19.5 14,19.5 C16.5,19.5 18.5,17.3 18.5,14 C18.5,9 12,2 12,2 Z M12,14 C11,15 11,17 11,17 H13 C13,17 13,15 12,14 Z M11.5,17 L12.5,17 L12.5,21.5 Q12.5,22 13,22 H11 Q11.5,22 11.5,21.5 Z" />
+          <path
+            d="M12,17 L12,22"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+        </svg>
+      );
+    case "hearts":
+      return (
+        <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+        </svg>
+      );
+    case "clubs":
+      return (
+        <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
+          <path d="M12,2.5c-2.5,0-4.5,2-4.5,4.5c0,1.4,0.6,2.6,1.6,3.4c-1.8,0.3-3.1,1.8-3.1,3.6c0,2.1,1.7,3.8,3.8,3.8 c0.6,0,1.2-0.2,1.7-0.5C11.1,19.2,11,21,10,23h4c-1-2-1.1-3.8-1.5-5.7c0.5,0.3,1.1,0.5,1.7,0.5c2.1,0,3.8-1.7,3.8-3.8 c0-1.8-1.4-3.4-3.1-3.6c1-0.8,1.6-2,1.6-3.4C16.5,4.5,14.5,2.5,12,2.5z" />
+        </svg>
+      );
+    case "diamonds":
+      return (
+        <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
+          <path d="M12 2L2 12l10 10 10-10L12 2z" />
+        </svg>
+      );
+  }
+}
+
 export { CARD_WIDTH, CARD_HEIGHT, STACK_OFFSET_FACEDOWN, STACK_OFFSET_FACEUP };
