@@ -98,10 +98,11 @@ export function CustomDragLayer({ scale }: CustomDragLayerProps) {
 // Simplified card preview for drag layer
 function CardPreview({ card }: { card: Card }) {
   const isRed = card.suit === "hearts" || card.suit === "diamonds";
+  const colorClass = isRed ? "text-rose-600" : "text-slate-900";
 
   return (
     <div
-      className="rounded-xl border border-black/20 shadow-lg bg-white overflow-hidden"
+      className={`relative rounded-xl border border-black/20 shadow-lg bg-white overflow-hidden ${colorClass}`}
       style={{
         width: CARD_WIDTH,
         height: CARD_HEIGHT,
@@ -109,40 +110,168 @@ function CardPreview({ card }: { card: Card }) {
     >
       {/* Corner index */}
       <div className="absolute top-1.5 left-1.5 flex flex-col items-center leading-none">
-        <span
-          className={`font-bold text-sm font-mono ${
-            isRed ? "text-rose-600" : "text-slate-900"
-          }`}
-        >
+        <span className="font-bold text-sm font-mono">
           {RANK_LABELS[card.rank]}
         </span>
-        <div
-          className={`w-2.5 h-2.5 ${
-            isRed ? "text-rose-600" : "text-slate-900"
-          }`}
-        >
+        <div className="w-2.5 h-2.5">
           <SuitIcon suit={card.suit} />
         </div>
       </div>
+
+      {/* Center art */}
+      <div className="absolute inset-0 flex items-center justify-center p-4">
+        <CenterArt rank={card.rank} suit={card.suit} />
+      </div>
+
       {/* Bottom corner (rotated) */}
       <div className="absolute bottom-1.5 right-1.5 flex flex-col items-center leading-none rotate-180">
-        <span
-          className={`font-bold text-sm font-mono ${
-            isRed ? "text-rose-600" : "text-slate-900"
-          }`}
-        >
+        <span className="font-bold text-sm font-mono">
           {RANK_LABELS[card.rank]}
         </span>
-        <div
-          className={`w-2.5 h-2.5 ${
-            isRed ? "text-rose-600" : "text-slate-900"
-          }`}
-        >
+        <div className="w-2.5 h-2.5">
           <SuitIcon suit={card.suit} />
         </div>
       </div>
     </div>
   );
+}
+
+// Center art for cards - simplified version
+function CenterArt({ rank, suit }: { rank: number; suit: Suit }) {
+  // Face Cards (J, Q, K)
+  if (rank >= 11) {
+    return (
+      <div className="w-full h-full flex items-center justify-center opacity-30">
+        <span className="text-4xl font-black">
+          {RANK_LABELS[rank as 11 | 12 | 13]}
+        </span>
+      </div>
+    );
+  }
+
+  // Aces - single large pip
+  if (rank === 1) {
+    return (
+      <div className="w-10 h-10">
+        <SuitIcon suit={suit} />
+      </div>
+    );
+  }
+
+  // Number cards (2-10) - show suit icons based on rank
+  const pipCount = rank;
+  const positions = getPipPositions(pipCount);
+
+  return (
+    <div className="relative w-full h-full">
+      {positions.map((pos, i) => (
+        <div
+          key={i}
+          className="absolute w-3 h-3"
+          style={{
+            left: `${pos.x}%`,
+            top: `${pos.y}%`,
+            transform: `translate(-50%, -50%) ${
+              pos.flip ? "rotate(180deg)" : ""
+            }`,
+          }}
+        >
+          <SuitIcon suit={suit} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Get pip positions for number cards
+function getPipPositions(
+  count: number
+): Array<{ x: number; y: number; flip?: boolean }> {
+  switch (count) {
+    case 2:
+      return [
+        { x: 50, y: 20 },
+        { x: 50, y: 80, flip: true },
+      ];
+    case 3:
+      return [
+        { x: 50, y: 20 },
+        { x: 50, y: 50 },
+        { x: 50, y: 80, flip: true },
+      ];
+    case 4:
+      return [
+        { x: 30, y: 20 },
+        { x: 70, y: 20 },
+        { x: 30, y: 80, flip: true },
+        { x: 70, y: 80, flip: true },
+      ];
+    case 5:
+      return [
+        { x: 30, y: 20 },
+        { x: 70, y: 20 },
+        { x: 50, y: 50 },
+        { x: 30, y: 80, flip: true },
+        { x: 70, y: 80, flip: true },
+      ];
+    case 6:
+      return [
+        { x: 30, y: 20 },
+        { x: 70, y: 20 },
+        { x: 30, y: 50 },
+        { x: 70, y: 50 },
+        { x: 30, y: 80, flip: true },
+        { x: 70, y: 80, flip: true },
+      ];
+    case 7:
+      return [
+        { x: 30, y: 18 },
+        { x: 70, y: 18 },
+        { x: 50, y: 35 },
+        { x: 30, y: 50 },
+        { x: 70, y: 50 },
+        { x: 30, y: 82, flip: true },
+        { x: 70, y: 82, flip: true },
+      ];
+    case 8:
+      return [
+        { x: 30, y: 18 },
+        { x: 70, y: 18 },
+        { x: 50, y: 35 },
+        { x: 30, y: 50 },
+        { x: 70, y: 50 },
+        { x: 50, y: 65, flip: true },
+        { x: 30, y: 82, flip: true },
+        { x: 70, y: 82, flip: true },
+      ];
+    case 9:
+      return [
+        { x: 30, y: 15 },
+        { x: 70, y: 15 },
+        { x: 30, y: 38 },
+        { x: 70, y: 38 },
+        { x: 50, y: 50 },
+        { x: 30, y: 62, flip: true },
+        { x: 70, y: 62, flip: true },
+        { x: 30, y: 85, flip: true },
+        { x: 70, y: 85, flip: true },
+      ];
+    case 10:
+      return [
+        { x: 30, y: 15 },
+        { x: 70, y: 15 },
+        { x: 50, y: 28 },
+        { x: 30, y: 38 },
+        { x: 70, y: 38 },
+        { x: 30, y: 62, flip: true },
+        { x: 70, y: 62, flip: true },
+        { x: 50, y: 72, flip: true },
+        { x: 30, y: 85, flip: true },
+        { x: 70, y: 85, flip: true },
+      ];
+    default:
+      return [];
+  }
 }
 
 function SuitIcon({ suit }: { suit: Suit }) {
