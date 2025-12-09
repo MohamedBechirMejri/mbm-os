@@ -6,6 +6,7 @@ import {
   catalogApps,
   preinstalledApps,
 } from "./components/apps/app-registry";
+import { toAppMeta } from "./components/apps/app-catalog";
 import { BrightnessOverlay } from "./components/brightness-overlay";
 import { Dock } from "./components/dock";
 import { DockAppIcon } from "./components/dock/dock-app-icon";
@@ -19,16 +20,16 @@ import {
 } from "./components/window-manager";
 
 export default function Desktop() {
-  const installed = useDesktop((s) => Object.values(s.apps));
-  const windows = useDesktop((s) => s.windows);
-  const activeId = useDesktop((s) => s.activeId);
+  const installed = useDesktop(s => Object.values(s.apps));
+  const windows = useDesktop(s => s.windows);
+  const activeId = useDesktop(s => s.activeId);
   const [anyMenuOpen, setAnyMenuOpen] = useState(false);
   const [isLaunchpadOpen, setIsLaunchpadOpen] = useState(false);
 
   const dockApps = installed.length > 0 ? installed : preinstalledApps;
 
   const getAppWindows = (appId: string) => {
-    return Object.values(windows).filter((w) => w.appId === appId);
+    return Object.values(windows).filter(w => w.appId === appId);
   };
 
   const handleDockClick = (appId: string) => {
@@ -36,9 +37,9 @@ export default function Desktop() {
 
     // Register app if not yet registered
     if (!s.apps[appId]) {
-      const meta = preinstalledApps.find((a) => a.id === appId);
+      const meta = preinstalledApps.find(a => a.id === appId);
       if (meta) {
-        DesktopAPI.registerApps([meta]);
+        DesktopAPI.registerApps([toAppMeta(meta)]);
       }
     }
 
@@ -50,9 +51,9 @@ export default function Desktop() {
     } else {
       // Has windows - check if any are visible and focused
       const visibleWindows = appWindows.filter(
-        (w) => w.state !== "minimized" && w.state !== "hidden",
+        w => w.state !== "minimized" && w.state !== "hidden"
       );
-      const activeWindow = appWindows.find((w) => w.id === activeId);
+      const activeWindow = appWindows.find(w => w.id === activeId);
 
       if (activeWindow && activeWindow.state !== "minimized") {
         // Active window of this app is frontmost - minimize it
@@ -90,7 +91,7 @@ export default function Desktop() {
         /> */}
         <div className="mx-auto mr-0"></div>
         <Dock className="select-none w-max relative z-9999">
-          {dockApps.map((app) => (
+          {dockApps.map(app => (
             <DockAppIcon
               key={app.id}
               app={app}

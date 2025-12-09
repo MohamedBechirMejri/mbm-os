@@ -7,6 +7,7 @@ I completely redesigned your app store from scratch to be a beautiful, functiona
 ## Key Features
 
 ### 🎨 Beautiful Design
+
 - **Liquid glass aesthetics**: Gradient backgrounds, backdrop blur, subtle transparency
 - **Rem-based typography**: All sizes use rem units as per your guidelines
 - **Smooth animations**: Hover states and transitions throughout
@@ -16,12 +17,14 @@ I completely redesigned your app store from scratch to be a beautiful, functiona
 ### 📱 Three Main Views
 
 1. **Discover View**:
+
    - Featured experiments section
    - Browse by category grid
    - Complete list of all experiments
    - Welcome message
 
 2. **Category View**:
+
    - Filter experiments by category
    - Category header with icon and description
    - Empty state message when no experiments exist
@@ -30,36 +33,43 @@ I completely redesigned your app store from scratch to be a beautiful, functiona
    - Full app information
    - Large icon
    - Description and tags
-   - "Coming Soon" or "Download" button
+   - "Coming Soon" or "Install" button
    - Back navigation
 
 ### 🔍 Search Functionality
+
 - Live search across app names, descriptions, and tags
 - Shows filtered results instantly
 - Dedicated search results view
 
 ### 📦 Easy to Extend
 
-The new structure makes it incredibly simple to add experiments:
+The new unified structure makes it incredibly simple to add experiments.
+Just add to `../app-catalog.ts` - that's it!
 
 ```typescript
-// Just add to data.ts - that's it!
 {
+  // Window manager fields
   id: "new-experiment",
-  name: "My Experiment",
+  title: "My Experiment",
+  icon: "icon-name",
+  Component: MyExperimentComponent,
+  minSize: { w: 1280, h: 960 },
+  floatingActionBar: true,
+
+  // App Store fields
   tagline: "What it does in one line",
   description: "Full description...",
-  icon: "icon-name",
   category: "webgpu",
   tags: ["webgpu", "cool"],
-  featured: true, // optional
-  available: false, // set to true when ready
+  featured: true,    // optional
+  available: false,  // set to true when ready
 }
 ```
 
 ## Pre-loaded Categories
 
-I've set up 7 categories with sample experiments:
+We've set up 7 categories with sample experiments:
 
 1. **WebGPU & Graphics** - 3D experiences and visual experiments
 2. **Games** - Interactive entertainment
@@ -69,29 +79,17 @@ I've set up 7 categories with sample experiments:
 6. **Utilities** - Helpful system tools
 7. **Experiments** - Wild ideas and POCs
 
-## Sample Experiments Added
-
-I've added 15+ placeholder experiments across categories including:
-- Music Visualizer (WebGPU, featured)
-- Particle System (WebGPU)
-- AI Chat (AI Tools)
-- Image Generator (AI Tools)
-- Pomodoro Timer (Productivity)
-- Drawing Canvas (Creative)
-- Liquid Glass Lab (Experiments, featured)
-- And more...
-
-All are marked as `available: false` so they show "Coming Soon" until you build them.
-
 ## File Structure
 
 ```
-app-store/
-├── index.tsx    - Main component (all views in one file)
-├── data.ts      - All experiments and categories
-├── types.ts     - TypeScript types
-├── readme.md    - Documentation for adding experiments
-└── catalog.ts   - Old file (can be safely deleted)
+apps/
+├── app-catalog.ts      # Unified app catalog (THE source of truth)
+├── app-registry.ts     # Registers apps with window manager
+└── app-store/
+    ├── index.tsx       # Main component (all views in one file)
+    ├── readme.md       # Documentation for adding experiments
+    ├── example-integration.md  # Step-by-step guide
+    └── summary.md      # This file
 ```
 
 ## How to Add Your First Real Experiment
@@ -99,9 +97,9 @@ app-store/
 When you're ready to make an experiment actually launchable:
 
 1. Build your experiment component (e.g., `music-visualizer/index.tsx`)
-2. Add it to the app registry (`app-registry.ts`)
-3. Set `available: true` in the app store data
-4. The "Download" button will work and install the app!
+2. Add it to `../app-catalog.ts` with `Component: YourComponent`
+3. Set `available: true`
+4. The "Install" button will work and install the app!
 
 ## Design Principles Used
 
@@ -112,13 +110,24 @@ When you're ready to make an experiment actually launchable:
 ✅ Clean, maintainable code
 ✅ Kebab-case file names
 ✅ Modern, simple approach
+✅ **Single source of truth** - one file for all app data
+
+## Architecture Changes (Latest)
+
+The app store and window manager now share a **unified app catalog** instead of maintaining separate data files:
+
+- `CatalogApp` type combines both window manager metadata (`AppMeta`) and App Store metadata
+- `catalogApps` is the single array of all apps
+- `toAppMeta()` converts a `CatalogApp` to `AppMeta` when needed by the window manager
+- No more duplicate definitions! 🎉
 
 ## Try It Out!
 
 Just open the App Store app in your OS and you'll see:
+
 - A gorgeous new interface
 - Organized categories
 - Search functionality
 - All your future experiments ready to be added
 
-The code is production-ready, well-typed, and easy to maintain. Whenever you build a new experiment, just add one entry to `data.ts` and you're done! 🚀
+The code is production-ready, well-typed, and easy to maintain. Whenever you build a new experiment, just add one entry to `app-catalog.ts` and you're done! 🚀

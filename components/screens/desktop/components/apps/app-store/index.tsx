@@ -13,8 +13,14 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { useAppInstallationStore } from "@/lib/app-installation-store";
 import { cn } from "@/lib/utils";
-import { CATEGORIES, EXPERIMENT_APPS, getFeaturedApps } from "./data";
-import type { Category, CategoryInfo, ExperimentApp } from "./types";
+import {
+  catalogApps,
+  CATEGORIES,
+  getFeaturedApps,
+  type CatalogApp,
+  type Category,
+  type CategoryInfo,
+} from "../app-catalog";
 
 type View = "discover" | "category" | "app-detail";
 
@@ -29,14 +35,14 @@ export function AppStoreApp({ instanceId: _ }: { instanceId: string }) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredApps = searchQuery
-    ? EXPERIMENT_APPS.filter(
-        (app) =>
+    ? catalogApps.filter(
+        app =>
           !app.hidden &&
-          (app.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (app.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             app.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            app.tags.some((tag) =>
-              tag.toLowerCase().includes(searchQuery.toLowerCase()),
-            )),
+            app.tags.some(tag =>
+              tag.toLowerCase().includes(searchQuery.toLowerCase())
+            ))
       )
     : null;
 
@@ -72,7 +78,7 @@ export function AppStoreApp({ instanceId: _ }: { instanceId: string }) {
               <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-white/50" />
               <Input
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Search experiments..."
                 className="h-7 w-full rounded-lg bg-black/20 pl-8 text-[0.8125rem] text-white placeholder:text-white/50 border-white/10"
               />
@@ -90,7 +96,7 @@ export function AppStoreApp({ instanceId: _ }: { instanceId: string }) {
             </SidebarSection>
 
             <SidebarSection title="Categories">
-              {CATEGORIES.map((cat) => (
+              {CATEGORIES.map(cat => (
                 <SidebarItem
                   key={cat.id}
                   label={cat.name}
@@ -128,18 +134,18 @@ export function AppStoreApp({ instanceId: _ }: { instanceId: string }) {
             {filteredApps ? (
               <SearchResults
                 apps={filteredApps}
-                onViewApp={(id) => {
+                onViewApp={id => {
                   setSearchQuery("");
                   setView({ type: "app-detail", appId: id });
                 }}
               />
             ) : view.type === "discover" ? (
               <DiscoverView
-                onViewApp={(id) => {
+                onViewApp={id => {
                   setSearchQuery("");
                   setView({ type: "app-detail", appId: id });
                 }}
-                onViewCategory={(id) => {
+                onViewCategory={id => {
                   setSearchQuery("");
                   setView({ type: "category", categoryId: id });
                 }}
@@ -147,7 +153,7 @@ export function AppStoreApp({ instanceId: _ }: { instanceId: string }) {
             ) : view.type === "category" && view.categoryId ? (
               <CategoryView
                 categoryId={view.categoryId}
-                onViewApp={(id) => {
+                onViewApp={id => {
                   setSearchQuery("");
                   setView({ type: "app-detail", appId: id });
                 }}
@@ -156,7 +162,7 @@ export function AppStoreApp({ instanceId: _ }: { instanceId: string }) {
               <AppDetailView
                 appId={view.appId}
                 onBack={() => setView({ type: "discover" })}
-                onViewApp={(id) => {
+                onViewApp={id => {
                   setSearchQuery("");
                   setView({ type: "app-detail", appId: id });
                 }}
@@ -207,7 +213,7 @@ function SidebarItem({
         "group flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-left text-[0.8125rem] transition-colors",
         active
           ? "bg-white/10 text-white"
-          : "text-white/70 hover:bg-white/5 hover:text-white/90",
+          : "text-white/70 hover:bg-white/5 hover:text-white/90"
       )}
     >
       <span className={cn("flex-shrink-0", color && `text-[${color}]`)}>
@@ -246,7 +252,7 @@ function DiscoverView({
             Featured Experiments
           </h2>
           <div className="grid gap-4 md:grid-cols-2">
-            {featured.map((app) => (
+            {featured.map(app => (
               <FeaturedCard
                 key={app.id}
                 app={app}
@@ -263,7 +269,7 @@ function DiscoverView({
           Browse by Category
         </h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {CATEGORIES.map((cat) => (
+          {CATEGORIES.map(cat => (
             <CategoryCard
               key={cat.id}
               category={cat}
@@ -279,13 +285,15 @@ function DiscoverView({
           All Experiments
         </h2>
         <div className="grid gap-3 grid-cols-[repeat(auto-fill,minmax(140px,1fr))]">
-          {EXPERIMENT_APPS.filter((a) => !a.hidden).map((app) => (
-            <GridAppCard
-              key={app.id}
-              app={app}
-              onClick={() => onViewApp(app.id)}
-            />
-          ))}
+          {catalogApps
+            .filter(a => !a.hidden)
+            .map(app => (
+              <GridAppCard
+                key={app.id}
+                app={app}
+                onClick={() => onViewApp(app.id)}
+              />
+            ))}
         </div>
       </section>
     </div>
@@ -299,10 +307,8 @@ function CategoryView({
   categoryId: Category;
   onViewApp: (id: string) => void;
 }) {
-  const category = CATEGORIES.find((c) => c.id === categoryId);
-  const apps = EXPERIMENT_APPS.filter(
-    (a) => a.category === categoryId && !a.hidden,
-  );
+  const category = CATEGORIES.find(c => c.id === categoryId);
+  const apps = catalogApps.filter(a => a.category === categoryId && !a.hidden);
 
   if (!category) return null;
 
@@ -328,7 +334,7 @@ function CategoryView({
       </div>
 
       <div className="grid gap-3 grid-cols-[repeat(auto-fill,minmax(140px,1fr))]">
-        {apps.map((app) => (
+        {apps.map(app => (
           <GridAppCard
             key={app.id}
             app={app}
@@ -360,8 +366,8 @@ function AppDetailView({
   onViewApp: (id: string) => void;
 }) {
   const app = useMemo(
-    () => EXPERIMENT_APPS.find((a) => a.id === appId && !a.hidden),
-    [appId],
+    () => catalogApps.find(a => a.id === appId && !a.hidden),
+    [appId]
   );
   const appAvailable = Boolean(app?.available);
   const appManifest = app?.installManifest;
@@ -369,14 +375,12 @@ function AppDetailView({
 
   const [localError, setLocalError] = useState<string | null>(null);
   const installedRecord = useAppInstallationStore(
-    (state) => state.installed[appId],
+    state => state.installed[appId]
   );
-  const progressState = useAppInstallationStore(
-    (state) => state.progress[appId],
-  );
-  const installApp = useAppInstallationStore((state) => state.installApp);
-  const resetProgress = useAppInstallationStore((state) => state.resetProgress);
-  const isRegistered = useDesktop((s) => Boolean(s.apps[appId]));
+  const progressState = useAppInstallationStore(state => state.progress[appId]);
+  const installApp = useAppInstallationStore(state => state.installApp);
+  const resetProgress = useAppInstallationStore(state => state.resetProgress);
+  const isRegistered = useDesktop(s => Boolean(s.apps[appId]));
 
   const isInstalling =
     progressState?.status === "installing" ||
@@ -448,7 +452,7 @@ function AppDetailView({
     void handleInstall();
   }, [appId, handleInstall, resetProgress]);
 
-  const uninstallApp = useAppInstallationStore((state) => state.uninstallApp);
+  const uninstallApp = useAppInstallationStore(state => state.uninstallApp);
   const [isUninstalling, setIsUninstalling] = useState(false);
 
   // Prevent uninstalling preinstalled apps (App Store, Safari, Finder, Terminal, etc.)
@@ -495,17 +499,17 @@ function AppDetailView({
 
   if (!app) return null;
 
-  const category = CATEGORIES.find((c) => c.id === appCategoryId);
-  const relatedApps = EXPERIMENT_APPS.filter(
-    (a) => a.category === app.category && a.id !== app.id && !a.hidden,
-  ).slice(0, 6);
+  const category = CATEGORIES.find(c => c.id === appCategoryId);
+  const relatedApps = catalogApps
+    .filter(a => a.category === app.category && a.id !== app.id && !a.hidden)
+    .slice(0, 6);
   return (
     <div className="space-y-8">
       <div className="flex items-start gap-6">
         <div className="flex size-32 items-center justify-center rounded-3xl bg-gradient-to-br from-white/10 to-white/5 p-4 shadow-2xl">
           <Image
             src={`/assets/icons/apps/${app.icon}.ico`}
-            alt={app.name}
+            alt={app.title}
             width={96}
             height={96}
             className="size-full"
@@ -514,7 +518,7 @@ function AppDetailView({
         <div className="flex-1 space-y-4">
           <div>
             <h1 className="text-[2.5rem] font-bold leading-none tracking-tight text-white">
-              {app.name}
+              {app.title}
             </h1>
             <p className="mt-3 text-[1.125rem] text-white/70">{app.tagline}</p>
           </div>
@@ -614,7 +618,7 @@ function AppDetailView({
                 More in {category?.name}
               </h2>
               <div className="grid gap-3 grid-cols-[repeat(auto-fill,minmax(140px,1fr))]">
-                {relatedApps.map((relApp) => (
+                {relatedApps.map(relApp => (
                   <GridAppCard
                     key={relApp.id}
                     app={relApp}
@@ -653,7 +657,7 @@ function AppDetailView({
                 Tags
               </h3>
               <div className="flex flex-wrap gap-2">
-                {app.tags.map((tag) => (
+                {app.tags.map(tag => (
                   <span
                     key={tag}
                     className="rounded-full bg-white/10 px-3 py-1 text-[0.75rem] font-medium text-white/80"
@@ -674,7 +678,7 @@ function SearchResults({
   apps,
   onViewApp,
 }: {
-  apps: ExperimentApp[];
+  apps: CatalogApp[];
   onViewApp: (id: string) => void;
 }) {
   return (
@@ -690,7 +694,7 @@ function SearchResults({
 
       {apps.length > 0 ? (
         <div className="grid gap-3 grid-cols-[repeat(auto-fill,minmax(140px,1fr))]">
-          {apps.map((app) => (
+          {apps.map(app => (
             <GridAppCard
               key={app.id}
               app={app}
@@ -715,12 +719,12 @@ function GridAppCard({
   app,
   onClick,
 }: {
-  app: ExperimentApp;
+  app: CatalogApp;
   onClick: () => void;
 }) {
-  const isInstalled = useDesktop((s) => Boolean(s.apps[app.id]));
+  const isInstalled = useDesktop(s => Boolean(s.apps[app.id]));
   const installStatus = useAppInstallationStore(
-    (state) => state.progress[app.id]?.status,
+    state => state.progress[app.id]?.status
   );
   const isInstalling =
     installStatus === "installing" || installStatus === "finalizing";
@@ -734,7 +738,7 @@ function GridAppCard({
       <div className="relative flex size-20 items-center justify-center rounded-2xl bg-gradient-to-br from-white/10 to-white/5 transition-transform group-hover:scale-105">
         <Image
           src={`/assets/icons/apps/${app.icon}.ico`}
-          alt={app.name}
+          alt={app.title}
           width={56}
           height={56}
           className="size-14"
@@ -742,7 +746,7 @@ function GridAppCard({
       </div>
       <div className="w-full space-y-0.5">
         <div className="truncate text-[0.8125rem] font-semibold text-white">
-          {app.name}
+          {app.title}
         </div>
         {isInstalled ? (
           <div className="text-[0.6875rem] text-emerald-300/80">Installed</div>
@@ -760,7 +764,7 @@ function FeaturedCard({
   app,
   onClick,
 }: {
-  app: ExperimentApp;
+  app: CatalogApp;
   onClick: () => void;
 }) {
   return (
@@ -773,7 +777,7 @@ function FeaturedCard({
         <div className="flex size-20 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-white/20 to-white/10 transition-transform group-hover:scale-105">
           <Image
             src={`/assets/icons/apps/${app.icon}.ico`}
-            alt={app.name}
+            alt={app.title}
             width={64}
             height={64}
             className="size-16"
@@ -784,7 +788,7 @@ function FeaturedCard({
             Featured
           </div>
           <div className="text-[1.25rem] font-bold leading-tight text-white">
-            {app.name}
+            {app.title}
           </div>
           <p className="line-clamp-2 text-[0.875rem] leading-relaxed text-white/70">
             {app.description}
@@ -823,7 +827,7 @@ function CategoryCard({
             {category.name}
           </div>
           <div className="mt-0.5 truncate text-[0.75rem] text-white/60">
-            {EXPERIMENT_APPS.filter((a) => a.category === category.id).length}{" "}
+            {catalogApps.filter(a => a.category === category.id).length}{" "}
             experiments
           </div>
         </div>

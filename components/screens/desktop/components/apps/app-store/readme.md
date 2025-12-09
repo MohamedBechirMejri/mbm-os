@@ -4,19 +4,23 @@ A beautiful, category-based showcase for your web experiments and interactive pr
 
 ## Adding New Experiments
 
-To add a new experiment to the app store, simply add a new entry to the `EXPERIMENT_APPS` array in `data.ts`.
+To add a new experiment to the app store, add a new entry to the `catalogApps` array in `../app-catalog.ts`.
 
 ### Example
 
 ```typescript
 {
   id: "my-cool-experiment",
-  name: "My Cool Experiment",
+  title: "My Cool Experiment",
+  icon: "icon-name", // Icon filename from /public/assets/icons/apps/ (without .ico extension)
+  Component: MyExperimentComponent, // The React component to render
+  minSize: { w: 1280, h: 960 },
+  floatingActionBar: true,
+  // App Store metadata
   tagline: "A short one-liner describing what it does",
   description: "A longer description explaining the experiment, what technologies it uses, and what makes it interesting.",
-  icon: "icon-name", // Icon filename from /public/assets/icons/apps/ (without .ico extension)
   category: "webgpu", // Choose from: webgpu, games, ai-tools, productivity, creative, utilities, experiments
-  tags: ["webgpu", "particles", "interactive"], // Tags for search
+  tags: ["webgpu", "particles", "interactive"],
   featured: false, // Set to true to show on the discover page
   available: false, // Set to true when the app is actually implemented
 }
@@ -24,12 +28,7 @@ To add a new experiment to the app store, simply add a new entry to the `EXPERIM
 
 ## Adding New Categories
 
-To add a new category:
-
-1. Update the `Category` type in `types.ts`
-2. Add a new entry to the `CATEGORIES` array in `data.ts`
-
-Example:
+To add a new category, update the `CATEGORIES` array in `../app-catalog.ts`:
 
 ```typescript
 {
@@ -51,9 +50,19 @@ Example:
 ## Structure
 
 ```
-app-store/
-├── index.tsx       # Main app store component with all views
-├── data.ts         # All experiments and categories
-├── types.ts        # TypeScript type definitions
-└── catalog.ts      # Legacy file (can be removed)
+apps/
+├── app-catalog.ts      # Unified app catalog with all apps and categories
+├── app-registry.ts     # Registers apps with the window manager
+└── app-store/
+    ├── index.tsx       # Main app store component with all views
+    └── readme.md       # This documentation
 ```
+
+## Key Files
+
+- **`../app-catalog.ts`**: The single source of truth for all apps. Contains:
+  - `CatalogApp` type: Unified type combining window manager and App Store metadata
+  - `catalogApps`: Array of all apps in the system
+  - `CATEGORIES`: All category definitions
+  - `preinstalledApps`: Apps that show in dock by default
+  - Helper functions: `getFeaturedApps()`, `getAppsByCategory()`, `toAppMeta()`

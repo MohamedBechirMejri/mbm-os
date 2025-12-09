@@ -5,7 +5,7 @@ import { persist } from "zustand/middleware";
 import type {
   InstallAsset,
   InstallManifest,
-} from "@/components/screens/desktop/components/apps/app-store/types";
+} from "@/components/screens/desktop/components/apps/app-catalog";
 
 const CACHE_NAMESPACE = "mbm-os.app-assets";
 
@@ -75,7 +75,7 @@ const normalizeCacheKey = (key: string): string => {
 const putInCache = async (
   cacheKey: string,
   blob: Blob,
-  contentType?: string,
+  contentType?: string
 ) => {
   const absoluteKey = normalizeCacheKey(cacheKey);
   if (typeof caches !== "undefined") {
@@ -110,7 +110,7 @@ const removeFromCache = async (cacheKey: string) => {
 
 const downloadAndCacheAsset = async (
   asset: InstallAsset,
-  onProgress: (downloaded: number, total?: number) => void,
+  onProgress: (downloaded: number, total?: number) => void
 ): Promise<CachedAsset> => {
   if (typeof fetch === "undefined") {
     throw new Error("Installation requires a browser environment");
@@ -175,7 +175,7 @@ export const useAppInstallationStore = create<AppInstallationState>()(
         const hintedBytes = manifest?.sizeEstimate;
         const summedBytes = assets.reduce(
           (sum, asset) => sum + (asset.bytes ?? 0),
-          0,
+          0
         );
         const totalBytes =
           hintedBytes ?? (summedBytes > 0 ? summedBytes : undefined);
@@ -189,7 +189,7 @@ export const useAppInstallationStore = create<AppInstallationState>()(
           totalAssets,
         };
 
-        set((state) => ({
+        set(state => ({
           progress: { ...state.progress, [appId]: baseProgress },
           queue: state.queue.includes(appId)
             ? state.queue
@@ -197,7 +197,7 @@ export const useAppInstallationStore = create<AppInstallationState>()(
         }));
 
         if (totalAssets === 0) {
-          set((state) => ({
+          set(state => ({
             installed: {
               ...state.installed,
               [appId]: {
@@ -214,7 +214,7 @@ export const useAppInstallationStore = create<AppInstallationState>()(
                 percent: 100,
               },
             },
-            queue: state.queue.filter((id) => id !== appId),
+            queue: state.queue.filter(id => id !== appId),
           }));
           return;
         }
@@ -223,7 +223,7 @@ export const useAppInstallationStore = create<AppInstallationState>()(
         let completedBytes = 0;
 
         const updateProgress = (patch: Partial<InstallProgress>) => {
-          set((state) => {
+          set(state => {
             const prev = state.progress[appId] ?? baseProgress;
             return {
               ...state,
@@ -249,15 +249,15 @@ export const useAppInstallationStore = create<AppInstallationState>()(
                 const localFraction = assetTotal
                   ? Math.min(downloaded / assetTotal, 1)
                   : asset.bytes
-                    ? Math.min(downloaded / asset.bytes, 1)
-                    : 0;
+                  ? Math.min(downloaded / asset.bytes, 1)
+                  : 0;
                 const aggregate =
                   (index + localFraction) / Math.max(assets.length, 1);
                 updateProgress({
                   percent: Math.min(100, aggregate * 100),
                   downloadedBytes: completedBytes + downloaded,
                 });
-              },
+              }
             );
 
             cachedAssets.push(assetRecord);
@@ -265,7 +265,7 @@ export const useAppInstallationStore = create<AppInstallationState>()(
             updateProgress({
               percent: Math.min(
                 100,
-                ((index + 1) / Math.max(assets.length, 1)) * 100,
+                ((index + 1) / Math.max(assets.length, 1)) * 100
               ),
               downloadedBytes: completedBytes,
             });
@@ -273,7 +273,7 @@ export const useAppInstallationStore = create<AppInstallationState>()(
 
           updateProgress({ status: "finalizing" });
 
-          set((state) => ({
+          set(state => ({
             installed: {
               ...state.installed,
               [appId]: {
@@ -293,20 +293,20 @@ export const useAppInstallationStore = create<AppInstallationState>()(
                 currentAssetIndex: Math.max(assets.length - 1, 0),
               },
             },
-            queue: state.queue.filter((id) => id !== appId),
+            queue: state.queue.filter(id => id !== appId),
           }));
         } catch (error) {
           const message =
             error instanceof Error ? error.message : "Installation failed";
           updateProgress({ status: "failed", error: message });
-          set((state) => ({
-            queue: state.queue.filter((id) => id !== appId),
+          set(state => ({
+            queue: state.queue.filter(id => id !== appId),
           }));
           throw error;
         }
       },
       resetProgress: (appId: string) => {
-        set((state) => {
+        set(state => {
           const { [appId]: _omit, ...rest } = state.progress;
           return { ...state, progress: rest };
         });
@@ -315,25 +315,25 @@ export const useAppInstallationStore = create<AppInstallationState>()(
         const record = get().installed[appId];
         if (!record) return;
 
-        set((state) => {
+        set(state => {
           const { [appId]: _installed, ...restInstalled } = state.installed;
           const { [appId]: _progress, ...restProgress } = state.progress;
           return {
             ...state,
             installed: restInstalled,
             progress: restProgress,
-            queue: state.queue.filter((id) => id !== appId),
+            queue: state.queue.filter(id => id !== appId),
           };
         });
 
         await Promise.all(
-          record.assets.map((asset) => removeFromCache(asset.cacheKey)),
+          record.assets.map(asset => removeFromCache(asset.cacheKey))
         );
       },
     }),
     {
       name: "app-installation-store",
-      partialize: (state) => ({ installed: state.installed }),
-    },
-  ),
+      partialize: state => ({ installed: state.installed }),
+    }
+  )
 );

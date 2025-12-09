@@ -3,13 +3,13 @@
 import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 import { useEffect } from "react";
+import { toAppMeta, type CatalogApp } from "../apps/app-catalog";
 import { DesktopAPI } from "../window-manager";
-import type { AppMeta } from "../window-manager/types";
 
 interface LaunchpadProps {
   isOpen: boolean;
   onClose: () => void;
-  apps: AppMeta[];
+  apps: CatalogApp[];
 }
 
 export function Launchpad({ isOpen, onClose, apps }: LaunchpadProps) {
@@ -29,9 +29,9 @@ export function Launchpad({ isOpen, onClose, apps }: LaunchpadProps) {
 
     // Register app if not yet registered
     if (!s.apps[appId]) {
-      const meta = apps.find((a) => a.id === appId);
+      const meta = apps.find(a => a.id === appId);
       if (meta) {
-        DesktopAPI.registerApps([meta]);
+        DesktopAPI.registerApps([toAppMeta(meta)]);
       }
     }
 
@@ -68,7 +68,7 @@ export function Launchpad({ isOpen, onClose, apps }: LaunchpadProps) {
               damping: 20,
             }}
             className="w-full max-w-6xl px-12"
-            onClick={(e) => e.stopPropagation()}
+            onClick={e => e.stopPropagation()}
           >
             <div className="grid grid-cols-6 gap-12 p-12">
               {apps.map((app, index) => (

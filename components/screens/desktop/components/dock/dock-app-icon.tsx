@@ -4,12 +4,16 @@ import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import GlassSurface from "@/components/ui/glass-surface";
+import { toAppMeta, type CatalogApp } from "../apps/app-catalog";
 import { DesktopAPI } from "../window-manager";
 import type { AppMeta, WinInstance } from "../window-manager/types";
 import { DockIcon } from ".";
 
+// Accept either CatalogApp or AppMeta - use toAppMeta for CatalogApp when registering
+type DockApp = CatalogApp | AppMeta;
+
 interface DockAppIconProps {
-  app: AppMeta;
+  app: DockApp;
   windows: WinInstance[];
   activeId: string | null;
   onClick: () => void;
@@ -30,10 +34,8 @@ export function DockAppIcon({
   const menuRef = useRef<HTMLDivElement>(null);
   const isRunning = windows.length > 0;
   const hasFocusedWindow = windows.some(
-    (win) =>
-      win.id === activeId &&
-      win.state !== "minimized" &&
-      win.state !== "hidden",
+    win =>
+      win.id === activeId && win.state !== "minimized" && win.state !== "hidden"
   );
 
   useEffect(() => {
@@ -64,12 +66,14 @@ export function DockAppIcon({
     if (e.altKey) {
       const s = DesktopAPI.getState();
       if (!s.apps[app.id]) {
-        DesktopAPI.registerApps([app]);
+        // Convert CatalogApp to AppMeta if needed
+        const appMeta = "tagline" in app ? toAppMeta(app) : app;
+        DesktopAPI.registerApps([appMeta]);
       }
       DesktopAPI.launch(app.id);
     } else {
       // If there's a minimized window, restore it instead of launching a new one
-      const minimizedWindow = windows.find((w) => w.state === "minimized");
+      const minimizedWindow = windows.find(w => w.state === "minimized");
       if (minimizedWindow) {
         DesktopAPI.restoreFromMinimized(minimizedWindow.id);
       } else {
@@ -94,7 +98,9 @@ export function DockAppIcon({
   const handleNewWindow = () => {
     const s = DesktopAPI.getState();
     if (!s.apps[app.id]) {
-      DesktopAPI.registerApps([app]);
+      // Convert CatalogApp to AppMeta if needed
+      const appMeta = "tagline" in app ? toAppMeta(app) : app;
+      DesktopAPI.registerApps([appMeta]);
     }
     DesktopAPI.launch(app.id);
     setShowMenu(false);
@@ -165,7 +171,11 @@ export function DockAppIcon({
         )}
         {isRunning && (
           <div
-            className={`absolute bottom-1 left-1/2 -translate-x-1/2 rounded-full shadow-lg ${hasFocusedWindow ? "h-1.5 w-3 bg-sky-400/90" : "h-1.5 w-1.5 bg-white/80"}`}
+            className={`absolute bottom-1 left-1/2 -translate-x-1/2 rounded-full shadow-lg ${
+              hasFocusedWindow
+                ? "h-1.5 w-3 bg-sky-400/90"
+                : "h-1.5 w-1.5 bg-white/80"
+            }`}
           />
         )}
       </DockIcon>
