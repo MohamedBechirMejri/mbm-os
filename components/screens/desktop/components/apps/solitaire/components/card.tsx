@@ -27,7 +27,7 @@ interface CardProps {
   onClick?: () => void;
   onDoubleClick?: () => void;
   stackIndex?: number;
-  isSpread?: boolean;
+  yOffset?: number;
   isTop?: boolean;
   isDropTarget?: boolean;
   canDrop?: boolean;
@@ -47,7 +47,7 @@ export function Card({
   onClick,
   onDoubleClick,
   stackIndex = 0,
-  isSpread = false,
+  yOffset = 0,
   isTop = false,
   isDropTarget = false,
   canDrop = false,
@@ -69,20 +69,13 @@ export function Card({
     [card.faceUp, dragCardIds, pileId]
   );
 
-  const yOffset = isSpread
-    ? stackIndex * (card.faceUp ? STACK_OFFSET_FACEUP : STACK_OFFSET_FACEDOWN)
-    : 0;
-
   return (
     <div
       ref={dragRef as unknown as React.RefObject<HTMLDivElement>}
-      className="absolute perspective-1000"
+      className="absolute"
       style={{
         top: yOffset,
         zIndex: stackIndex,
-        // If dragging, we want the placeholder to be invisible but present layout-wise
-        // But since this is absolute positioned, layout shift isn't an issue.
-        // We hide it to show the "ghost" effectively.
       }}
     >
       <motion.div
@@ -98,17 +91,11 @@ export function Card({
         }}
         onClick={onClick}
         onDoubleClick={onDoubleClick}
-        /*
-         * Removed layout prop to fix lag when moving OS window.
-         * Now uses simple CSS transitions for hover interactions.
-         */
         whileHover={
           card.faceUp && !isDragging
             ? {
-                y: -8,
-                scale: 1.05,
-                zIndex: 100,
-                transition: { duration: 0.15 },
+                y: -4,
+                transition: { duration: 0.1 },
               }
             : undefined
         }

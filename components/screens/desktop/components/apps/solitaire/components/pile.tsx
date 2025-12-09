@@ -154,9 +154,20 @@ export function Pile({
 
       {/* Drop zone indicator (empty piles handled above) */}
 
-      {/* Cards */}
+      {/* Cards - calculate cumulative offset for each card */}
       {cards.map((card, index) => {
         const isTopCard = index === cards.length - 1;
+
+        // Calculate cumulative yOffset based on all cards BEFORE this one
+        let yOffset = 0;
+        if (spread) {
+          for (let i = 0; i < index; i++) {
+            yOffset += cards[i].faceUp
+              ? STACK_OFFSET_FACEUP
+              : STACK_OFFSET_FACEDOWN;
+          }
+        }
+
         return (
           <Card
             key={card.id}
@@ -164,7 +175,7 @@ export function Pile({
             pileId={pileId}
             dragCardIds={getDragCardIds(index)}
             stackIndex={index}
-            isSpread={spread}
+            yOffset={yOffset}
             isTop={isTopCard}
             isDropTarget={isTopCard && isOver}
             canDrop={canDrop}
