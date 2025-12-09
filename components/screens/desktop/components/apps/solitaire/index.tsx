@@ -19,6 +19,7 @@ import { RotateCcw, Undo2, Redo2, Trophy, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSolitaireStore } from "./store";
 import { KlondikeLayout } from "./modes/klondike";
+import { CustomDragLayer } from "./components/drag-layer";
 import type { GameMode } from "./types";
 
 interface SolitaireAppProps {
@@ -92,7 +93,9 @@ export function SolitaireApp({ instanceId }: SolitaireAppProps) {
 
         {/* Auto-scaling Game Area */}
         <div className="absolute inset-0 top-16 bottom-20 flex items-center justify-center overflow-hidden">
-          <AutoScaleWrapper>
+          <AutoScaleWrapper
+            renderDragLayer={scale => <CustomDragLayer scale={scale} />}
+          >
             {mode === "klondike" && <KlondikeLayout />}
           </AutoScaleWrapper>
         </div>
@@ -302,9 +305,15 @@ function TimeDisplay({
 
 /**
  * Auto-scales children to fit the container while preserving aspect ratio.
- * Base design size: 900x600
+ * Base design size: 900x650
  */
-function AutoScaleWrapper({ children }: { children: React.ReactNode }) {
+function AutoScaleWrapper({
+  children,
+  renderDragLayer,
+}: {
+  children: React.ReactNode;
+  renderDragLayer?: (scale: number) => React.ReactNode;
+}) {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const [scale, setScale] = React.useState(1);
 
@@ -322,8 +331,6 @@ function AutoScaleWrapper({ children }: { children: React.ReactNode }) {
       const scaleY = height / BASE_HEIGHT;
 
       // Use the smaller scale to ensure it fits
-      // But limit max scale to avoid pixelation excess (e.g. 1.5) if we want
-      // For a "Game", filling is good.
       const newScale = Math.min(scaleX, scaleY) * 0.95; // 95% to leave margin
       setScale(Math.max(0.5, newScale)); // Min scale 0.5
     };
@@ -336,21 +343,26 @@ function AutoScaleWrapper({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <div
-      ref={containerRef}
-      className="w-full h-full flex items-center justify-center"
-    >
+    <>
+      {/* Drag layer rendered outside the scaled container */}
+      {renderDragLayer?.(scale)}
+
       <div
-        style={{
-          width: BASE_WIDTH,
-          height: BASE_HEIGHT,
-          transform: `scale(${scale})`,
-          transformOrigin: "center center",
-        }}
-        className="relative"
+        ref={containerRef}
+        className="w-full h-full flex items-center justify-center"
       >
-        {children}
+        <div
+          style={{
+            width: BASE_WIDTH,
+            height: BASE_HEIGHT,
+            transform: `scale(${scale})`,
+            transformOrigin: "center center",
+          }}
+          className="relative"
+        >
+          {children}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

@@ -9,7 +9,7 @@
 
 import * as React from "react";
 import { useDrag } from "react-dnd";
-import { motion } from "motion/react";
+import { getEmptyImage } from "react-dnd-html5-backend";
 import { cn } from "@/lib/utils";
 import {
   DND_ITEM_TYPES,
@@ -53,7 +53,7 @@ export function Card({
   canDrop = false,
   className,
 }: CardProps) {
-  const [{ isDragging }, dragRef] = useDrag(
+  const [{ isDragging }, dragRef, previewRef] = useDrag(
     () => ({
       type: DND_ITEM_TYPES.CARD,
       item: {
@@ -69,6 +69,11 @@ export function Card({
     [card.faceUp, dragCardIds, pileId]
   );
 
+  // Hide the default browser drag ghost (it shows at wrong scale due to AutoScaleWrapper)
+  React.useEffect(() => {
+    previewRef(getEmptyImage(), { captureDraggingState: true });
+  }, [previewRef]);
+
   return (
     <div
       ref={dragRef as unknown as React.RefObject<HTMLDivElement>}
@@ -78,10 +83,10 @@ export function Card({
         zIndex: stackIndex,
       }}
     >
-      <motion.div
+      <div
         className={cn(
           "relative select-none",
-          isDragging ? "opacity-0" : "opacity-100",
+          isDragging ? "opacity-30" : "opacity-100",
           card.faceUp ? "cursor-grab active:cursor-grabbing" : "cursor-default",
           className
         )}
@@ -91,28 +96,15 @@ export function Card({
         }}
         onClick={onClick}
         onDoubleClick={onDoubleClick}
-        whileHover={
-          card.faceUp && !isDragging
-            ? {
-                y: -4,
-                transition: { duration: 0.1 },
-              }
-            : undefined
-        }
       >
         <div
           className={cn(
-            "w-full h-full rounded-xl overflow-hidden transition-all duration-200",
-            // Clean simple border
+            "w-full h-full rounded-xl overflow-hidden",
             "border border-black/20 shadow-sm",
             card.faceUp ? "bg-white" : "bg-[#1E293B]",
             // Drop target visual feedback
-            isDropTarget &&
-              canDrop &&
-              "ring-2 ring-emerald-400 ring-offset-2 ring-offset-transparent",
-            isDropTarget &&
-              !canDrop &&
-              "ring-2 ring-red-400 ring-offset-2 ring-offset-transparent"
+            isDropTarget && canDrop && "ring-2 ring-emerald-400",
+            isDropTarget && !canDrop && "ring-2 ring-red-400"
           )}
         >
           {card.faceUp ? <CardFace card={card} /> : <CardBack />}
@@ -120,7 +112,7 @@ export function Card({
           {/* Lighting overlay -- subtle */}
           <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-black/5 pointer-events-none" />
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }
