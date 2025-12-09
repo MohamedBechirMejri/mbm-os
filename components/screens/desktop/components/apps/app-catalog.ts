@@ -134,6 +134,7 @@ import { SafariApp } from "./safari";
 import { ShadowPlaygroundApp } from "./shadow-playground";
 import { SketchPadApp } from "./sketch-pad";
 import { TerminalApp } from "./terminal";
+import { SolitaireApp } from "./solitaire";
 
 // ---------------------------------------------------------------------------
 // Unified App Catalog
@@ -563,6 +564,33 @@ export const catalogApps: CatalogApp[] = [
   // =========================================================================
   // Games
   // =========================================================================
+  {
+    id: "solitaire",
+    title: "Solitaire",
+    icon: "gnome-aisleriot",
+    Component: SolitaireApp,
+    minSize: { w: 700, h: 560 },
+    floatingActionBar: true,
+    tagline: "Classic card games: Klondike, Spider, FreeCell",
+    description:
+      "The classic Windows card game collection. Features Klondike (classic solitaire) with undo/redo, drag-and-drop cards, and win celebration. Spider and FreeCell modes coming soon.",
+    category: "games",
+    tags: ["cards", "puzzle", "classic", "windows"],
+    featured: true,
+    available: true,
+    hidden: false,
+    installManifest: {
+      sizeEstimate: 500_000,
+      assets: [
+        {
+          url: "/assets/icons/apps/gnome-aisleriot.ico",
+          kind: "icon",
+          bytes: 4_096,
+          cacheKey: "solitaire/icon",
+        },
+      ],
+    },
+  },
   {
     id: "2048",
     title: "2048",

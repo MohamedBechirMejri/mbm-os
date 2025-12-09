@@ -49,6 +49,8 @@
     "next": "16.0.8",
     "postgres": "^3.4.7",
     "react": "19.2.1",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "19.2.1",
     "react-terminal": "^1.4.5",
     "sonner": "^2.0.7",
