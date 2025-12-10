@@ -3,6 +3,7 @@ import { Figtree } from "next/font/google";
 import "./globals.css";
 import { MotionConfig } from "motion/react";
 import { ReactQueryProvider } from "@/components/react-query-provider";
+import { Analytics } from "@vercel/analytics/next";
 
 // import LiquidGlassFilters from "@/components/screens/login/components/liquid-glass-filters";
 
@@ -37,6 +38,7 @@ export default function RootLayout({
 
         {/* SVG Filters */}
         {/* <LiquidGlassFilters /> */}
+        <Analytics />
       </body>
     </html>
   );
