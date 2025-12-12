@@ -297,11 +297,6 @@ export const catalogApps: CatalogApp[] = [
           bytes: 6_144,
           cacheKey: "calculator/icon",
         },
-        {
-          url: "/assets/mp3/bittersweet.mp3",
-          kind: "audio",
-          cacheKey: "calculator/audio/bittersweet",
-        },
       ],
     },
   },
