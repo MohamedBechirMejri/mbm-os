@@ -100,7 +100,7 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
       }
 
       const response = await fetch(
-        `/api/million-row-grid?${params.toString()}`,
+        `/api/million-row-grid?${params.toString()}`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch demo events.");
@@ -109,7 +109,7 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
       const payload = (await response.json()) as GridResponse;
       return payload;
     },
-    getNextPageParam: (lastPage) => lastPage.nextCursor,
+    getNextPageParam: lastPage => lastPage.nextCursor,
     retry: false,
   });
 
@@ -127,23 +127,23 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
     () =>
       ((query.data as InfiniteData<GridResponse> | undefined)?.pages ??
         []) as GridResponse[],
-    [query.data],
+    [query.data]
   );
 
   const allRows = useMemo(
-    () => dataPages.flatMap((page) => page.rows),
-    [dataPages],
+    () => dataPages.flatMap(page => page.rows),
+    [dataPages]
   );
 
   const lastRowId =
-    allRows.length > 0 ? (allRows[allRows.length - 1]?.id ?? null) : null;
+    allRows.length > 0 ? allRows[allRows.length - 1]?.id ?? null : null;
 
   const columns = useMemo<ColumnDef<DemoEvent>[]>(
     () => [
       {
         accessorKey: "id",
         header: "ID",
-        cell: (info) => (
+        cell: info => (
           <span className="font-mono text-xs text-white/40">
             #{String(info.getValue())}
           </span>
@@ -153,7 +153,7 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
       {
         accessorKey: "companyName",
         header: "Company",
-        cell: (info) => {
+        cell: info => {
           const value = info.getValue() as string | null;
           return value ? (
             <span className="font-medium text-white/90">{value}</span>
@@ -166,7 +166,7 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
       {
         accessorKey: "title",
         header: "Title",
-        cell: (info) => {
+        cell: info => {
           const value = info.getValue() as string | null;
           return value ? (
             <span className="text-white/80">{value}</span>
@@ -179,7 +179,7 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
       {
         accessorKey: "body",
         header: "Description",
-        cell: (info) => {
+        cell: info => {
           const value = info.getValue() as string | null;
           return value ? (
             <div className="line-clamp-2 text-xs leading-relaxed text-white/60">
@@ -194,7 +194,7 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
       {
         accessorKey: "createdAt",
         header: "Created",
-        cell: (info) => {
+        cell: info => {
           const value = info.getValue() as string | null;
           return value ? (
             <span className="text-xs text-white/50">{formatDate(value)}</span>
@@ -205,7 +205,7 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
         size: 160,
       },
     ],
-    [],
+    []
   );
 
   const table = useReactTable({
@@ -227,6 +227,20 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
   const virtualRows = rowVirtualizer.getVirtualItems();
   const lastVirtualRow = virtualRows[virtualRows.length - 1];
 
+  // Clean up URL params on unmount so they don't persist after closing the app
+  useEffect(() => {
+    return () => {
+      const params = new URLSearchParams(window.location.search);
+      params.delete(LIMIT_PARAM);
+      params.delete(START_CURSOR_PARAM);
+      params.delete(END_CURSOR_PARAM);
+
+      const nextQuery = params.toString();
+      const target = nextQuery ? `${pathname}?${nextQuery}` : pathname;
+      window.history.replaceState(null, "", target);
+    };
+  }, [pathname]);
+
   useEffect(() => {
     if (!query.data) return;
 
@@ -234,11 +248,11 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
     params.set(LIMIT_PARAM, String(limit));
 
     const firstVirtualRow = virtualRows.find(
-      (virtualRow) => virtualRow.index < allRows.length,
+      virtualRow => virtualRow.index < allRows.length
     );
     const candidateIndex = firstVirtualRow?.index ?? null;
     const candidateStartId =
-      candidateIndex !== null ? (allRows[candidateIndex]?.id ?? null) : null;
+      candidateIndex !== null ? allRows[candidateIndex]?.id ?? null : null;
 
     if (candidateStartId !== null && candidateIndex !== null) {
       const lastSyncedIndex = lastSyncedStartIndexRef.current;
@@ -343,9 +357,9 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
           <div className="max-h-full overflow-hidden">
             <table className="min-w-full border-collapse">
               <thead className="sticky top-0 z-10 bg-black/30 backdrop-blur-xl">
-                {table.getHeaderGroups().map((headerGroup) => (
+                {table.getHeaderGroups().map(headerGroup => (
                   <tr key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => (
+                    {headerGroup.headers.map(header => (
                       <th
                         key={header.id}
                         className="border-b border-white/10 px-3 py-2 text-left text-xs font-medium tracking-wide text-white/50"
@@ -355,7 +369,7 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
                           ? null
                           : flexRender(
                               header.column.columnDef.header,
-                              header.getContext(),
+                              header.getContext()
                             )}
                       </th>
                     ))}
@@ -374,7 +388,7 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
                 position: "relative",
               }}
             >
-              {virtualRows.map((virtualRow) => {
+              {virtualRows.map(virtualRow => {
                 const row = table.getRowModel().rows[virtualRow.index];
                 const isLoaderRow = virtualRow.index >= allRows.length;
 
@@ -422,7 +436,7 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
                   >
                     <tbody>
                       <tr className="group border-b border-white/5 transition-colors duration-150 hover:bg-white/5">
-                        {row.getVisibleCells().map((cell) => (
+                        {row.getVisibleCells().map(cell => (
                           <td
                             key={cell.id}
                             className="px-3 py-2.5"
@@ -430,7 +444,7 @@ export function MillionRowGrid({ instanceId: _ }: { instanceId: string }) {
                           >
                             {flexRender(
                               cell.column.columnDef.cell,
-                              cell.getContext(),
+                              cell.getContext()
                             )}
                           </td>
                         ))}
