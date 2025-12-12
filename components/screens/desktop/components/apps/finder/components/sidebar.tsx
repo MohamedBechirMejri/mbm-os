@@ -101,21 +101,6 @@ export function Sidebar({ path, onNavigate }: SidebarProps) {
           icon: { type: "asset", src: "/assets/icons/apps/codeblocks.ico" },
           path: ["macintosh-hd", "users", "mbm", "dev"],
         },
-        {
-          id: "op",
-          label: "op",
-          icon: {
-            type: "asset",
-            src: "/assets/icons/apps/preferences-system-privacy.ico",
-          },
-          path: ["macintosh-hd", "users", "mbm", "op"],
-        },
-        {
-          id: "yt",
-          label: "yt",
-          icon: { type: "asset", src: "/assets/icons/apps/youtube.ico" },
-          path: ["macintosh-hd", "users", "mbm", "yt"],
-        },
       ],
     },
     {
@@ -183,7 +168,7 @@ export function Sidebar({ path, onNavigate }: SidebarProps) {
   ];
 
   const toggleSection = (title: string) => {
-    setCollapsed((prev) => ({ ...prev, [title]: !prev[title] }));
+    setCollapsed(prev => ({ ...prev, [title]: !prev[title] }));
   };
 
   const sectionHeadingClass =
@@ -195,7 +180,7 @@ export function Sidebar({ path, onNavigate }: SidebarProps) {
     <aside className="flex h-full w-48 flex-col p-1.5 pr-0">
       <div className="h-full w-full overflow-hidden rounded-3xl bg-[#56BBE8]/1 backdrop-blur-[24rem] flex flex-col border border-white/6">
         <div className="flex-1 flex flex-col gap-3 overflow-y-auto px-2 py-3 text-[0.75rem] text-white/70 pt-10">
-          {sections.map((section) => (
+          {sections.map(section => (
             <div key={section.title} className="flex flex-col gap-1">
               {section.collapsible ? (
                 <button
@@ -216,7 +201,7 @@ export function Sidebar({ path, onNavigate }: SidebarProps) {
 
               {!collapsed[section.title] && (
                 <div className="flex flex-col gap-[0.15rem]">
-                  {section.items.map((item) => {
+                  {section.items.map(item => {
                     const itemKey = item.path.join("/");
                     const isActive =
                       itemKey === ""
@@ -232,7 +217,7 @@ export function Sidebar({ path, onNavigate }: SidebarProps) {
                           "relative flex w-full items-center gap-2 rounded-md px-2 py-1 text-left text-[0.75rem] font-normal transition-all duration-100 ease-out",
                           isActive
                             ? "bg-white/15 text-white/90"
-                            : "text-white/70 hover:bg-white/8 hover:text-white/85",
+                            : "text-white/70 hover:bg-white/8 hover:text-white/85"
                         )}
                         aria-current={isActive ? "page" : undefined}
                       >
@@ -271,7 +256,7 @@ function RenderIcon({
         height={16}
         className={cn(
           "rounded-sm object-contain transition-opacity",
-          active ? "opacity-90" : "opacity-70",
+          active ? "opacity-90" : "opacity-70"
         )}
         priority={false}
       />
@@ -284,7 +269,7 @@ function RenderIcon({
       <Icon
         className={cn(
           "size-4 transition-colors",
-          active ? "text-white/90" : "text-white/60",
+          active ? "text-white/90" : "text-white/60"
         )}
         strokeWidth={1.5}
       />
