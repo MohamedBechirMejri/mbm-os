@@ -6,9 +6,7 @@
 
 A creative lab for web experiments, interactive tools, and polished UI components — built with Next.js 16, React 19, and modern web technologies.
 
-<!-- TODO: Add hero screenshot -->
-
-![mbm-os Desktop](https://via.placeholder.com/1200x675/1a1a2e/ffffff?text=📷+Add+Screenshot+Here)
+![mbm-os Desktop](image.png)
 
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)](https://react.dev/)
