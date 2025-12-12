@@ -204,9 +204,7 @@ export function AppMenus() {
           </MenubarItem>
           <MenubarSeparator />
           <MenubarItem
-            onClick={() =>
-              window.open("https://mohamedbechirmejri.dev", "_blank")
-            }
+            onClick={() => window.open("https://bechir.xyz", "_blank")}
           >
             Portfolio Website
           </MenubarItem>
