@@ -16,7 +16,7 @@ A creative lab for web experiments, interactive tools, and polished UI component
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.x-38B2AC?logo=tailwindcss)](https://tailwindcss.com/)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-[Live Demo](https://mohamedbechirmejri.dev) · [Report Bug](https://github.com/MohamedBechirMejri/mbm-os/issues) · [Request Feature](https://github.com/MohamedBechirMejri/mbm-os/issues)
+[Live Demo](https://bechir.xyz) · [Report Bug](https://github.com/MohamedBechirMejri/mbm-os/issues) · [Request Feature](https://github.com/MohamedBechirMejri/mbm-os/issues)
 
 </div>
 
@@ -203,9 +203,9 @@ This project is licensed under the **GPL-3.0 License** — see the [LICENSE](LIC
 
 **Mohamed Bechir Mejri**
 
-- Portfolio: [mohamedbechirmejri.dev](https://mohamedbechirmejri.dev)
+- Portfolio: [bechir.xyz](https://bechir.xyz)
 - GitHub: [@MohamedBechirMejri](https://github.com/MohamedBechirMejri)
-- Twitter: [@MohamedBechirMe](https://twitter.com/MohamedBechirMe)
+- Twitter: [@0x4D424D](https://twitter.com/0x4D424D)
 - LinkedIn: [MohamedBechirMejri](https://www.linkedin.com/in/MohamedBechirMejri/)
 
 ---
