@@ -1,18 +1,27 @@
 import { forwardRef, useCallback } from "react";
 import { useCanvas } from "../hooks/use-canvas";
-import type { Tool, BrushSettings, Viewport } from "../types";
+import type { BrushSettings, Point, Tool, Viewport } from "../types";
 
 interface CanvasLayerProps {
   width: number;
   height: number;
+  layerId: string;
   isActive: boolean;
   isVisible: boolean;
   opacity: number;
   tool: Tool;
   brush: BrushSettings;
   viewport: Viewport;
-  onStrokeStart: () => void;
+  onStrokeStart: (
+    layerId: string,
+    point: Point,
+    size: number,
+    color: string,
+  ) => void;
+  onStrokePoint: (point: Point) => void;
   onStrokeEnd: () => void;
+  onErasePoint: (point: Point, layerId: string) => void;
+  onEraseEnd: () => void;
 }
 
 // Individual canvas layer that handles drawing when active
@@ -21,6 +30,7 @@ export const CanvasLayer = forwardRef<HTMLCanvasElement, CanvasLayerProps>(
     {
       width,
       height,
+      layerId,
       isActive,
       isVisible,
       opacity,
@@ -28,9 +38,12 @@ export const CanvasLayer = forwardRef<HTMLCanvasElement, CanvasLayerProps>(
       brush,
       viewport,
       onStrokeStart,
+      onStrokePoint,
       onStrokeEnd,
+      onErasePoint,
+      onEraseEnd,
     },
-    ref
+    ref,
   ) {
     const {
       handlePointerDown,
@@ -41,8 +54,12 @@ export const CanvasLayer = forwardRef<HTMLCanvasElement, CanvasLayerProps>(
       tool,
       brush,
       viewport,
+      layerId,
       onStrokeStart,
+      onStrokePoint,
       onStrokeEnd,
+      onErasePoint,
+      onEraseEnd,
     });
 
     // Wrapped handlers that only fire when layer is active and not in pan mode
@@ -51,7 +68,7 @@ export const CanvasLayer = forwardRef<HTMLCanvasElement, CanvasLayerProps>(
         if (!isActive || tool === "pan") return;
         handlePointerDown(e);
       },
-      [isActive, tool, handlePointerDown]
+      [isActive, tool, handlePointerDown],
     );
 
     const onPointerMove = useCallback(
@@ -59,7 +76,7 @@ export const CanvasLayer = forwardRef<HTMLCanvasElement, CanvasLayerProps>(
         if (!isActive || tool === "pan") return;
         handlePointerMove(e);
       },
-      [isActive, tool, handlePointerMove]
+      [isActive, tool, handlePointerMove],
     );
 
     return (
@@ -80,5 +97,5 @@ export const CanvasLayer = forwardRef<HTMLCanvasElement, CanvasLayerProps>(
         onPointerLeave={handlePointerLeave}
       />
     );
-  }
+  },
 );

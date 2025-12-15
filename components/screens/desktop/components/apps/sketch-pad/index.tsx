@@ -1,17 +1,22 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import type { Tool, Layer, BrushSettings } from "./types";
-import { DEFAULT_BRUSH, createDefaultLayer } from "./constants";
-import { generateLayerId, exportToPng, clearCanvas } from "./utils";
-import { useHistory } from "./hooks/use-history";
-import { useViewport } from "./hooks/use-viewport";
+import { ActionBar } from "./components/action-bar";
 import { CanvasLayer } from "./components/canvas-layer";
+import { LayerDropdown } from "./components/layer-dropdown";
 import { Toolbar } from "./components/toolbar";
 import { ZoomControls } from "./components/zoom-controls";
-import { LayerDropdown } from "./components/layer-dropdown";
-import { ActionBar } from "./components/action-bar";
+import { createDefaultLayer, DEFAULT_BRUSH } from "./constants";
+import { useStrokes } from "./hooks/use-strokes";
+import { useViewport } from "./hooks/use-viewport";
+import type { BrushSettings, Layer, Point, Tool } from "./types";
+import {
+  drawStroke,
+  exportToPng,
+  generateLayerId,
+  redrawLayerStrokes,
+} from "./utils";
 
 // Large canvas for "infinite" feel
 const CANVAS_WIDTH = 4000;
@@ -53,11 +58,21 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
     resetView,
   } = useViewport();
 
-  // History for undo/redo
-  const { canUndo, canRedo, pushHistory, undo, redo } = useHistory();
-
-  // Get active layer
-  const activeLayer = layers.find(l => l.id === activeLayerId) ?? layers[0];
+  // Stroke-based drawing and history
+  const {
+    strokes,
+    currentStroke,
+    startStroke,
+    addPointToStroke,
+    endStroke,
+    deleteStrokesAtPoint,
+    commitEraseBatch,
+    clearLayerStrokes,
+    canUndo,
+    canRedo,
+    undo,
+    redo,
+  } = useStrokes();
 
   // Store canvas ref when layer mounts
   const setCanvasRef = useCallback(
@@ -68,8 +83,39 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
         canvasRefs.current.delete(layerId);
       }
     },
-    []
+    [],
   );
+
+  // Redraw all layers when strokes change
+  useEffect(() => {
+    for (const layer of layers) {
+      const canvas = canvasRefs.current.get(layer.id);
+      if (!canvas) continue;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) continue;
+      redrawLayerStrokes(ctx, strokes, layer.id, CANVAS_WIDTH, CANVAS_HEIGHT);
+    }
+  }, [strokes, layers]);
+
+  // Draw current stroke in real-time
+  useEffect(() => {
+    if (!currentStroke) return;
+
+    const canvas = canvasRefs.current.get(currentStroke.layerId);
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Redraw all strokes plus the current one
+    redrawLayerStrokes(
+      ctx,
+      strokes,
+      currentStroke.layerId,
+      CANVAS_WIDTH,
+      CANVAS_HEIGHT,
+    );
+    drawStroke(ctx, currentStroke);
+  }, [currentStroke, strokes]);
 
   // Layer management
   const addLayer = useCallback(() => {
@@ -77,7 +123,7 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
       id: generateLayerId(),
       ...createDefaultLayer(layers.length + 1),
     };
-    setLayers(prev => [newLayer, ...prev]);
+    setLayers((prev) => [newLayer, ...prev]);
     setActiveLayerId(newLayer.id);
   }, [layers.length]);
 
@@ -85,59 +131,75 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
     (id: string) => {
       if (layers.length <= 1) return;
 
-      setLayers(prev => prev.filter(l => l.id !== id));
+      setLayers((prev) => prev.filter((l) => l.id !== id));
 
       if (activeLayerId === id) {
-        const remaining = layers.filter(l => l.id !== id);
+        const remaining = layers.filter((l) => l.id !== id);
         setActiveLayerId(remaining[0].id);
       }
 
       canvasRefs.current.delete(id);
+      // Also clear strokes for removed layer
+      clearLayerStrokes(id);
     },
-    [layers, activeLayerId]
+    [layers, activeLayerId, clearLayerStrokes],
   );
 
   const toggleLayerVisibility = useCallback((id: string) => {
-    setLayers(prev =>
-      prev.map(l => (l.id === id ? { ...l, visible: !l.visible } : l))
+    setLayers((prev) =>
+      prev.map((l) => (l.id === id ? { ...l, visible: !l.visible } : l)),
     );
   }, []);
 
   // Brush settings update
   const updateBrush = useCallback((updates: Partial<BrushSettings>) => {
-    setBrush(prev => ({ ...prev, ...updates }));
+    setBrush((prev) => ({ ...prev, ...updates }));
   }, []);
 
-  // Stroke callbacks for history
-  const handleStrokeStart = useCallback(() => {
-    const canvas = canvasRefs.current.get(activeLayerId);
-    if (canvas) {
-      pushHistory(activeLayerId, canvas);
-    }
-  }, [activeLayerId, pushHistory]);
+  // Stroke handlers
+  const handleStrokeStart = useCallback(
+    (layerId: string, point: Point, size: number, color: string) => {
+      startStroke(layerId, point, size, color);
+    },
+    [startStroke],
+  );
 
-  const handleStrokeEnd = useCallback(() => {}, []);
+  const handleStrokePoint = useCallback(
+    (point: Point) => {
+      addPointToStroke(point);
+    },
+    [addPointToStroke],
+  );
+
+  const handleStrokeEnd = useCallback(() => {
+    endStroke();
+  }, [endStroke]);
+
+  // Erase handlers
+  const handleErasePoint = useCallback(
+    (point: Point, layerId: string) => {
+      deleteStrokesAtPoint(point, layerId);
+    },
+    [deleteStrokesAtPoint],
+  );
+
+  const handleEraseEnd = useCallback(() => {
+    commitEraseBatch();
+  }, [commitEraseBatch]);
 
   // History actions
   const handleUndo = useCallback(() => {
-    undo(canvasRefs.current);
+    undo();
   }, [undo]);
 
   const handleRedo = useCallback(() => {
-    redo(canvasRefs.current);
+    redo();
   }, [redo]);
 
   // Clear current layer
   const handleClear = useCallback(() => {
-    const canvas = canvasRefs.current.get(activeLayerId);
-    if (!canvas) return;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    pushHistory(activeLayerId, canvas);
-    clearCanvas(ctx);
-  }, [activeLayerId, pushHistory]);
+    clearLayerStrokes(activeLayerId);
+  }, [activeLayerId, clearLayerStrokes]);
 
   // Export all layers as PNG
   const handleExport = useCallback(() => {
@@ -194,7 +256,7 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
         resetView();
       }
     },
-    [tool, isSpaceHeld, handleUndo, handleRedo, zoomIn, zoomOut, resetView]
+    [tool, isSpaceHeld, handleUndo, handleRedo, zoomIn, zoomOut, resetView],
   );
 
   const handleKeyUp = useCallback(
@@ -204,7 +266,7 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
         setTool(previousToolRef.current);
       }
     },
-    [isSpaceHeld]
+    [isSpaceHeld],
   );
 
   // Handle pen tablet top barrel button (fires as right-click/context menu)
@@ -225,7 +287,7 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
       // Middle click or other aux button = undo
       handleUndo();
     },
-    [handleUndo]
+    [handleUndo],
   );
 
   // Pointer handlers for canvas area (panning when in pan mode)
@@ -236,7 +298,7 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
         handlePanStart(e);
       }
     },
-    [tool, handlePanStart]
+    [tool, handlePanStart],
   );
 
   const handleCanvasPointerMove = useCallback(
@@ -245,7 +307,7 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
         handlePanMove(e);
       }
     },
-    [isPanning, handlePanMove]
+    [isPanning, handlePanMove],
   );
 
   // Current tool for cursor
@@ -258,11 +320,13 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
         className="relative h-full w-full overflow-hidden text-white outline-none"
         style={{ backgroundColor: bgColor }}
         role="application"
+        // biome-ignore lint/a11y/noNoninteractiveTabindex: dd
         tabIndex={0}
         onKeyDown={handleKeyDown}
         onKeyUp={handleKeyUp}
       >
         {/* Canvas container with pan/zoom */}
+        {/** biome-ignore lint/a11y/noStaticElementInteractions: ddd */}
         <div
           className="absolute inset-0"
           style={{
@@ -292,12 +356,13 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
             }}
           >
             {/* Render layers bottom-to-top */}
-            {[...layers].reverse().map(layer => (
+            {[...layers].reverse().map((layer) => (
               <CanvasLayer
                 key={layer.id}
                 ref={setCanvasRef(layer.id)}
                 width={CANVAS_WIDTH}
                 height={CANVAS_HEIGHT}
+                layerId={layer.id}
                 isActive={layer.id === activeLayerId}
                 isVisible={layer.visible}
                 opacity={layer.opacity}
@@ -305,7 +370,10 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
                 brush={brush}
                 viewport={viewport}
                 onStrokeStart={handleStrokeStart}
+                onStrokePoint={handleStrokePoint}
                 onStrokeEnd={handleStrokeEnd}
+                onErasePoint={handleErasePoint}
+                onEraseEnd={handleEraseEnd}
               />
             ))}
           </div>

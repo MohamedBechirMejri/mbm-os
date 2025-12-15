@@ -21,6 +21,15 @@ export interface Point {
   y: number;
 }
 
+// A single stroke (line drawn without lifting)
+export interface Stroke {
+  id: string;
+  points: Point[];
+  size: number;
+  color: string;
+  layerId: string;
+}
+
 // Viewport for pan/zoom (infinite canvas)
 export interface Viewport {
   offsetX: number;
@@ -32,4 +41,10 @@ export interface Viewport {
 export interface HistoryEntry {
   layerId: string;
   imageData: ImageData;
+}
+
+// Stroke-based history entry for undo/redo
+export interface StrokeHistoryEntry {
+  type: "add" | "delete";
+  strokes: Stroke[];
 }

@@ -1,13 +1,21 @@
 import { useCallback, useRef } from "react";
-import type { Point, Tool, BrushSettings, Viewport } from "../types";
-import { drawLine, drawDot } from "../utils";
+import type { BrushSettings, Point, Tool, Viewport } from "../types";
 
 interface UseCanvasOptions {
   tool: Tool;
   brush: BrushSettings;
   viewport: Viewport;
-  onStrokeStart?: () => void;
+  layerId: string;
+  onStrokeStart?: (
+    layerId: string,
+    point: Point,
+    size: number,
+    color: string
+  ) => void;
+  onStrokePoint?: (point: Point) => void;
   onStrokeEnd?: () => void;
+  onErasePoint?: (point: Point, layerId: string) => void;
+  onEraseEnd?: () => void;
 }
 
 interface UseCanvasReturn {
@@ -21,13 +29,15 @@ export const useCanvas = ({
   tool,
   brush,
   viewport,
+  layerId,
   onStrokeStart,
+  onStrokePoint,
   onStrokeEnd,
+  onErasePoint,
+  onEraseEnd,
 }: UseCanvasOptions): UseCanvasReturn => {
-  // Track if currently drawing
+  // Track if currently drawing/erasing
   const isDrawingRef = useRef(false);
-  // Last point for line drawing
-  const lastPointRef = useRef<Point | null>(null);
 
   // Get point from pointer event relative to canvas, accounting for viewport
   const getPoint = useCallback(
@@ -35,15 +45,16 @@ export const useCanvas = ({
       const canvas = e.currentTarget;
       const rect = canvas.getBoundingClientRect();
 
-      // Get screen position relative to canvas element
+      // Get screen position relative to the transformed canvas element
+      // getBoundingClientRect() already accounts for CSS transforms (translate/scale)
+      // so we only need to account for the zoom scale, not the offset
       const screenX = e.clientX - rect.left;
       const screenY = e.clientY - rect.top;
 
-      // Transform from screen to canvas coordinates using viewport
-      // Account for zoom and offset
+      // Only divide by zoom since the rect position already includes the offset
       return {
-        x: (screenX - viewport.offsetX) / viewport.zoom,
-        y: (screenY - viewport.offsetY) / viewport.zoom,
+        x: screenX / viewport.zoom,
+        y: screenY / viewport.zoom,
       };
     },
     [viewport]
@@ -54,58 +65,50 @@ export const useCanvas = ({
       if (tool === "pan") return;
 
       const canvas = e.currentTarget;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
-
       // Capture pointer for smoother drawing outside canvas
       canvas.setPointerCapture(e.pointerId);
 
       isDrawingRef.current = true;
       const point = getPoint(e);
-      lastPointRef.current = point;
 
-      // Notify parent that stroke is starting (for history snapshot)
-      onStrokeStart?.();
-
-      // Draw initial dot
-      drawDot(ctx, point, brush.size, brush.color, tool === "eraser");
+      if (tool === "brush") {
+        // Start a new stroke
+        onStrokeStart?.(layerId, point, brush.size, brush.color);
+      } else if (tool === "eraser") {
+        // Delete strokes at this point
+        onErasePoint?.(point, layerId);
+      }
     },
-    [brush, tool, getPoint, onStrokeStart]
+    [brush, tool, layerId, getPoint, onStrokeStart, onErasePoint]
   );
 
   const handlePointerMove = useCallback(
     (e: React.PointerEvent<HTMLCanvasElement>) => {
-      if (!isDrawingRef.current || !lastPointRef.current || tool === "pan")
-        return;
-
-      const canvas = e.currentTarget;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
+      if (!isDrawingRef.current || tool === "pan") return;
 
       const point = getPoint(e);
 
-      // Draw line from last point to current point
-      drawLine(
-        ctx,
-        lastPointRef.current,
-        point,
-        brush.size,
-        brush.color,
-        tool === "eraser"
-      );
-
-      lastPointRef.current = point;
+      if (tool === "brush") {
+        // Add point to current stroke
+        onStrokePoint?.(point);
+      } else if (tool === "eraser") {
+        // Delete strokes at this point
+        onErasePoint?.(point, layerId);
+      }
     },
-    [brush, tool, getPoint]
+    [tool, layerId, getPoint, onStrokePoint, onErasePoint]
   );
 
   const handlePointerUp = useCallback(() => {
     if (isDrawingRef.current) {
       isDrawingRef.current = false;
-      lastPointRef.current = null;
-      onStrokeEnd?.();
+      if (tool === "brush") {
+        onStrokeEnd?.();
+      } else if (tool === "eraser") {
+        onEraseEnd?.();
+      }
     }
-  }, [onStrokeEnd]);
+  }, [tool, onStrokeEnd, onEraseEnd]);
 
   const handlePointerLeave = useCallback(() => {
     // Don't stop drawing on leave - pointer capture handles this
