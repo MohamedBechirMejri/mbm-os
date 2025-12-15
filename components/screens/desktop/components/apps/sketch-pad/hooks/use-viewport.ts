@@ -21,6 +21,7 @@ interface UseViewportReturn {
 }
 
 export const useViewport = (): UseViewportReturn => {
+  // Start at origin - the parent will center the view on mount
   const [viewport, setViewport] = useState<Viewport>({
     offsetX: 0,
     offsetY: 0,

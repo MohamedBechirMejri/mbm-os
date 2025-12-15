@@ -18,11 +18,20 @@ import {
   redrawLayerStrokes,
 } from "./utils";
 
-// Large canvas for "infinite" feel
-const CANVAS_WIDTH = 4000;
-const CANVAS_HEIGHT = 4000;
+// Initial canvas size - will grow dynamically
+const INITIAL_CANVAS_SIZE = 4000;
+// How much to expand when reaching edge
+const EXPAND_AMOUNT = 2000;
+// How close to edge before expanding (in canvas coordinates)
+const EXPAND_THRESHOLD = 200;
 
 export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
+  // Dynamic canvas size - starts at initial size and grows as needed
+  const [canvasSize, setCanvasSize] = useState({
+    width: INITIAL_CANVAS_SIZE,
+    height: INITIAL_CANVAS_SIZE,
+  });
+
   // Layer state
   const [layers, setLayers] = useState<Layer[]>(() => [
     { id: generateLayerId(), ...createDefaultLayer(1) },
@@ -48,6 +57,7 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
   // Viewport for pan/zoom
   const {
     viewport,
+    setViewport,
     handleWheel,
     handlePanStart,
     handlePanMove,
@@ -57,6 +67,19 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
     zoomOut,
     resetView,
   } = useViewport();
+
+  // Center the view when the container mounts
+  useEffect(() => {
+    if (containerRef.current) {
+      const { width, height } = containerRef.current.getBoundingClientRect();
+      // Center on the middle of the initial canvas
+      setViewport({
+        offsetX: width / 2 - INITIAL_CANVAS_SIZE / 2,
+        offsetY: height / 2 - INITIAL_CANVAS_SIZE / 2,
+        zoom: 1,
+      });
+    }
+  }, [setViewport]);
 
   // Stroke-based drawing and history
   const {
@@ -74,6 +97,58 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
     redo,
   } = useStrokes();
 
+  // Check if a point is near the canvas edge and expand if needed
+  const checkAndExpandCanvas = useCallback(
+    (point: Point) => {
+      let needsExpand = false;
+      let expandLeft = false;
+      let expandTop = false;
+      let newWidth = canvasSize.width;
+      let newHeight = canvasSize.height;
+
+      // Check right edge
+      if (point.x > canvasSize.width - EXPAND_THRESHOLD) {
+        newWidth = canvasSize.width + EXPAND_AMOUNT;
+        needsExpand = true;
+      }
+      // Check bottom edge
+      if (point.y > canvasSize.height - EXPAND_THRESHOLD) {
+        newHeight = canvasSize.height + EXPAND_AMOUNT;
+        needsExpand = true;
+      }
+      // Check left edge (point near 0)
+      if (point.x < EXPAND_THRESHOLD) {
+        newWidth = canvasSize.width + EXPAND_AMOUNT;
+        expandLeft = true;
+        needsExpand = true;
+      }
+      // Check top edge (point near 0)
+      if (point.y < EXPAND_THRESHOLD) {
+        newHeight = canvasSize.height + EXPAND_AMOUNT;
+        expandTop = true;
+        needsExpand = true;
+      }
+
+      if (needsExpand) {
+        setCanvasSize({ width: newWidth, height: newHeight });
+
+        // If expanding left or top, we need to shift the viewport and all strokes
+        if (expandLeft || expandTop) {
+          const shiftX = expandLeft ? EXPAND_AMOUNT : 0;
+          const shiftY = expandTop ? EXPAND_AMOUNT : 0;
+
+          // Shift viewport to keep visual position the same
+          setViewport((prev) => ({
+            ...prev,
+            offsetX: prev.offsetX - shiftX * prev.zoom,
+            offsetY: prev.offsetY - shiftY * prev.zoom,
+          }));
+        }
+      }
+    },
+    [canvasSize, setViewport]
+  );
+
   // Store canvas ref when layer mounts
   const setCanvasRef = useCallback(
     (layerId: string) => (element: HTMLCanvasElement | null) => {
@@ -86,16 +161,16 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
     [],
   );
 
-  // Redraw all layers when strokes change
+  // Redraw all layers when strokes change or canvas size changes
   useEffect(() => {
     for (const layer of layers) {
       const canvas = canvasRefs.current.get(layer.id);
       if (!canvas) continue;
       const ctx = canvas.getContext("2d");
       if (!ctx) continue;
-      redrawLayerStrokes(ctx, strokes, layer.id, CANVAS_WIDTH, CANVAS_HEIGHT);
+      redrawLayerStrokes(ctx, strokes, layer.id, canvasSize.width, canvasSize.height);
     }
-  }, [strokes, layers]);
+  }, [strokes, layers, canvasSize]);
 
   // Draw current stroke in real-time
   useEffect(() => {
@@ -111,11 +186,11 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
       ctx,
       strokes,
       currentStroke.layerId,
-      CANVAS_WIDTH,
-      CANVAS_HEIGHT,
+      canvasSize.width,
+      canvasSize.height,
     );
     drawStroke(ctx, currentStroke);
-  }, [currentStroke, strokes]);
+  }, [currentStroke, strokes, canvasSize]);
 
   // Layer management
   const addLayer = useCallback(() => {
@@ -159,16 +234,18 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
   // Stroke handlers
   const handleStrokeStart = useCallback(
     (layerId: string, point: Point, size: number, color: string) => {
+      checkAndExpandCanvas(point);
       startStroke(layerId, point, size, color);
     },
-    [startStroke],
+    [startStroke, checkAndExpandCanvas],
   );
 
   const handleStrokePoint = useCallback(
     (point: Point) => {
+      checkAndExpandCanvas(point);
       addPointToStroke(point);
     },
-    [addPointToStroke],
+    [addPointToStroke, checkAndExpandCanvas],
   );
 
   const handleStrokeEnd = useCallback(() => {
@@ -203,8 +280,8 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
 
   // Export all layers as PNG
   const handleExport = useCallback(() => {
-    exportToPng(canvasRefs.current, layers, CANVAS_WIDTH, CANVAS_HEIGHT);
-  }, [layers]);
+    exportToPng(canvasRefs.current, layers, canvasSize.width, canvasSize.height);
+  }, [layers, canvasSize]);
 
   // Keyboard shortcuts
   const handleKeyDown = useCallback(
@@ -351,8 +428,8 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
             style={{
               transform: `translate(${viewport.offsetX}px, ${viewport.offsetY}px) scale(${viewport.zoom})`,
               transformOrigin: "0 0",
-              width: CANVAS_WIDTH,
-              height: CANVAS_HEIGHT,
+              width: canvasSize.width,
+              height: canvasSize.height,
             }}
           >
             {/* Render layers bottom-to-top */}
@@ -360,8 +437,8 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
               <CanvasLayer
                 key={layer.id}
                 ref={setCanvasRef(layer.id)}
-                width={CANVAS_WIDTH}
-                height={CANVAS_HEIGHT}
+                width={canvasSize.width}
+                height={canvasSize.height}
                 layerId={layer.id}
                 isActive={layer.id === activeLayerId}
                 isVisible={layer.visible}
