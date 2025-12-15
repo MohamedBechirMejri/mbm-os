@@ -146,7 +146,7 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
         }
       }
     },
-    [canvasSize, setViewport]
+    [canvasSize, setViewport],
   );
 
   // Store canvas ref when layer mounts
@@ -168,7 +168,13 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
       if (!canvas) continue;
       const ctx = canvas.getContext("2d");
       if (!ctx) continue;
-      redrawLayerStrokes(ctx, strokes, layer.id, canvasSize.width, canvasSize.height);
+      redrawLayerStrokes(
+        ctx,
+        strokes,
+        layer.id,
+        canvasSize.width,
+        canvasSize.height,
+      );
     }
   }, [strokes, layers, canvasSize]);
 
@@ -280,7 +286,12 @@ export function SketchPadApp({ instanceId: _ }: { instanceId: string }) {
 
   // Export all layers as PNG
   const handleExport = useCallback(() => {
-    exportToPng(canvasRefs.current, layers, canvasSize.width, canvasSize.height);
+    exportToPng(
+      canvasRefs.current,
+      layers,
+      canvasSize.width,
+      canvasSize.height,
+    );
   }, [layers, canvasSize]);
 
   // Keyboard shortcuts
