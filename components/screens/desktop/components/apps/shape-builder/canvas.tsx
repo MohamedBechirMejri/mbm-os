@@ -267,10 +267,148 @@ export function Canvas({ state }: CanvasProps) {
       return svgPath;
     }
 
-    // Recreate path with the dragged point
-    // For simplicity, we just return the base path - the handles show the real-time position
-    return svgPath;
-  }, [dragState, svgPath]);
+    // Build path with the dragged point substituted
+    const parts: string[] = [];
+    const point = dragState.localPoint;
+
+    // Start point (might be dragged)
+    const startX =
+      dragState.type === "start" && !dragState.commandId
+        ? point.x
+        : shape.start.x;
+    const startY =
+      dragState.type === "start" && !dragState.commandId
+        ? point.y
+        : shape.start.y;
+    parts.push(`M ${startX} ${startY}`);
+
+    let currentX = startX;
+    let currentY = startY;
+
+    for (const cmd of shape.commands) {
+      const isDraggingThis = dragState.commandId === cmd.id;
+
+      switch (cmd.type) {
+        case "move": {
+          const px =
+            isDraggingThis && dragState.type === "end" ? point.x : cmd.point.x;
+          const py =
+            isDraggingThis && dragState.type === "end" ? point.y : cmd.point.y;
+          currentX = px;
+          currentY = py;
+          parts.push(`M ${currentX} ${currentY}`);
+          break;
+        }
+
+        case "line": {
+          const px =
+            isDraggingThis && dragState.type === "end" ? point.x : cmd.point.x;
+          const py =
+            isDraggingThis && dragState.type === "end" ? point.y : cmd.point.y;
+          currentX = px;
+          currentY = py;
+          parts.push(`L ${currentX} ${currentY}`);
+          break;
+        }
+
+        case "hline": {
+          currentX =
+            isDraggingThis && dragState.type === "end" ? point.x : cmd.value;
+          parts.push(`H ${currentX}`);
+          break;
+        }
+
+        case "vline": {
+          currentY =
+            isDraggingThis && dragState.type === "end" ? point.y : cmd.value;
+          parts.push(`V ${currentY}`);
+          break;
+        }
+
+        case "curve": {
+          const endX =
+            isDraggingThis && dragState.type === "end" ? point.x : cmd.end.x;
+          const endY =
+            isDraggingThis && dragState.type === "end" ? point.y : cmd.end.y;
+          const c1x =
+            isDraggingThis && dragState.type === "control1"
+              ? point.x
+              : cmd.control1.x;
+          const c1y =
+            isDraggingThis && dragState.type === "control1"
+              ? point.y
+              : cmd.control1.y;
+
+          if (cmd.control2) {
+            const c2x =
+              isDraggingThis && dragState.type === "control2"
+                ? point.x
+                : cmd.control2.x;
+            const c2y =
+              isDraggingThis && dragState.type === "control2"
+                ? point.y
+                : cmd.control2.y;
+            parts.push(`C ${c1x} ${c1y}, ${c2x} ${c2y}, ${endX} ${endY}`);
+          } else {
+            parts.push(`Q ${c1x} ${c1y}, ${endX} ${endY}`);
+          }
+          currentX = endX;
+          currentY = endY;
+          break;
+        }
+
+        case "smooth": {
+          const endX =
+            isDraggingThis && dragState.type === "end" ? point.x : cmd.end.x;
+          const endY =
+            isDraggingThis && dragState.type === "end" ? point.y : cmd.end.y;
+
+          if (cmd.control) {
+            const cx =
+              isDraggingThis && dragState.type === "control1"
+                ? point.x
+                : cmd.control.x;
+            const cy =
+              isDraggingThis && dragState.type === "control1"
+                ? point.y
+                : cmd.control.y;
+            parts.push(`S ${cx} ${cy}, ${endX} ${endY}`);
+          } else {
+            parts.push(`T ${endX} ${endY}`);
+          }
+          currentX = endX;
+          currentY = endY;
+          break;
+        }
+
+        case "arc": {
+          const endX =
+            isDraggingThis && dragState.type === "end" ? point.x : cmd.end.x;
+          const endY =
+            isDraggingThis && dragState.type === "end" ? point.y : cmd.end.y;
+          const rx = cmd.rx;
+          const ry = cmd.ry ?? cmd.rx;
+          const rotation = cmd.rotate ?? 0;
+          const largeArc = cmd.size === "large" ? 1 : 0;
+          const sweep = cmd.sweep === "cw" ? 1 : 0;
+          parts.push(
+            `A ${rx} ${ry} ${rotation} ${largeArc} ${sweep} ${endX} ${endY}`
+          );
+          currentX = endX;
+          currentY = endY;
+          break;
+        }
+
+        case "close":
+          parts.push("Z");
+          currentX = startX;
+          currentY = startY;
+          break;
+      }
+    }
+
+    return parts.join(" ");
+  }, [dragState, shape, svgPath]);
 
   // Render point handles for each command
   const renderHandles = () => {
