@@ -132,6 +132,7 @@ import { ImageConverterApp } from "./image-converter";
 import { MillionRowGrid } from "./million-row-grid";
 import { SafariApp } from "./safari";
 import { ShadowPlaygroundApp } from "./shadow-playground";
+import { ShapeBuilderApp } from "./shape-builder";
 import { SketchPadApp } from "./sketch-pad";
 import { TerminalApp } from "./terminal";
 import { SolitaireApp } from "./solitaire";
@@ -194,6 +195,32 @@ export const catalogApps: CatalogApp[] = [
           kind: "icon",
           bytes: 4_096,
           cacheKey: "shadow-playground/icon",
+        },
+      ],
+    },
+  },
+  {
+    id: "shape-builder",
+    title: "Shape Builder",
+    icon: "preferences-desktop-plasma-theme",
+    Component: ShapeBuilderApp,
+    minSize: { w: 1280, h: 800 },
+    floatingActionBar: true,
+    tagline: "Visual CSS shape() Generator",
+    description:
+      "Design custom CSS shapes with an interactive canvas. Create complex clip-paths using the new CSS shape() function with lines, curves, and arcs, then copy the generated CSS code.",
+    category: "creative",
+    tags: ["css", "design", "shape", "generator", "clip-path"],
+    available: true,
+    hidden: false,
+    installManifest: {
+      sizeEstimate: 450_000,
+      assets: [
+        {
+          url: "/assets/icons/apps/preferences-desktop-plasma-theme.ico",
+          kind: "icon",
+          bytes: 4_096,
+          cacheKey: "shape-builder/icon",
         },
       ],
     },
