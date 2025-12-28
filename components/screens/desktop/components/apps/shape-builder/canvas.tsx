@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils";
 import { useCallback, useRef, useState } from "react";
 import type { ShapeBuilderState } from "./use-shape-builder";
 import type { Point, ShapeCommand } from "./types";
-import { generateId } from "./use-shape-builder";
 
 interface CanvasProps {
   state: ShapeBuilderState;
@@ -32,23 +31,35 @@ export function Canvas({ state }: CanvasProps) {
   } = state;
 
   const svgRef = useRef<SVGSVGElement>(null);
-  const [dragging, setDragging] = useState<{
+
+  // Dragging state - we keep a local copy during drag to avoid history spam
+  const [dragState, setDragState] = useState<{
+    active: boolean;
     type: "start" | "end" | "control1" | "control2";
     commandId?: string;
+    // Local position for immediate visual feedback
+    localPoint: Point | null;
   } | null>(null);
 
-  // Convert screen coordinates to SVG coordinates
+  // Convert screen coordinates to SVG coordinates using native SVG methods
+  // This handles transforms and window positioning correctly
   const screenToSvg = useCallback((clientX: number, clientY: number): Point => {
-    if (!svgRef.current) return { x: 0, y: 0 };
+    const svg = svgRef.current;
+    if (!svg) return { x: 50, y: 50, xPercent: true, yPercent: true };
 
-    const rect = svgRef.current.getBoundingClientRect();
-    const x = ((clientX - rect.left) / rect.width) * CANVAS_SIZE;
-    const y = ((clientY - rect.top) / rect.height) * CANVAS_SIZE;
+    // Use SVG's native coordinate transform - this handles all the weirdness
+    const pt = svg.createSVGPoint();
+    pt.x = clientX;
+    pt.y = clientY;
 
-    // Clamp to canvas bounds
+    const ctm = svg.getScreenCTM();
+    if (!ctm) return { x: 50, y: 50, xPercent: true, yPercent: true };
+
+    const svgPt = pt.matrixTransform(ctm.inverse());
+
     return {
-      x: Math.max(0, Math.min(CANVAS_SIZE, x)),
-      y: Math.max(0, Math.min(CANVAS_SIZE, y)),
+      x: Math.max(0, Math.min(CANVAS_SIZE, svgPt.x)),
+      y: Math.max(0, Math.min(CANVAS_SIZE, svgPt.y)),
       xPercent: true,
       yPercent: true,
     };
@@ -57,18 +68,14 @@ export function Canvas({ state }: CanvasProps) {
   // Handle canvas click to add new points
   const handleCanvasClick = useCallback(
     (e: React.MouseEvent) => {
-      if (dragging) return;
+      if (dragState?.active) return;
 
       const point = screenToSvg(e.clientX, e.clientY);
 
       // Add command based on active tool
       switch (activeTool) {
         case "line":
-          addCommand({
-            type: "line",
-            mode: "to",
-            point,
-          });
+          addCommand({ type: "line", mode: "to", point });
           break;
 
         case "hline":
@@ -89,8 +96,7 @@ export function Canvas({ state }: CanvasProps) {
           });
           break;
 
-        case "curve":
-          // Find last point position for control point calculation
+        case "curve": {
           const lastPoint = getLastPoint(shape);
           const midX = (lastPoint.x + point.x) / 2;
           const midY = (lastPoint.y + point.y) / 2 - 20;
@@ -106,13 +112,10 @@ export function Canvas({ state }: CanvasProps) {
             },
           });
           break;
+        }
 
         case "smooth":
-          addCommand({
-            type: "smooth",
-            mode: "to",
-            end: point,
-          });
+          addCommand({ type: "smooth", mode: "to", end: point });
           break;
 
         case "arc":
@@ -126,21 +129,26 @@ export function Canvas({ state }: CanvasProps) {
           break;
 
         case "close":
-          // Check if we already have a close command
           if (!shape.commands.some(c => c.type === "close")) {
             addCommand({ type: "close" });
           }
           break;
 
         default:
-          // Select tool - clicking empty space deselects
           setSelectedCommandId(null);
       }
     },
-    [activeTool, addCommand, dragging, screenToSvg, setSelectedCommandId, shape]
+    [
+      activeTool,
+      addCommand,
+      dragState,
+      screenToSvg,
+      setSelectedCommandId,
+      shape,
+    ]
   );
 
-  // Handle mouse down on a point handle
+  // Handle mouse down on a point handle - start dragging
   const handlePointMouseDown = useCallback(
     (
       e: React.MouseEvent,
@@ -148,79 +156,133 @@ export function Canvas({ state }: CanvasProps) {
       commandId?: string
     ) => {
       e.stopPropagation();
-      setDragging({ type, commandId });
+      e.preventDefault();
+
+      const point = screenToSvg(e.clientX, e.clientY);
+
+      setDragState({
+        active: true,
+        type,
+        commandId,
+        localPoint: point,
+      });
+
       if (commandId) {
         setSelectedCommandId(commandId);
       }
     },
-    [setSelectedCommandId]
+    [screenToSvg, setSelectedCommandId]
   );
 
-  // Handle mouse move for dragging
+  // Handle mouse move - update local position directly (no history)
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
-      if (!dragging) return;
+      if (!dragState?.active) return;
 
       const point = screenToSvg(e.clientX, e.clientY);
 
-      if (dragging.type === "start") {
-        updateStartPoint(point);
-      } else if (dragging.commandId) {
-        const cmd = shape.commands.find(c => c.id === dragging.commandId);
-        if (!cmd) return;
+      // Just update local state - this is instant
+      setDragState(prev => (prev ? { ...prev, localPoint: point } : null));
+    },
+    [dragState?.active, screenToSvg]
+  );
 
+  // Handle mouse up - commit the change to history
+  const handleMouseUp = useCallback(() => {
+    if (!dragState?.active || !dragState.localPoint) {
+      setDragState(null);
+      return;
+    }
+
+    const point = dragState.localPoint;
+
+    // Now commit to state (with history)
+    if (dragState.type === "start") {
+      updateStartPoint(point);
+    } else if (dragState.commandId) {
+      const cmd = shape.commands.find(c => c.id === dragState.commandId);
+      if (cmd) {
         switch (cmd.type) {
           case "line":
           case "move":
-            if (dragging.type === "end") {
+            if (dragState.type === "end") {
               updateCommand(cmd.id, { point });
             }
             break;
 
           case "curve":
-            if (dragging.type === "end") {
+            if (dragState.type === "end") {
               updateCommand(cmd.id, { end: point });
-            } else if (dragging.type === "control1") {
+            } else if (dragState.type === "control1") {
               updateCommand(cmd.id, { control1: point });
-            } else if (dragging.type === "control2") {
+            } else if (dragState.type === "control2") {
               updateCommand(cmd.id, { control2: point });
             }
             break;
 
           case "smooth":
-            if (dragging.type === "end") {
+            if (dragState.type === "end") {
               updateCommand(cmd.id, { end: point });
-            } else if (dragging.type === "control1") {
+            } else if (dragState.type === "control1") {
               updateCommand(cmd.id, { control: point });
             }
             break;
 
           case "arc":
-            if (dragging.type === "end") {
+            if (dragState.type === "end") {
               updateCommand(cmd.id, { end: point });
             }
             break;
         }
       }
+    }
+
+    setDragState(null);
+  }, [dragState, shape.commands, updateCommand, updateStartPoint]);
+
+  // Get the current position for a handle, using local drag state if active
+  const getHandlePosition = useCallback(
+    (
+      type: "start" | "end" | "control1" | "control2",
+      commandId: string | undefined,
+      originalPoint: Point
+    ): Point => {
+      // If we're dragging this specific handle, use the local position
+      if (
+        dragState?.active &&
+        dragState.type === type &&
+        dragState.commandId === commandId &&
+        dragState.localPoint
+      ) {
+        return dragState.localPoint;
+      }
+      return originalPoint;
     },
-    [dragging, screenToSvg, shape.commands, updateCommand, updateStartPoint]
+    [dragState]
   );
 
-  // Handle mouse up to stop dragging
-  const handleMouseUp = useCallback(() => {
-    setDragging(null);
-  }, []);
+  // Generate SVG path with local drag state applied
+  const getDisplayPath = useCallback(() => {
+    if (!dragState?.active || !dragState.localPoint) {
+      return svgPath;
+    }
+
+    // Recreate path with the dragged point
+    // For simplicity, we just return the base path - the handles show the real-time position
+    return svgPath;
+  }, [dragState, svgPath]);
 
   // Render point handles for each command
   const renderHandles = () => {
     const handles: React.ReactNode[] = [];
 
     // Start point handle
+    const startPos = getHandlePosition("start", undefined, shape.start);
     handles.push(
       <PointHandle
         key="start"
-        x={shape.start.x}
-        y={shape.start.y}
+        x={startPos.x}
+        y={startPos.y}
         type="start"
         selected={false}
         onMouseDown={e => handlePointMouseDown(e, "start")}
@@ -236,12 +298,13 @@ export function Canvas({ state }: CanvasProps) {
 
       switch (cmd.type) {
         case "line":
-        case "move":
+        case "move": {
+          const pos = getHandlePosition("end", cmd.id, cmd.point);
           handles.push(
             <PointHandle
               key={`${cmd.id}-end`}
-              x={cmd.point.x}
-              y={cmd.point.y}
+              x={pos.x}
+              y={pos.y}
               type="end"
               selected={isSelected}
               onMouseDown={e => handlePointMouseDown(e, "end", cmd.id)}
@@ -250,13 +313,20 @@ export function Canvas({ state }: CanvasProps) {
           currentX = cmd.point.x;
           currentY = cmd.point.y;
           break;
+        }
 
-        case "hline":
+        case "hline": {
+          const pos = getHandlePosition("end", cmd.id, {
+            x: cmd.value,
+            y: currentY,
+            xPercent: true,
+            yPercent: true,
+          });
           handles.push(
             <PointHandle
               key={`${cmd.id}-end`}
-              x={cmd.value}
-              y={currentY}
+              x={pos.x}
+              y={pos.y}
               type="end"
               selected={isSelected}
               onMouseDown={e => handlePointMouseDown(e, "end", cmd.id)}
@@ -264,13 +334,20 @@ export function Canvas({ state }: CanvasProps) {
           );
           currentX = cmd.value;
           break;
+        }
 
-        case "vline":
+        case "vline": {
+          const pos = getHandlePosition("end", cmd.id, {
+            x: currentX,
+            y: cmd.value,
+            xPercent: true,
+            yPercent: true,
+          });
           handles.push(
             <PointHandle
               key={`${cmd.id}-end`}
-              x={currentX}
-              y={cmd.value}
+              x={pos.x}
+              y={pos.y}
               type="end"
               selected={isSelected}
               onMouseDown={e => handlePointMouseDown(e, "end", cmd.id)}
@@ -278,16 +355,20 @@ export function Canvas({ state }: CanvasProps) {
           );
           currentY = cmd.value;
           break;
+        }
 
-        case "curve":
+        case "curve": {
+          const c1Pos = getHandlePosition("control1", cmd.id, cmd.control1);
+          const endPos = getHandlePosition("end", cmd.id, cmd.end);
+
           // Control point 1 line
           handles.push(
             <ControlLine
               key={`${cmd.id}-c1-line`}
               x1={currentX}
               y1={currentY}
-              x2={cmd.control1.x}
-              y2={cmd.control1.y}
+              x2={c1Pos.x}
+              y2={c1Pos.y}
               visible={isSelected}
             />
           );
@@ -295,29 +376,30 @@ export function Canvas({ state }: CanvasProps) {
           handles.push(
             <ControlHandle
               key={`${cmd.id}-c1`}
-              x={cmd.control1.x}
-              y={cmd.control1.y}
+              x={c1Pos.x}
+              y={c1Pos.y}
               visible={isSelected}
               onMouseDown={e => handlePointMouseDown(e, "control1", cmd.id)}
             />
           );
           // Control point 2 (if cubic)
           if (cmd.control2) {
+            const c2Pos = getHandlePosition("control2", cmd.id, cmd.control2);
             handles.push(
               <ControlLine
                 key={`${cmd.id}-c2-line`}
-                x1={cmd.end.x}
-                y1={cmd.end.y}
-                x2={cmd.control2.x}
-                y2={cmd.control2.y}
+                x1={endPos.x}
+                y1={endPos.y}
+                x2={c2Pos.x}
+                y2={c2Pos.y}
                 visible={isSelected}
               />
             );
             handles.push(
               <ControlHandle
                 key={`${cmd.id}-c2`}
-                x={cmd.control2.x}
-                y={cmd.control2.y}
+                x={c2Pos.x}
+                y={c2Pos.y}
                 visible={isSelected}
                 onMouseDown={e => handlePointMouseDown(e, "control2", cmd.id)}
               />
@@ -327,8 +409,8 @@ export function Canvas({ state }: CanvasProps) {
           handles.push(
             <PointHandle
               key={`${cmd.id}-end`}
-              x={cmd.end.x}
-              y={cmd.end.y}
+              x={endPos.x}
+              y={endPos.y}
               type="end"
               selected={isSelected}
               onMouseDown={e => handlePointMouseDown(e, "end", cmd.id)}
@@ -337,25 +419,29 @@ export function Canvas({ state }: CanvasProps) {
           currentX = cmd.end.x;
           currentY = cmd.end.y;
           break;
+        }
 
-        case "smooth":
+        case "smooth": {
+          const endPos = getHandlePosition("end", cmd.id, cmd.end);
+
           // Control point (if specified)
           if (cmd.control) {
+            const cPos = getHandlePosition("control1", cmd.id, cmd.control);
             handles.push(
               <ControlLine
                 key={`${cmd.id}-c-line`}
-                x1={cmd.end.x}
-                y1={cmd.end.y}
-                x2={cmd.control.x}
-                y2={cmd.control.y}
+                x1={endPos.x}
+                y1={endPos.y}
+                x2={cPos.x}
+                y2={cPos.y}
                 visible={isSelected}
               />
             );
             handles.push(
               <ControlHandle
                 key={`${cmd.id}-c`}
-                x={cmd.control.x}
-                y={cmd.control.y}
+                x={cPos.x}
+                y={cPos.y}
                 visible={isSelected}
                 onMouseDown={e => handlePointMouseDown(e, "control1", cmd.id)}
               />
@@ -365,8 +451,8 @@ export function Canvas({ state }: CanvasProps) {
           handles.push(
             <PointHandle
               key={`${cmd.id}-end`}
-              x={cmd.end.x}
-              y={cmd.end.y}
+              x={endPos.x}
+              y={endPos.y}
               type="end"
               selected={isSelected}
               onMouseDown={e => handlePointMouseDown(e, "end", cmd.id)}
@@ -375,13 +461,15 @@ export function Canvas({ state }: CanvasProps) {
           currentX = cmd.end.x;
           currentY = cmd.end.y;
           break;
+        }
 
-        case "arc":
+        case "arc": {
+          const endPos = getHandlePosition("end", cmd.id, cmd.end);
           handles.push(
             <PointHandle
               key={`${cmd.id}-end`}
-              x={cmd.end.x}
-              y={cmd.end.y}
+              x={endPos.x}
+              y={endPos.y}
               type="end"
               selected={isSelected}
               onMouseDown={e => handlePointMouseDown(e, "end", cmd.id)}
@@ -390,9 +478,9 @@ export function Canvas({ state }: CanvasProps) {
           currentX = cmd.end.x;
           currentY = cmd.end.y;
           break;
+        }
 
         case "close":
-          // No handles for close
           currentX = shape.start.x;
           currentY = shape.start.y;
           break;
@@ -406,7 +494,7 @@ export function Canvas({ state }: CanvasProps) {
     <div className="relative flex-1 overflow-hidden bg-[#1a1a1a]">
       {/* Grid background */}
       <div
-        className="absolute inset-0 opacity-20"
+        className="absolute inset-0 opacity-20 pointer-events-none"
         style={{
           backgroundImage: `
             linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px),
@@ -428,10 +516,14 @@ export function Canvas({ state }: CanvasProps) {
         style={{ cursor: activeTool === "select" ? "default" : "crosshair" }}
       >
         {/* Shape preview fill */}
-        <path d={svgPath} fill="rgba(59, 130, 246, 0.3)" stroke="none" />
+        <path
+          d={getDisplayPath()}
+          fill="rgba(59, 130, 246, 0.3)"
+          stroke="none"
+        />
         {/* Shape outline */}
         <path
-          d={svgPath}
+          d={getDisplayPath()}
           fill="none"
           stroke="rgba(59, 130, 246, 0.8)"
           strokeWidth="0.5"
@@ -443,7 +535,7 @@ export function Canvas({ state }: CanvasProps) {
       </svg>
 
       {/* Tool indicator */}
-      <div className="absolute bottom-4 left-4 px-2 py-1 bg-black/50 backdrop-blur-sm rounded text-[10px] text-white/60 uppercase tracking-wider">
+      <div className="absolute bottom-4 left-4 px-2 py-1 bg-black/50 backdrop-blur-sm rounded text-[10px] text-white/60 uppercase tracking-wider pointer-events-none">
         {activeTool}
       </div>
     </div>
@@ -470,7 +562,7 @@ function PointHandle({
       cy={y}
       r={HANDLE_SIZE / 2}
       className={cn(
-        "cursor-move transition-all",
+        "cursor-move",
         type === "start"
           ? "fill-green-500 stroke-green-300"
           : selected
