@@ -25,6 +25,7 @@ export function Canvas({ state }: CanvasProps) {
     selectedCommandId,
     setSelectedCommandId,
     activeTool,
+    setActiveTool,
     updateStartPoint,
     addCommand,
     updateCommand,
@@ -65,84 +66,107 @@ export function Canvas({ state }: CanvasProps) {
     };
   }, []);
 
+  // Get the last point position (for relative drawing)
+  const lastPoint = getLastPoint(shape);
+
   // Handle canvas click to add new points
+  // NOTE: Handle clicks use stopPropagation so they never reach here
   const handleCanvasClick = useCallback(
     (e: React.MouseEvent) => {
+      // If we just finished dragging, ignore this click
       if (dragState?.active) return;
 
-      const point = screenToSvg(e.clientX, e.clientY);
+      const clickPoint = screenToSvg(e.clientX, e.clientY);
 
-      // Add command based on active tool
+      // Select tool = clicking canvas deselects any selection
+      if (activeTool === "select") {
+        setSelectedCommandId(null);
+        return;
+      }
+
+      // Close tool = just close the path, no clicking needed
+      if (activeTool === "close") {
+        if (!shape.commands.some(c => c.type === "close")) {
+          addCommand({ type: "close" });
+        }
+        return;
+      }
+
+      // Drawing tools - add points at click position
       switch (activeTool) {
         case "line":
-          addCommand({ type: "line", mode: "to", point });
+          // Line tool stays active for multiple consecutive points
+          addCommand({ type: "line", mode: "to", point: clickPoint });
           break;
 
         case "hline":
+          // Horizontal line - stays active for multiple horizontal segments
           addCommand({
             type: "hline",
             mode: "to",
-            value: point.x,
+            value: clickPoint.x,
             percent: true,
           });
           break;
 
         case "vline":
+          // Vertical line - stays active for multiple vertical segments
           addCommand({
             type: "vline",
             mode: "to",
-            value: point.y,
+            value: clickPoint.y,
             percent: true,
           });
           break;
 
         case "curve": {
-          const lastPoint = getLastPoint(shape);
-          const midX = (lastPoint.x + point.x) / 2;
-          const midY = (lastPoint.y + point.y) / 2 - 20;
+          // Curve - switch to select after to allow adjusting control points
+          const midX = (lastPoint.x + clickPoint.x) / 2;
+          const midY = (lastPoint.y + clickPoint.y) / 2 - 15;
           addCommand({
             type: "curve",
             mode: "to",
-            end: point,
+            end: clickPoint,
             control1: {
               x: midX,
-              y: Math.max(0, midY),
+              y: Math.max(0, Math.min(100, midY)),
               xPercent: true,
               yPercent: true,
             },
           });
+          setActiveTool("select");
           break;
         }
 
         case "smooth":
-          addCommand({ type: "smooth", mode: "to", end: point });
+          addCommand({ type: "smooth", mode: "to", end: clickPoint });
+          setActiveTool("select");
           break;
 
-        case "arc":
+        case "arc": {
+          // Arc - switch to select after
+          const dx = Math.abs(clickPoint.x - lastPoint.x);
+          const dy = Math.abs(clickPoint.y - lastPoint.y);
+          const radius = Math.max(5, Math.min(dx, dy) / 2);
           addCommand({
             type: "arc",
             mode: "to",
-            end: point,
-            rx: 20,
+            end: clickPoint,
+            rx: radius,
             sweep: "cw",
           });
+          setActiveTool("select");
           break;
-
-        case "close":
-          if (!shape.commands.some(c => c.type === "close")) {
-            addCommand({ type: "close" });
-          }
-          break;
-
-        default:
-          setSelectedCommandId(null);
+        }
       }
     },
     [
       activeTool,
       addCommand,
       dragState,
+      lastPoint,
       screenToSvg,
+      setActiveTool,
       setSelectedCommandId,
       shape,
     ]
