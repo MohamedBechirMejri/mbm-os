@@ -1,10 +1,16 @@
 "use client";
 
+import { Move, Rotate3d, Scaling } from "lucide-react";
 import { useCallback } from "react";
 import { SceneCanvas } from "./scene-canvas";
 import { Sidebar } from "./sidebar";
 import { useGltfViewer } from "./use-gltf-viewer";
 import type { TransformMode } from "./types";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 /**
  * GLTF Viewer App
@@ -89,47 +95,56 @@ export function GltfViewerApp({ instanceId: _ }: { instanceId: string }) {
 
   return (
     <div
-      className="flex flex-col w-full h-full bg-[#0d0d0d] text-white overflow-hidden select-none"
+      className="flex flex-col w-full h-full text-white overflow-hidden select-none relative"
       onKeyDown={handleKeyDown}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
       tabIndex={0}
     >
       {/* Titlebar with controls */}
-      <div className="h-[46px] flex items-center justify-between px-4 border-b border-white/10 bg-[#0d0d0d] shrink-0 relative z-10">
-        {/* Left side - window buttons go here via floating action bar */}
-        <div className="w-20" />
+      <div className="flex items-center gap-1 left-8 bottom-8 z-10 absolute bg-black/50 backdrop-blur-md p-1 rounded-xl border border-white/10">
+        {(["translate", "rotate", "scale"] as const).map(mode => {
+          const Icon =
+            mode === "translate"
+              ? Move
+              : mode === "rotate"
+              ? Rotate3d
+              : Scaling;
+          const label =
+            mode === "translate"
+              ? "Move"
+              : mode === "rotate"
+              ? "Rotate"
+              : "Scale";
+          const shortcut =
+            mode === "translate" ? "G" : mode === "rotate" ? "R" : "S";
 
-        {/* Center - Transform mode buttons */}
-        <div className="flex items-center gap-1 bg-white/5 rounded-lg p-1">
-          {(["translate", "rotate", "scale"] as const).map(mode => (
-            <button
-              key={mode}
-              onClick={() => state.setTransformMode(mode)}
-              className={`
-                px-3 py-1 text-xs font-medium rounded transition-colors
-                ${
-                  state.transformMode === mode
-                    ? "bg-blue-600 text-white"
-                    : "text-neutral-400 hover:text-white hover:bg-white/10"
-                }
-              `}
-            >
-              {mode === "translate"
-                ? "Move (G)"
-                : mode === "rotate"
-                ? "Rotate (R)"
-                : "Scale (S)"}
-            </button>
-          ))}
-        </div>
-
-        {/* Right side - info */}
-        <div className="w-20 text-right">
-          <span className="text-[10px] text-neutral-500 font-mono">
-            {state.models.length} model{state.models.length !== 1 ? "s" : ""}
-          </span>
-        </div>
+          return (
+            <Tooltip key={mode}>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => state.setTransformMode(mode)}
+                  className={`
+                      p-2 rounded-lg transition-all
+                      ${
+                        state.transformMode === mode
+                          ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
+                          : "text-neutral-400 hover:text-white hover:bg-white/10"
+                      }
+                    `}
+                >
+                  <Icon className="w-4 h-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="flex items-center gap-2">
+                <span>{label}</span>
+                <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-[10px] font-mono">
+                  {shortcut}
+                </kbd>
+              </TooltipContent>
+            </Tooltip>
+          );
+        })}
       </div>
 
       {/* Main content */}
