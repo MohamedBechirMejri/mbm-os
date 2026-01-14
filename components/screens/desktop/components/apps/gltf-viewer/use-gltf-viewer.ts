@@ -28,32 +28,80 @@ export function useGltfViewer(): GltfViewerState {
   const [transformMode, setTransformMode] =
     useState<TransformMode>("translate");
 
-  const addModel = useCallback(async (file: File): Promise<void> => {
-    // Create a blob URL for the file
-    const url = URL.createObjectURL(file);
-    const id = generateId();
-    const name = extractName(file);
+  const addModel = useCallback(async (files: File | File[]): Promise<void> => {
+    const fileList = Array.isArray(files) ? files : [files];
 
-    const newModel: SceneModel = {
-      id,
-      name,
-      url,
-      position: [0, 0, 0],
-      rotation: [0, 0, 0],
-      scale: [1, 1, 1],
-      visible: true,
-    };
+    // Find model files (.gltf or .glb)
+    const modelFiles = fileList.filter(f => /\.(gltf|glb)$/i.test(f.name));
 
-    setModels(prev => [...prev, newModel]);
-    setSelectedModelId(id);
+    if (modelFiles.length === 0) return;
+
+    for (const modelFile of modelFiles) {
+      const id = generateId();
+      const name = extractName(modelFile);
+      const url = URL.createObjectURL(modelFile);
+
+      // Create asset map for this model
+      const getPath = (f: File) => {
+        const path = (f as any).fullPath || (f as any).webkitRelativePath || "";
+        return path.startsWith("/") ? path.slice(1) : path;
+      };
+
+      const assetMap: Record<string, string> = {};
+      const modelPath = getPath(modelFile);
+      const modelDir = modelPath.includes("/")
+        ? modelPath.substring(0, modelPath.lastIndexOf("/") + 1)
+        : "";
+
+      for (const assetFile of fileList) {
+        if (assetFile === modelFile) continue;
+
+        const assetUrl = URL.createObjectURL(assetFile);
+        const assetPath = getPath(assetFile);
+
+        // Store by full name
+        assetMap[assetFile.name] = assetUrl;
+
+        // Store by relative path if it's within the same directory structure
+        if (modelDir && assetPath.startsWith(modelDir)) {
+          const relativePath = assetPath.substring(modelDir.length);
+          assetMap[relativePath] = assetUrl;
+        }
+      }
+
+      const newModel: SceneModel = {
+        id,
+        name,
+        url,
+        assetMap,
+        position: [0, 0, 0],
+        rotation: [0, 0, 0],
+        scale: [1, 1, 1],
+        visible: true,
+      };
+
+      setModels(prev => [...prev, newModel]);
+      setSelectedModelId(id);
+    }
   }, []);
 
   const removeModel = useCallback((id: string) => {
     setModels(prev => {
       const model = prev.find(m => m.id === id);
       if (model) {
-        // Revoke blob URL to free memory
+        // Revoke the main model URL
         URL.revokeObjectURL(model.url);
+
+        // Only revoke assets if they aren't shared with another model (e.g. from duplication)
+        const isAssetMapShared = prev.some(
+          m => m.id !== id && m.assetMap === model.assetMap
+        );
+
+        if (!isAssetMapShared && model.assetMap) {
+          for (const assetUrl of Object.values(model.assetMap)) {
+            URL.revokeObjectURL(assetUrl);
+          }
+        }
       }
       return prev.filter(m => m.id !== id);
     });

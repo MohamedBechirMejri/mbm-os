@@ -9,6 +9,7 @@ export interface SceneModel {
   id: string;
   name: string;
   url: string;
+  assetMap?: Record<string, string>;
   position: [number, number, number];
   rotation: [number, number, number];
   scale: [number, number, number];
@@ -29,7 +30,7 @@ export interface GltfViewerState {
   transformMode: TransformMode;
 
   // Actions
-  addModel: (file: File) => Promise<void>;
+  addModel: (files: File | File[]) => Promise<void>;
   removeModel: (id: string) => void;
   selectModel: (id: string | null) => void;
   setTransformMode: (mode: TransformMode) => void;

@@ -8,8 +8,8 @@ import {
   Grid,
 } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import { Suspense, memo, useRef } from "react";
-import type { Group } from "three";
+import { Suspense, memo, useRef, useMemo } from "react";
+import { LoadingManager, type Group } from "three";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import type { GltfViewerState, SceneModel, TransformMode } from "./types";
 
@@ -36,7 +36,32 @@ const Model = memo(function Model({
   onTransformChange,
   orbitControlsRef,
 }: ModelProps) {
-  const { scene } = useGLTF(model.url);
+  // Create a loading manager to handle external assets (textures, etc.)
+  const manager = useMemo(() => {
+    const m = new LoadingManager();
+    if (model.assetMap) {
+      m.setURLModifier(url => {
+        // 1. Try exact match
+        if (model.assetMap?.[url]) return model.assetMap[url];
+
+        // 2. Try decoded URL match
+        const decodedUrl = decodeURIComponent(url);
+        if (model.assetMap?.[decodedUrl]) return model.assetMap[decodedUrl];
+
+        // 3. Try filename only match
+        const fileName = decodedUrl.split("/").pop();
+        if (fileName && model.assetMap?.[fileName])
+          return model.assetMap[fileName];
+
+        return url;
+      });
+    }
+    return m;
+  }, [model.assetMap]);
+
+  const { scene } = useGLTF(model.url, true, true, (loader: any) => {
+    loader.manager = manager;
+  });
   // Ref for the group that TransformControls will attach to
   const groupRef = useRef<Group>(null);
 

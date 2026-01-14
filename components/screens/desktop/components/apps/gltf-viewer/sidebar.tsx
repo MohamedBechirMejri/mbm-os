@@ -397,16 +397,13 @@ export function Sidebar({ state }: SidebarProps) {
   const handleFileSelect = useCallback(async () => {
     const input = document.createElement("input");
     input.type = "file";
-    input.accept = ".gltf,.glb";
+    input.accept = ".gltf,.glb,.png,.jpg,.jpeg,.bin";
     input.multiple = true;
 
     input.onchange = async () => {
       const files = input.files;
       if (!files) return;
-
-      for (const file of Array.from(files)) {
-        await state.addModel(file);
-      }
+      await state.addModel(Array.from(files));
     };
 
     input.click();
@@ -417,12 +414,53 @@ export function Sidebar({ state }: SidebarProps) {
       e.preventDefault();
       setIsDragOver(false);
 
-      const files = Array.from(e.dataTransfer.files).filter(
-        f => f.name.endsWith(".gltf") || f.name.endsWith(".glb")
-      );
+      const items = e.dataTransfer.items;
+      if (!items) return;
 
-      for (const file of files) {
-        await state.addModel(file);
+      const allFiles: File[] = [];
+
+      const traverseEntry = async (entry: FileSystemEntry) => {
+        if (entry.isFile) {
+          const file = await new Promise<File>((resolve, reject) => {
+            (entry as FileSystemFileEntry).file(file => {
+              // Attach fullPath so use-gltf-viewer can resolve relative paths
+              (file as any).fullPath = entry.fullPath;
+              resolve(file);
+            }, reject);
+          });
+          allFiles.push(file);
+        } else if (entry.isDirectory) {
+          const reader = (entry as FileSystemDirectoryEntry).createReader();
+          const readAllEntries = async (): Promise<FileSystemEntry[]> => {
+            const result: FileSystemEntry[] = [];
+            while (true) {
+              const entries = await new Promise<FileSystemEntry[]>(
+                (resolve, reject) => {
+                  reader.readEntries(resolve, reject);
+                }
+              );
+              if (entries.length === 0) break;
+              result.push(...entries);
+            }
+            return result;
+          };
+
+          const entries = await readAllEntries();
+          for (const childEntry of entries) {
+            await traverseEntry(childEntry);
+          }
+        }
+      };
+
+      const promises = Array.from(items).map(item => {
+        const entry = item.webkitGetAsEntry();
+        return entry ? traverseEntry(entry) : Promise.resolve();
+      });
+
+      await Promise.all(promises);
+
+      if (allFiles.length > 0) {
+        await state.addModel(allFiles);
       }
     },
     [state]
