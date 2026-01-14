@@ -127,6 +127,7 @@ export const CATEGORIES: CategoryInfo[] = [
 import { AppStoreApp } from "./app-store";
 import { CalculatorApp } from "./calculator";
 import { FinderApp } from "./finder";
+import { GltfViewerApp } from "./gltf-viewer";
 import { GpuWaterLab } from "./gpu-water-lab";
 import { ImageConverterApp } from "./image-converter";
 import { MillionRowGrid } from "./million-row-grid";
@@ -502,6 +503,39 @@ export const catalogApps: CatalogApp[] = [
           kind: "icon",
           bytes: 6_144,
           cacheKey: "gpu-water-lab/icon",
+        },
+      ],
+    },
+  },
+  {
+    id: "gltf-viewer",
+    title: "GLTF Viewer",
+    icon: "preferences-desktop-display",
+    Component: GltfViewerApp,
+    minSize: { w: 1280, h: 800 },
+    floatingActionBar: true,
+    titlebarHeight: 46,
+    actionButtonsStyle: {
+      top: 14,
+      left: 14,
+      position: "absolute" as const,
+    },
+    tagline: "Interactive 3D Model Viewer",
+    description:
+      "Load, view, and manipulate glTF and GLB 3D models. Features include transform controls (move, rotate, scale), model hierarchy management, visibility toggles, and an infinite grid environment. Perfect for previewing 3D assets.",
+    category: "webgpu",
+    tags: ["3d", "gltf", "viewer", "three.js", "models"],
+    featured: true,
+    available: true,
+    hidden: false,
+    installManifest: {
+      sizeEstimate: 2_000_000,
+      assets: [
+        {
+          url: "/assets/icons/apps/preferences-desktop-display.ico",
+          kind: "icon",
+          bytes: 6_144,
+          cacheKey: "gltf-viewer/icon",
         },
       ],
     },
