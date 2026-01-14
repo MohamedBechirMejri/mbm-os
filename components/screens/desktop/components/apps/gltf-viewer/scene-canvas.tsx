@@ -171,7 +171,7 @@ export function SceneCanvas({ state }: SceneCanvasProps) {
   const orbitControlsRef = useRef<OrbitControlsImpl | null>(null);
 
   return (
-    <div className="flex-1 relative min-h-0 min-w-0">
+    <div className="flex-1 relative min-h-0 min-w-0 h-full w-full">
       <Canvas
         shadows
         camera={{ position: [5, 5, 5], fov: 50 }}

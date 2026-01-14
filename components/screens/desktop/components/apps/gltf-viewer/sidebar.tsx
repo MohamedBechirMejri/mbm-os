@@ -160,7 +160,7 @@ function ModelItem({
       className={cn(
         "group relative flex items-center gap-2 px-3 py-2 cursor-pointer transition-all border-l-2",
         isSelected
-          ? "bg-blue-600/15 border-blue-500 shadow-[inset_0_0_20px_rgba(37,99,235,0.05)]"
+          ? "bg-blue-600/15 border-blue-500"
           : "hover:bg-white/5 border-transparent",
         !model.visible && "opacity-40"
       )}
@@ -441,7 +441,7 @@ export function Sidebar({ state }: SidebarProps) {
     <motion.div
       layout
       className={cn(
-        "w-full bg-black/40 backdrop-blur-2xl border border-white/10 rounded-3xl flex flex-col relative overflow-hidden transition-all shadow-2xl",
+        "w-full bg-black/40 backdrop-blur-2xl border border-white/10 rounded-3xl flex flex-col relative overflow-hidden transition-all",
         isDragOver && "bg-blue-600/10 border-blue-500/50",
         isSidebarMinimized ? "h-14" : "h-full"
       )}
@@ -457,7 +457,7 @@ export function Sidebar({ state }: SidebarProps) {
         onClick={() => setIsSidebarMinimized(!isSidebarMinimized)}
       >
         <div className="flex items-center gap-3">
-          <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+          <div className="w-2 h-2 rounded-full bg-blue-500" />
           <span className="text-[11px] font-bold text-white uppercase tracking-[0.2em]">
             Scene Hierarchy
           </span>
