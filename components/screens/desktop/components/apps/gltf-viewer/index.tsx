@@ -148,12 +148,15 @@ export function GltfViewerApp({ instanceId: _ }: { instanceId: string }) {
       </div>
 
       {/* Main content */}
-      <div className="flex flex-1 min-h-0">
-        {/* Scene viewer (left) */}
+      <div className="flex-1 min-h-0 relative">
         <SceneCanvas state={state} />
 
-        {/* Model list sidebar (right) */}
-        <Sidebar state={state} />
+        {/* Floating Sidebar */}
+        <div className="absolute right-6 top-6 bottom-6 w-80 z-20 pointer-events-none">
+          <div className="w-full h-full pointer-events-auto">
+            <Sidebar state={state} />
+          </div>
+        </div>
       </div>
     </div>
   );
