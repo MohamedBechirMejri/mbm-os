@@ -129,6 +129,7 @@ import { CalculatorApp } from "./calculator";
 import { FinderApp } from "./finder";
 import { GltfViewerApp } from "./gltf-viewer";
 import { GpuWaterLab } from "./gpu-water-lab";
+import { FoveatedVisionApp } from "./foveated-vision";
 import { ImageConverterApp } from "./image-converter";
 import { MillionRowGrid } from "./million-row-grid";
 import { SafariApp } from "./safari";
@@ -759,6 +760,33 @@ export const catalogApps: CatalogApp[] = [
   // =========================================================================
   // Experiments
   // =========================================================================
+  {
+    id: "foveated-vision",
+    title: "Foveated Vision",
+    icon: "preferences-desktop-display",
+    Component: FoveatedVisionApp,
+    minSize: { w: 1280, h: 900 },
+    floatingActionBar: true,
+    tagline: "Eye-tracked burn-in guard",
+    description:
+      "Camera-powered gaze tracker that masks the UI with VR-style foveated falloff. Adjustable blur, dimming, and live overlays for shareable 'solved OLED burn-in' demos.",
+    category: "experiments",
+    tags: ["camera", "foveated", "vision", "webcam", "burn-in"],
+    featured: true,
+    available: true,
+    hidden: false,
+    installManifest: {
+      sizeEstimate: 1_800_000,
+      assets: [
+        {
+          url: "/assets/icons/apps/preferences-desktop-display.ico",
+          kind: "icon",
+          bytes: 4_096,
+          cacheKey: "foveated-vision/icon",
+        },
+      ],
+    },
+  },
   {
     id: "liquid-glass",
     title: "Liquid Glass Lab",
