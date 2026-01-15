@@ -865,6 +865,21 @@ export const catalogApps: CatalogApp[] = [
     available: false,
     hidden: true,
   },
+  {
+    id: "blink-reader",
+    title: "Blink Reader",
+    category: "creative",
+    tags: ["reading", "text", "fun"],
+    description: "Read text at 900 words per minute",
+    tagline: "Read text at 900 words per minute",
+    featured: true,
+    available: false,
+    hidden: true,
+    minSize: { w: 1280, h: 960 },
+    floatingActionBar: true,
+    icon: "utilities-system-monitor",
+    Component: () => null,
+  },
 ];
 
 // ---------------------------------------------------------------------------
