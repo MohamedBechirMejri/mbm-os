@@ -137,6 +137,7 @@ import { ShadowPlaygroundApp } from "./shadow-playground";
 import { ShapeBuilderApp } from "./shape-builder";
 import { SketchPadApp } from "./sketch-pad";
 import { TerminalApp } from "./terminal";
+import { FunFormApp } from "./fun-form";
 import { SolitaireApp } from "./solitaire";
 
 // ---------------------------------------------------------------------------
@@ -760,6 +761,33 @@ export const catalogApps: CatalogApp[] = [
   // =========================================================================
   // Experiments
   // =========================================================================
+  {
+    id: "fun-form",
+    title: "Fun Form",
+    icon: "accessories-character-map",
+    Component: FunFormApp,
+    minSize: { w: 900, h: 560 },
+    floatingActionBar: true,
+    tagline: "Login form with personality",
+    description:
+      "A login form with cute characters that react to your actions. They track your cursor, celebrate valid emails, look away when you toggle password visibility, and get sad when login fails.",
+    category: "experiments",
+    tags: ["fun", "form", "animation", "characters"],
+    featured: true,
+    available: true,
+    hidden: false,
+    installManifest: {
+      sizeEstimate: 350_000,
+      assets: [
+        {
+          url: "/assets/icons/apps/accessories-character-map.ico",
+          kind: "icon",
+          bytes: 4_096,
+          cacheKey: "fun-form/icon",
+        },
+      ],
+    },
+  },
   {
     id: "foveated-vision",
     title: "Foveated Vision",
